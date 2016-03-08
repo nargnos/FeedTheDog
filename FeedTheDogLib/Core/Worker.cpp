@@ -1,49 +1,54 @@
 #include "Worker.h"
 #include "Core.h"
+#include "..\Pool\SessionPool.h"
 namespace FeedTheDog
 {
-	Worker::Worker(TCore * corePtr) :
-		core(corePtr)
+	Worker::Worker(TCore* core)
 	{
-		threadCount = _BOOST thread::hardware_concurrency() * 2;
-
+		static int wid = 0;
+		id = wid++;
+		owner = core;
+		ioService = make_unique<_ASIO io_service>();
+		sessionPool = make_shared<TSessionPool>(this);
 	}
 
 	Worker::~Worker()
 	{
-		Stop();
+		//Stop();
 	}
 
-	int Worker::Count() const
+	Worker::TSessionPool* Worker::GetIdleSessionPool()
 	{
-		return threadCount;
+		return sessionPool.get();
 	}
+
+	_ASIO io_service* Worker::GetIoService()
+	{
+		return ioService.get();
+	}
+
+	int Worker::GetID() const
+	{
+		return id;
+	}
+
+	
 
 	void Worker::Start()
 	{
-		auto& ioservice = core->GetIoService();
-		_STD vector<shared_ptr<_BOOST thread>> threads;
-		auto tmpCount = threadCount - 1;
-		if (tmpCount > 0)
-		{
-			for (auto i = 0; i < tmpCount; i++)
-			{
-				auto tmpThread = make_shared<_BOOST thread>(_BOOST bind(&_ASIO io_service::run, &ioservice));
-
-				threads.push_back(tmpThread);
-			}
-		}
-		// 自身线程也算在内
-		ioservice.run();
-		// join等待所有线程结束
-		for each (auto& var in threads)
-		{
-			var->join();
-		}
+		work = make_unique<_ASIO io_service::work>(*ioService);
+		//ioService.reset();
+		ioService->run();
 	}
 	void Worker::Stop()
 	{
-		// TODO:
+		work.reset();
+		ioService->stop();
+	}
+
+	Worker::TCore * Worker::GetCore() const
+	{
+		return owner;
 	}
 
 }  // namespace FeedTheDog

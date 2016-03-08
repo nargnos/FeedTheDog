@@ -7,7 +7,7 @@ namespace FeedTheDog
 		typedef Core TCore;
 		typedef Worker TWorker;
 		typedef IService TService;
-		typedef MemoryPool TMemoryPool;
+		//typedef MemoryPool TMemoryPool;
 		typedef SessionPool TSessionPool;
 	};
 

@@ -13,17 +13,19 @@ namespace FeedTheDog
 		typedef Session<TProtocol> TSession;
 		typedef typename TProtocol::socket TSocket;
 		
-		Session(TCore* core) :
-			TSessionBase(core),
-			socket_(core->GetIoService())
+		Session(TSessionPool* ptr,_ASIO io_service& io):
+			socket_(io),
+			TSessionBase(ptr)
 		{
 		}
 		TSocket& GetSocket()
 		{
 			return socket_;
-		}		
+		}
 	protected:
 		TSocket socket_;
 	};
+
+
 }  // namespace FeedTheDog
 

@@ -21,17 +21,8 @@ namespace ServerTest
 		{
 			_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 		}
-		TEST_METHOD(MemoryPoolTest)
-		{
-
-		}
 		TEST_METHOD(CoreTest)
 		{
-
-			Core k;
-			auto j = make_shared<EchoService>(9999);
-			k.AddService(j);
-			k.Start();
 		}
 	};
 }

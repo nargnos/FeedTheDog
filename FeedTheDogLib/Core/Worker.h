@@ -5,21 +5,28 @@
 #include "..\Trait\CoreTrait.h"
 namespace FeedTheDog
 {
-	class Worker
+	class Worker:
+		private _BOOST noncopyable
 	{
 	public:
 		typedef Worker TWorker;
 		typedef typename WorkerTrait::TService TService;
 		typedef typename CoreTrait::TCore TCore;
+		typedef typename WorkerTrait::TSessionPool TSessionPool;
 		Worker(TCore* core);
 		virtual ~Worker();
-
-		int Count() const;
+		TSessionPool* GetIdleSessionPool();
+		_ASIO io_service* GetIoService();
+		int GetID() const;
 		void Start();
 		void Stop();
-	private:
-		int threadCount;
-		TCore* core;
 		
+		TCore* GetCore() const;
+	private:
+		unique_ptr<_ASIO io_service> ioService;
+		shared_ptr<TSessionPool> sessionPool;
+		unique_ptr<_ASIO io_service::work> work;
+		int id;
+		TCore* owner;
 	};
 }  // namespace FeedTheDog

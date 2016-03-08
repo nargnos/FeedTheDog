@@ -4,39 +4,35 @@
 #include "..\Trait\Trait.h"
 #include "..\Trait\CoreTrait.h"
 #include "..\Interface\IService.h"
-#include "Worker.h"
-#include "..\Pool\SessionPool.h"
 namespace FeedTheDog
 {
-	class Core
+	class Core :
+		private _BOOST noncopyable
 	{
 	public:
 		typedef typename Core TCore;
 		typedef typename CoreTrait::TWorker TWorker;
 		typedef typename CoreTrait::TService TService;
-		typedef typename CoreTrait::TMemoryPool TMemoryPool;
 		typedef typename CoreTrait::TSessionPool TSessionPool;
 		Core();
 		virtual ~Core();
-		_ASIO io_service& GetIoService();
-		typename _ASIO io_service::strand* GetStrand();
-		void AddService(const shared_ptr<TService>&);
+		// 取空闲Worker的对象池
+		TSessionPool* GetIdleSessionPool();
+		TService* GetService(int id);
+		bool AddService(const shared_ptr<TService>&);
 		void DeleteService(const shared_ptr<TService>&);
 		void Start();
 		void Stop();
-		shared_ptr<TTcpSession> GetTcpSession();
-		shared_ptr<TUdpSession> GetUdpSession();
+		int GetWorkerCount() const;
+		// 取空闲Worker
+		TWorker* SelectIdleWorker();
 	private:
-		_ASIO io_service ioService;
+		bool isStop;
+		int threadCount;
 		Config config;
-
-		unique_ptr<typename _ASIO io_service::strand> strand;		
-		unique_ptr<TWorker> worker;
-		unique_ptr<_ASIO io_service::work> work;
-
-		unique_ptr<TSessionPool> sessionPool;
-
-		_STD unordered_map<int, shared_ptr<TService>> services;
+		_STD vector<shared_ptr<TWorker>> workers;
+		_BOOST mutex mutex;
+		concurrent_unordered_map<int, shared_ptr<TService>> services;
 	};
 
 }  // namespace FeedTheDog
