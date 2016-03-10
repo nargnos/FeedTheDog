@@ -3,8 +3,8 @@
 
 #include "stdafx.h"
 
-#include <Core\Core.h>
-#include <Service\EchoService.h>
+#include <Core.h>
+#include <EchoService.h>
 
 class CrtSetDbgFlag
 {
@@ -37,12 +37,19 @@ int main()
 	using namespace FeedTheDog;
 
 	auto& core = make_shared<Core>();
+	core->Init();
 	auto j = make_shared<EchoService>(9999);
 	core->AddService(j);
-	auto& io = core->GetIdleSessionPool()->GetIoService();
+#if 1
+	auto& io = core->SelectIdleWorker()->GetIoService();
 	_ASIO deadline_timer t(io);
-	t.expires_from_now(_BOOST posix_time::seconds(10));
+	t.expires_from_now(_BOOST posix_time::seconds(60));
 	t.async_wait(_BOOST bind(&Core::Stop, core));
+#endif // 0
+
+
+
+
 
 	core->Start();
 

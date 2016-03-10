@@ -1,6 +1,7 @@
 #pragma once
 
 
+#include <json\json.h>
 #include <boost\asio.hpp>
 #include <boost\bind.hpp>
 #include <boost\atomic.hpp>
@@ -8,10 +9,18 @@
 #include <boost\utility.hpp>
 #include <boost\thread.hpp>
 #include <boost\lockfree\queue.hpp>
-#include <boost\pool\object_pool.hpp>
+//#include <boost\pool\object_pool.hpp>
+
+#include <filesystem>
+#include <fstream>
 #include <vector>
 #include <concurrent_unordered_map.h>
 #include <concurrent_unordered_set.h>
+#include <unordered_map>
+#include <unordered_set>
+
+#include <string>
+#include <sstream>
 
 #include <memory>
 #include <cassert>

@@ -70,77 +70,81 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)\..\Boost;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\..\Boost\Lib;$(LibraryPath)</LibraryPath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)\..\Boost;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\..\Boost\Lib;$(LibraryPath)</LibraryPath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(SolutionDir)\..\Boost\;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\..\Boost\Lib;$(LibraryPath)</LibraryPath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)\..\Boost;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\..\Boost\Lib;$(LibraryPath)</LibraryPath>
-  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Boost;$(SolutionDir)JsonCpp\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
     </Link>
+    <Lib>
+      <AdditionalLibraryDirectories>$(SolutionDir)\..\Boost\Lib;</AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Boost;$(SolutionDir)JsonCpp\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
     </Link>
+    <Lib>
+      <AdditionalLibraryDirectories>$(SolutionDir)\..\Boost\Lib;</AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Boost;$(SolutionDir)JsonCpp\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
+    <Lib>
+      <AdditionalLibraryDirectories>$(SolutionDir)\..\Boost\Lib;</AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Boost;$(SolutionDir)JsonCpp\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
+    <Lib>
+      <AdditionalLibraryDirectories>$(SolutionDir)\..\Boost\Lib;</AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -148,34 +152,52 @@
   <ItemGroup>
     <ClInclude Include="Common.h" />
     <ClInclude Include="Config.h" />
-    <ClInclude Include="Core\Core.h" />
-    <ClInclude Include="Interface\IEncryptor.h" />
-    <ClInclude Include="Pool\PoolElement\Session.h" />
-    <ClInclude Include="Pool\PoolElement\SessionBase.h" />
-    <ClInclude Include="Pool\SessionPool.h" />
-    <ClInclude Include="Core\Worker.h" />
-    <ClInclude Include="Interface\IService.h" />
-    <ClInclude Include="Service\EchoService.h" />
-    <ClInclude Include="Service\ServiceBase.h" />
+    <ClInclude Include="Core.h" />
+    <ClInclude Include="ConsoleListener.h" />
+    <ClInclude Include="DebugListener.h" />
+    <ClInclude Include="FileListener.h" />
+    <ClInclude Include="IEncryptor.h" />
+    <ClInclude Include="IListener.h" />
+    <ClInclude Include="ListenerBase.h" />
+    <ClInclude Include="Session.h" />
+    <ClInclude Include="SessionBase.h" />
+    <ClInclude Include="SessionPool.h" />
+    <ClInclude Include="TraceSource.h" />
+    <ClInclude Include="TraceSourceBase.h" />
+    <ClInclude Include="Worker.h" />
+    <ClInclude Include="IService.h" />
+    <ClInclude Include="EchoService.h" />
+    <ClInclude Include="ServiceBase.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="Trait\CoreTrait.h" />
-    <ClInclude Include="Trait\SessionPoolTrait.h" />
-    <ClInclude Include="Trait\Trait.h" />
-    <ClInclude Include="Trait\WorkerTrait.h" />
+    <ClInclude Include="CoreTrait.h" />
+    <ClInclude Include="SessionPoolTrait.h" />
+    <ClInclude Include="Trait.h" />
+    <ClInclude Include="WorkerTrait.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Config.cpp" />
-    <ClCompile Include="Core\Core.cpp" />
-    <ClCompile Include="Core\Worker.cpp" />
-    <ClCompile Include="Pool\PoolElement\SessionBase.cpp" />
-    <ClCompile Include="Service\EchoService.cpp" />
+    <ClCompile Include="Core.cpp" />
+    <ClCompile Include="ConsoleListener.cpp" />
+    <ClCompile Include="DebugListener.cpp" />
+    <ClCompile Include="FileListener.cpp" />
+    <ClCompile Include="ListenerBase.cpp" />
+    <ClCompile Include="TraceSource.cpp" />
+    <ClCompile Include="TraceSourceBase.cpp" />
+    <ClCompile Include="Worker.cpp" />
+    <ClCompile Include="SessionBase.cpp" />
+    <ClCompile Include="EchoService.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\JsonCpp\JsonCpp.vcxproj">
+      <Project>{f1ecc13a-e873-4394-b4d9-11ea3c9e8c19}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
