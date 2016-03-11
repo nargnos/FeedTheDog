@@ -3,16 +3,11 @@
 #define CRTDBG_MAP_ALLOC
 #include <stdlib.h>
 #include <crtdbg.h>
-#include <boost\lockfree\queue.hpp>
-#include <boost\lexical_cast.hpp>
-#include <Core\Core.h>
-#include <Service\EchoService.h>
+#include <concurrent_unordered_map.h>
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace ServerTest
 {
-	using namespace FeedTheDog;
-
 	TEST_CLASS(ServerTest1)
 	{
 
@@ -23,6 +18,7 @@ namespace ServerTest
 		}
 		TEST_METHOD(CoreTest)
 		{
+			
 		}
 	};
 }

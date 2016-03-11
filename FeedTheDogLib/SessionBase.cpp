@@ -4,13 +4,17 @@
 #include "SessionPool.h"
 namespace FeedTheDog
 {
-	SessionBase::SessionBase(const shared_ptr<TCore>& ptr, _ASIO io_service& io):
+	SessionBase::SessionBase(const shared_ptr<TCore>& ptr, _ASIO io_service& io) :
 		ios(io)
 	{
 		core = ptr;
+
+
 	}
 	SessionBase::~SessionBase()
 	{
+
+
 	}
 	SessionBase::TBufferType& SessionBase::GetBuffer()
 	{
@@ -24,7 +28,7 @@ namespace FeedTheDog
 	{
 		return core;
 	}
-	
+
 }  // namespace FeedTheDog
 
 

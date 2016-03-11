@@ -7,16 +7,20 @@
 
 namespace FeedTheDog
 {
-	template<long long TUniqueID>
 	struct ServiceBase :
 		public IService
 	{
-		static const long long ID = TUniqueID;
-		virtual long long UniqueID() const override
+		ServiceBase(const char* name)
 		{
-			return TUniqueID;
+			name_ = name;
+		}
+		virtual const char* Name() const override
+		{
+			return name_;
 		}
 		virtual ~ServiceBase() = default;
+	protected:
+		const char* name_;
 	};
 
 }  // namespace FeedTheDog

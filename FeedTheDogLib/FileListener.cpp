@@ -5,7 +5,7 @@ namespace FeedTheDog
 {
 	FileListener::FileListener()
 	{
-
+		FileNameNode(defaultConfig)= ".\\log.log";
 	}
 
 
@@ -27,9 +27,9 @@ namespace FeedTheDog
 		auto& fileNameNode = FileNameNode(listenerConfig);
 		if (!fileNameNode.isString())
 		{
-			fileNameNode = ".\\log.log";
+			fileNameNode = FileNameNode(defaultConfig);
 		}
-		ofs = make_shared<_STD ofstream>(fileNameNode.asString());
+		ofs = make_shared<_STD ofstream>(fileNameNode.asString(), _STD ios::app | _STD ios::out);
 		isOpen = ofs->good();
 	}
 	Json::Value & FileListener::FileNameNode(Json::Value & listener)

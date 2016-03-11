@@ -162,6 +162,7 @@
     <ClInclude Include="Session.h" />
     <ClInclude Include="SessionBase.h" />
     <ClInclude Include="SessionPool.h" />
+    <ClInclude Include="TraceDefine.h" />
     <ClInclude Include="TraceSource.h" />
     <ClInclude Include="TraceSourceBase.h" />
     <ClInclude Include="Worker.h" />
@@ -182,6 +183,8 @@
     <ClCompile Include="DebugListener.cpp" />
     <ClCompile Include="FileListener.cpp" />
     <ClCompile Include="ListenerBase.cpp" />
+    <ClCompile Include="SessionPool.cpp" />
+    <ClCompile Include="TraceDefine.cpp" />
     <ClCompile Include="TraceSource.cpp" />
     <ClCompile Include="TraceSourceBase.cpp" />
     <ClCompile Include="Worker.cpp" />

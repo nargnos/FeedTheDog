@@ -8,7 +8,6 @@ namespace FeedTheDog
 		TraceSourceBase()
 		{
 			openTrace = false;
-
 		}
 
 	protected:
@@ -23,8 +22,9 @@ namespace FeedTheDog
 				var->WriteLine(str, level);
 			}
 		}
-
-
+		
+		static const int TimeBufferSize = 64;
+		char timeBuffer[TimeBufferSize];
 	};
 }  // namespace FeedTheDog
 

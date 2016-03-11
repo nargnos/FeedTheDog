@@ -32,7 +32,15 @@
     <ClCompile Include="TraceSource.cpp">
       <Filter>Config</Filter>
     </ClCompile>
-    <ClCompile Include="DebugListener.cpp" />
+    <ClCompile Include="DebugListener.cpp">
+      <Filter>Listener</Filter>
+    </ClCompile>
+    <ClCompile Include="TraceDefine.cpp">
+      <Filter>Type</Filter>
+    </ClCompile>
+    <ClCompile Include="SessionPool.cpp">
+      <Filter>SessionPool</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common.h" />
@@ -45,16 +53,16 @@
       <Filter>Interface</Filter>
     </ClInclude>
     <ClInclude Include="Trait.h">
-      <Filter>Trait</Filter>
+      <Filter>Type</Filter>
     </ClInclude>
     <ClInclude Include="SessionPoolTrait.h">
-      <Filter>Trait</Filter>
+      <Filter>Type</Filter>
     </ClInclude>
     <ClInclude Include="WorkerTrait.h">
-      <Filter>Trait</Filter>
+      <Filter>Type</Filter>
     </ClInclude>
     <ClInclude Include="CoreTrait.h">
-      <Filter>Trait</Filter>
+      <Filter>Type</Filter>
     </ClInclude>
     <ClInclude Include="Core.h">
       <Filter>Core</Filter>
@@ -98,7 +106,12 @@
     <ClInclude Include="ListenerBase.h">
       <Filter>Listener</Filter>
     </ClInclude>
-    <ClInclude Include="DebugListener.h" />
+    <ClInclude Include="DebugListener.h">
+      <Filter>Listener</Filter>
+    </ClInclude>
+    <ClInclude Include="TraceDefine.h">
+      <Filter>Type</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -106,9 +119,6 @@
   <ItemGroup>
     <Filter Include="Interface">
       <UniqueIdentifier>{c5ac5a81-5a4f-4ff9-a9b6-b9b7a521ff4b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Trait">
-      <UniqueIdentifier>{04ab5aa8-270a-47d7-a955-2cae8e638617}</UniqueIdentifier>
     </Filter>
     <Filter Include="Core">
       <UniqueIdentifier>{9ddb68ea-5ad6-4213-b9d0-e7d7f9510ce1}</UniqueIdentifier>
@@ -130,6 +140,9 @@
     </Filter>
     <Filter Include="Listener">
       <UniqueIdentifier>{b9e8a6fb-c7ec-4321-a073-48736af2e30a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Type">
+      <UniqueIdentifier>{04ab5aa8-270a-47d7-a955-2cae8e638617}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

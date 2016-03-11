@@ -13,7 +13,7 @@ namespace FeedTheDog
 		typedef typename WorkerTrait::TService TService;
 		typedef typename CoreTrait::TCore TCore;
 		typedef typename WorkerTrait::TSessionPool TSessionPool;
-		Worker(const shared_ptr<TCore>& core);
+		Worker(TCore* core);
 		virtual ~Worker();
 		TSessionPool* GetSessionPool();
 		_ASIO io_service& GetIoService();
@@ -21,12 +21,13 @@ namespace FeedTheDog
 		void Start();
 		void Stop();
 
-		shared_ptr<Worker::TCore> GetCore() const;
+		Worker::TCore* GetCore() const;
 	private:
 		_ASIO io_service ioService;
 		TSessionPool sessionPool;
 		unique_ptr<_ASIO io_service::work> work;
 		int id;
-		weak_ptr<TCore> owner;
+		TCore* owner;
+		bool isRunning;
 	};
 }  // namespace FeedTheDog

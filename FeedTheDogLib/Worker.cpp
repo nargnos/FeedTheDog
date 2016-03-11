@@ -4,19 +4,19 @@
 
 namespace FeedTheDog
 {
-	Worker::Worker(const shared_ptr<TCore>& core):
+	Worker::Worker(TCore* core):
 		sessionPool(core, ioService)
 	{
+		isRunning = false;
 		static int wid = 0;
 		id = wid++;
 		owner = core;
-		//ioService = ;
-		//sessionPool = make_shared<TSessionPool>(this);
+		owner->GetTrace()->TracePoint(LogMsg::NewWorker, true, id);
 	}
 
 	Worker::~Worker()
 	{
-		//Stop();
+		owner->GetTrace()->TracePoint(LogMsg::FreeWorker, true, id);
 	}
 
 	Worker::TSessionPool* Worker::GetSessionPool()
@@ -41,6 +41,8 @@ namespace FeedTheDog
 		work = make_unique<_ASIO io_service::work>(ioService);
 
 		ioService.reset();
+		isRunning = true;
+		owner->GetTrace()->TracePoint(LogMsg::StartWorker, true, id);
 		ioService.run();
 	}
 	void Worker::Stop()
@@ -49,12 +51,13 @@ namespace FeedTheDog
 		sessionPool.CloseAll();
 		
 		ioService.stop();
-		
+		isRunning = false;
+		owner->GetTrace()->TracePoint(LogMsg::StopWorker, true, id);
 	}
 
-	shared_ptr<Worker::TCore> Worker::GetCore() const
+	Worker::TCore* Worker::GetCore() const
 	{
-		return owner.lock();
+		return owner;
 	}
 
 }  // namespace FeedTheDog

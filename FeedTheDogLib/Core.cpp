@@ -1,34 +1,32 @@
 #include "stdafx.h"
 #include "Core.h"
 #include "SessionPool.h"
-
+#include "Worker.h"
 namespace FeedTheDog
 {
 	Core::Core()
 	{
 		isStop = true;
-		isInited = false;
-
-	}
-	void Core::Init()
-	{
-		if (isInited)
-		{
-			return;
-		}
-		isInited = true;
 		config.Load();
+		GetTrace()->TracePoint(LogMsg::NewCore);
 		auto threadCount = config.GetThreadCount();
 		assert(threadCount > 0 && threadCount <= config.GetMaxThreadCount());
 
 		for (auto i = 0; i < threadCount; i++)
 		{
-			workers.push_back(make_shared<TWorker>(this->shared_from_this()));
+			workers.push_back(make_shared<TWorker>(this));
 		}
+		config.Save();
+		GetTrace()->TracePoint(LogMsg::Initialized);
 	}
 	Core::~Core()
 	{
+		GetTrace()->TracePoint(LogMsg::FreeCore);
 		Stop();
+	}
+	shared_ptr<TraceSource<Config::TEnum>>& Core::GetTrace()
+	{
+		return config.GetTrace();
 	}
 	Core::TSessionPool* Core::GetIdleSessionPool()
 	{
@@ -37,11 +35,11 @@ namespace FeedTheDog
 		return result;
 	}
 
-	Core::TService* Core::GetService(long long id)
+	Core::TService* Core::GetService(const char* name)
 	{
-		if (services.count(id) > 0)
+		if (services.count(name) > 0)
 		{
-			return services[id].get();
+			return services[name].get();
 		}
 		return NULL;
 	}
@@ -50,7 +48,7 @@ namespace FeedTheDog
 
 	bool Core::AddService(const shared_ptr<TService>& svr)
 	{
-		if (services.count(svr->UniqueID()) > 0)
+		if (services.count(svr->Name()) > 0)
 		{
 			return false;
 		}
@@ -58,25 +56,36 @@ namespace FeedTheDog
 		{
 			return false;
 		}
-		services.insert(_STD pair<long long, shared_ptr<TService>>(svr->UniqueID(), svr));
+		services.insert(_STD pair<const char*, shared_ptr<TService>>(svr->Name(), svr));
+		GetTrace()->TracePoint(LogMsg::AddService, false, 0, svr->Name());
 		svr->AsyncStart();
 		return true;
 	}
 	void Core::DeleteService(const shared_ptr<TService>& svr)
 	{
-		GetService(svr->UniqueID())->Stop();
+		auto find = GetService(svr->Name());
+		if (find == NULL)
+		{
+			return;
+		}
+		// TODO: 把对应服务的所有session关掉
+		find->Stop();
+		GetTrace()->TracePoint(LogMsg::AddService, false, 0, svr->Name());
 		mutex.lock();
-		services.unsafe_erase(svr->UniqueID());
+		services.unsafe_erase(svr->Name());
 		mutex.unlock();
+
+
 	}
 	void Core::Start()
 	{
+		GetTrace()->TracePoint(LogMsg::CoreStart);
 		isStop = false;
 		_STD vector<shared_ptr<_BOOST thread>> threads;
-		auto tmpCount = workers.size();// -1;
-		if (tmpCount > 0)
+		auto tmpCount = workers.size();
+		if (tmpCount > 1)
 		{
-			for (size_t i = 0; i < tmpCount; i++)
+			for (size_t i = 1; i < tmpCount; i++)
 			{
 				auto tmpThread = make_shared<_BOOST thread>(_BOOST bind(&TWorker::Start, workers[i]));
 
@@ -84,7 +93,7 @@ namespace FeedTheDog
 			}
 		}
 		// 自身线程也算在内
-		//workers[0]->Start();
+		workers[0]->Start();
 		// join等待所有线程结束
 		for each (auto& var in threads)
 		{
@@ -97,6 +106,7 @@ namespace FeedTheDog
 		{
 			return;
 		}
+		GetTrace()->TracePoint(LogMsg::CoreStop);
 		isStop = true;
 		for each (auto& var in services)
 		{
@@ -111,6 +121,7 @@ namespace FeedTheDog
 	{
 		return workers.size();
 	}
+	// TODO: 让没开始时不要往一个线程弄太多队列
 	Core::TWorker* Core::SelectIdleWorker()
 	{
 		assert(workers.size() > 0);
@@ -126,7 +137,7 @@ namespace FeedTheDog
 				}
 			}
 		}
-		__assume(result != NULL);
+		assert(result != NULL);
 		return result;
 	}
 }  // namespace FeedTheDog

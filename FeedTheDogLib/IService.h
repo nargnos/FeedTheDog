@@ -8,7 +8,7 @@ namespace FeedTheDog
 	{
 		typedef typename CoreTrait::TCore TCore;
 		typedef IService TService;
-		virtual long long UniqueID() const = 0;
+		virtual const char* Name() const = 0;
 		virtual void AsyncStart() = 0;
 		virtual void Stop() = 0;
 		virtual bool Init(TCore*) = 0;

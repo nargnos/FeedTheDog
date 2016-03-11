@@ -37,9 +37,10 @@ int main()
 	using namespace FeedTheDog;
 
 	auto& core = make_shared<Core>();
-	core->Init();
-	auto j = make_shared<EchoService>(9999);
-	core->AddService(j);
+	auto a = make_shared<EchoService>(9999,"Echo No1");
+	core->AddService(a);
+	auto b = make_shared<EchoService>(8888,"Echo No2");
+	core->AddService(b);
 #if 1
 	auto& io = core->SelectIdleWorker()->GetIoService();
 	_ASIO deadline_timer t(io);
@@ -47,12 +48,8 @@ int main()
 	t.async_wait(_BOOST bind(&Core::Stop, core));
 #endif // 0
 
-
-
-
-
 	core->Start();
-
+	core->GetTrace()->TracePoint(LogMsg::MainEnd);
 	return 0;
 }
 

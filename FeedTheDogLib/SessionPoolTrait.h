@@ -1,11 +1,12 @@
 #pragma once
 #include "Trait.h"
-#include "Session.h"
 namespace FeedTheDog
 {
-
+	template<typename TProtocol>
+	class Session;
 	struct SessionPoolTrait
 	{
+		
 		typedef _ASIO ip::tcp TTcp;
 		typedef _ASIO ip::udp TUdp;		
 		typedef Worker TWorker;
@@ -26,6 +27,14 @@ namespace FeedTheDog
 		};
 		typedef TSession<TTcp>::type TTcpSession;
 		typedef TSession<TUdp>::type TUdpSession;
+		template<typename TProtocol>
+		struct TSessionSave
+		{
+			typedef concurrent_unordered_multimap<const char*, typename SessionPoolTrait::TSession<TProtocol>::type*> MapType;
+			typedef typename MapType::iterator SessionSave;
+			typedef typename MapType::value_type MapValue;
+		};
+		
 	};
 	typedef SessionPoolTrait::TTcpSession TTcpSession;
 	typedef SessionPoolTrait::TUdpSession TUdpSession;

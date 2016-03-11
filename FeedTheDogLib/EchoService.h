@@ -3,10 +3,10 @@
 namespace FeedTheDog
 {
 	class EchoService :
-		public ServiceBase<0xEC017>
+		public ServiceBase
 	{
 	public:
-		EchoService(int port);
+		EchoService(int port, const char* name);
 		~EchoService();
 		virtual void AsyncStart() override;
 		virtual void Stop() override;
