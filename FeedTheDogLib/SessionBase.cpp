@@ -4,12 +4,12 @@
 #include "SessionPool.h"
 namespace FeedTheDog
 {
-	SessionBase::SessionBase(const shared_ptr<TCore>& ptr, _ASIO io_service& io) :
+	SessionBase::SessionBase(TCore* ptr, _ASIO io_service& io) :
 		ios(io)
 	{
 		core = ptr;
-
-
+		isClosed = false;
+		isErased = false;
 	}
 	SessionBase::~SessionBase()
 	{
@@ -24,7 +24,7 @@ namespace FeedTheDog
 	{
 		return ios;
 	}
-	shared_ptr<SessionBase::TCore> SessionBase::GetCore() const
+	SessionBase::TCore* SessionBase::GetCore() const
 	{
 		return core;
 	}

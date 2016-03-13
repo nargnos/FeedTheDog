@@ -30,7 +30,8 @@ namespace FeedTheDog
 		shared_ptr<TraceSource<Config::TEnum>>& GetTrace();
 	private:
 		bool isStop;
-		
+		// 当core没启动时用的
+		int tmpWorkerIndex;
 		Config config;
 		_STD vector<shared_ptr<TWorker>> workers;
 		_BOOST mutex mutex;

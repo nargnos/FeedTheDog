@@ -159,6 +159,7 @@
     <ClInclude Include="IEncryptor.h" />
     <ClInclude Include="IListener.h" />
     <ClInclude Include="ListenerBase.h" />
+    <ClInclude Include="Rfc1928.h" />
     <ClInclude Include="Session.h" />
     <ClInclude Include="SessionBase.h" />
     <ClInclude Include="SessionPool.h" />
@@ -183,6 +184,7 @@
     <ClCompile Include="DebugListener.cpp" />
     <ClCompile Include="FileListener.cpp" />
     <ClCompile Include="ListenerBase.cpp" />
+    <ClCompile Include="Rfc1928.cpp" />
     <ClCompile Include="SessionPool.cpp" />
     <ClCompile Include="TraceDefine.cpp" />
     <ClCompile Include="TraceSource.cpp" />

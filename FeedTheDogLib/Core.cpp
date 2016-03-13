@@ -2,11 +2,15 @@
 #include "Core.h"
 #include "SessionPool.h"
 #include "Worker.h"
+
+// TODO: 查找性能瓶颈，优化
+
 namespace FeedTheDog
 {
 	Core::Core()
 	{
 		isStop = true;
+		tmpWorkerIndex = -1;
 		config.Load();
 		GetTrace()->TracePoint(LogMsg::NewCore);
 		auto threadCount = config.GetThreadCount();
@@ -45,7 +49,7 @@ namespace FeedTheDog
 	}
 
 
-
+	// TODO: 测试在运行时添加、删除服务的运行情况
 	bool Core::AddService(const shared_ptr<TService>& svr)
 	{
 		if (services.count(svr->Name()) > 0)
@@ -68,14 +72,17 @@ namespace FeedTheDog
 		{
 			return;
 		}
-		// TODO: 把对应服务的所有session关掉
+		// 由服务控制是否接受新连接
 		find->Stop();
 		GetTrace()->TracePoint(LogMsg::AddService, false, 0, svr->Name());
+		// 把对应服务的所有session关掉
+		for each (auto& var in workers)
+		{
+			var->GetSessionPool()->RemoveServiceSession(svr->Name());
+		}
 		mutex.lock();
 		services.unsafe_erase(svr->Name());
 		mutex.unlock();
-
-
 	}
 	void Core::Start()
 	{
@@ -92,6 +99,7 @@ namespace FeedTheDog
 				threads.push_back(tmpThread);
 			}
 		}
+		
 		// 自身线程也算在内
 		workers[0]->Start();
 		// join等待所有线程结束
@@ -99,19 +107,23 @@ namespace FeedTheDog
 		{
 			var->join();
 		}
+		//concurrency::parallel_for(0, (int)workers.size(), [this](int i) {workers[i]->Start(); });
 	}
 	void Core::Stop()
 	{
+		// 整个程序结束需要执行的东西，不管结束后再start的情况了，如果需要就重新new
 		if (isStop)
 		{
 			return;
 		}
 		GetTrace()->TracePoint(LogMsg::CoreStop);
 		isStop = true;
+		// 此处停止服务不会关掉会话
 		for each (auto& var in services)
 		{
 			var.second->Stop();
 		}
+		// 此处会关并删掉会话
 		for (size_t i = 0; i < workers.size(); i++)
 		{
 			workers[i]->Stop();
@@ -121,21 +133,31 @@ namespace FeedTheDog
 	{
 		return workers.size();
 	}
-	// TODO: 让没开始时不要往一个线程弄太多队列
+
 	Core::TWorker* Core::SelectIdleWorker()
 	{
 		assert(workers.size() > 0);
-		TWorker * result = workers[0].get();
-		if (!isStop)
+		TWorker* result = NULL;
+		if (isStop)
 		{
-			for (size_t i = 1; i < workers.size(); i++)
+			// 当core未开时用于分散此时添加的服务
+			tmpWorkerIndex = (tmpWorkerIndex + 1) % workers.size();
+			result= workers[tmpWorkerIndex].get();
+		}
+		else
+		{
+			int index = 0;
+			unsigned int sessionCount = workers[index]->GetSessionPool()->GetSessionCount();
+			for (int i = index+1; i < workers.size(); i++)
 			{
-				auto tmpWorker = workers[i].get();
-				if (tmpWorker->GetSessionPool()->GetSessionCount() < result->GetSessionPool()->GetSessionCount())
+				auto tmpSessionCount = workers[i]->GetSessionPool()->GetSessionCount();
+				if (tmpSessionCount < sessionCount)
 				{
-					result = tmpWorker;
+					index = i;
+					sessionCount = tmpSessionCount;
 				}
 			}
+			result = workers[index].get();
 		}
 		assert(result != NULL);
 		return result;

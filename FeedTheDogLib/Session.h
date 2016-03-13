@@ -13,7 +13,7 @@ namespace FeedTheDog
 		typedef Session<TProtocol> TSession;
 		typedef typename TProtocol::socket TSocket;
 		friend typename CoreTrait::TSessionPool;
-		Session(const shared_ptr<TCore>& corePtr, _ASIO io_service& io):
+		Session(TCore* corePtr, _ASIO io_service& io):
 			socket_(io),
 			TSessionBase(corePtr,io)
 		{
@@ -35,8 +35,7 @@ namespace FeedTheDog
 		TSocket socket_;
 		// 当前在map中的位置
 		typedef typename SessionPoolTrait::TSessionSave<TProtocol>::SessionSave TSessionSave;
-		TSessionSave mapPosition;
-		
+		TSessionSave mapPosition;		
 	};
 
 

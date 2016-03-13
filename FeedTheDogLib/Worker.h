@@ -14,14 +14,16 @@ namespace FeedTheDog
 		typedef typename CoreTrait::TCore TCore;
 		typedef typename WorkerTrait::TSessionPool TSessionPool;
 		Worker(TCore* core);
-		virtual ~Worker();
+		~Worker();
 		TSessionPool* GetSessionPool();
 		_ASIO io_service& GetIoService();
 		int GetID() const;
+		// 只在程序开始使用
 		void Start();
+		// 只在程序结束使用
 		void Stop();
 
-		Worker::TCore* GetCore() const;
+		TCore* GetCore() const;
 	private:
 		_ASIO io_service ioService;
 		TSessionPool sessionPool;

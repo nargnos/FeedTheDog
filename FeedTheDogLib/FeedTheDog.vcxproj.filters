@@ -41,6 +41,9 @@
     <ClCompile Include="SessionPool.cpp">
       <Filter>SessionPool</Filter>
     </ClCompile>
+    <ClCompile Include="Rfc1928.cpp">
+      <Filter>Service</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common.h" />
@@ -111,6 +114,9 @@
     </ClInclude>
     <ClInclude Include="TraceDefine.h">
       <Filter>Type</Filter>
+    </ClInclude>
+    <ClInclude Include="Rfc1928.h">
+      <Filter>Service</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

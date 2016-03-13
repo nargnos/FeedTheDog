@@ -26,6 +26,7 @@ namespace FeedTheDog
 		DeleteService
 
 	};
+	// TODO: 功能待完善，文件那里要能按日期分
 	class Config
 	{
 	public:
@@ -46,7 +47,6 @@ namespace FeedTheDog
 		shared_ptr<Json::StreamWriter> writer;
 		Json::Value root;
 		Json::Value& ConfigNode();
-		Json::Value& LoggerNode();
 
 		Json::Value& ThreadCountMember();
 	};

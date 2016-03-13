@@ -31,6 +31,7 @@ namespace FeedTheDog
 			// ÉèÖÃ¼àÌıÆ÷
 			auto& listener = config["Listener"];
 
+			// Ìí¼Ó¼àÌıÆ÷
 			ReadListener<ConsoleListener>(listener, "Console", needSetDefaultCofig);
 			ReadListener<FileListener>(listener, "File", needSetDefaultCofig);
 			ReadListener<DebugListener>(listener, "Debug", needSetDefaultCofig);
@@ -71,6 +72,14 @@ namespace FeedTheDog
 				return;
 			}
 			TracePoint((*strmap)[msg], useIndex, index,str, level);
+		}
+		void TracePoint(const _STD string& msg, TraceLevel level)
+		{
+			TracePoint(msg, false, 0, NULL, level);
+		}
+		void TracePoint(TEnum msg, TraceLevel level)
+		{
+			TracePoint(msg, false, 0, NULL, level);
 		}
 	private:
 		shared_ptr<TMap> strmap;

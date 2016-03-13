@@ -9,7 +9,6 @@
 #include <boost\utility.hpp>
 #include <boost\thread.hpp>
 #include <boost\lockfree\queue.hpp>
-//#include <boost\pool\object_pool.hpp>
 
 #include <filesystem>
 #include <fstream>
@@ -19,7 +18,7 @@
 #include <concurrent_unordered_set.h>
 #include <unordered_map>
 #include <unordered_set>
-
+#include <ppl.h>
 #include <string>
 #include <sstream>
 #include <time.h>

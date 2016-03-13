@@ -19,12 +19,16 @@ namespace FeedTheDog
 			ios(io),
 			count(0),
 			tcpSessionPool(tcpAlloc, 0),
-			udpSessionPool(udpAlloc, 0)
+			udpSessionPool(udpAlloc, 0),
+			tcpfreeSessionDelegate(_BOOST bind(&SessionPool::Free<TTcp>, this, _1)),
+			udpfreeSessionDelegate(_BOOST bind(&SessionPool::Free<TUdp>, this, _1))
 		{
-			static int sid = 0;
+			static unsigned char sid = 0;
 			id = sid++;
 			corePtr = core;
 			corePtr->GetTrace()->TracePoint(LogMsg::NewSessionPool, true, id);
+			//const int hhhhh=sizeof(typename SessionPoolTrait::TSession<TTcp>::type);
+
 		}
 
 		virtual ~SessionPool()
@@ -37,7 +41,7 @@ namespace FeedTheDog
 			corePtr->GetTrace()->TracePoint(LogMsg::FreeSessionPool, true, id);
 		}
 
-		long long GetSessionCount() const
+		unsigned int GetSessionCount() const
 		{
 			return count;
 		}
@@ -48,17 +52,17 @@ namespace FeedTheDog
 #ifdef _DEBUG
 			corePtr->GetTrace()->TracePoint(LogMsg::AllocMemory, true, id, serviceName);
 #endif // _DEBUG
-			typedef typename SessionPoolTrait::TSessionSave<TProtocol>::MapValue TValue;
-
-			// 结构都是线程安全的就不lock了
-			auto result = GetSessionPool<TProtocol>().construct<true, false>(corePtr->shared_from_this(), _STD ref(ios));
-			// 保存插入位置，删除时使用
-			result->mapPosition = GetSet<TProtocol>().insert(TValue(serviceName, result));
 			// 统计session
 			++count;
-			return shared_ptr<typename SessionPoolTrait::TSession<TProtocol>::type>(
-				result,
-				_BOOST bind(&SessionPool::Free<TProtocol>, this, _1));
+			typedef typename SessionPoolTrait::TSessionSave<TProtocol>::MapValue TValue;
+
+			// 构建session，结构是线程安全的就不lock了
+			auto result = GetSessionPool<TProtocol>().construct<true, false>(corePtr, _STD ref(ios));
+			// 保存插入位置，删除时使用
+			// lock 这里不锁会有问题,插入为线程安全
+			ReadLock lock(mutex);
+			result->mapPosition = GetSet<TProtocol>().insert(TValue(serviceName, result));
+			return shared_ptr<typename SessionPoolTrait::TSession<TProtocol>::type>(result, GetFreeSessionDelegate<TProtocol>());
 		}
 		void CloseAll()
 		{
@@ -66,15 +70,46 @@ namespace FeedTheDog
 			CloseAll<TUdp>();
 		}
 		// 关掉并删除相关项，智能指针free中的重复删除不会出问题
-		void CloseServiceSession(const char* serviceName)
-		{			
-			CloseServiceSession<TTcp>(serviceName);
-			CloseServiceSession<TUdp>(serviceName);
+		void RemoveServiceSession(const char* serviceName)
+		{
+			RemoveServiceSession<TTcp>(serviceName);
+			RemoveServiceSession<TUdp>(serviceName);
 		}
 	private:
-		_BOOST mutex mutex;
-		_BOOST atomic<long long> count;
+		// 简化调用bind
+#pragma region bind
+		template<typename TProtocol>
+		struct TFreeSessionDelegate
+		{
+			typedef _BOOST _bi::bind_t<
+				void, _BOOST _mfi::mf1<void, SessionPool, Session<TProtocol> *>,
+				_BOOST _bi::list2<_BOOST _bi::value<SessionPool*>, _BOOST arg<1>>
+			> type;
+		};
+		typename TFreeSessionDelegate<TTcp>::type tcpfreeSessionDelegate;
+		typename TFreeSessionDelegate<TUdp>::type udpfreeSessionDelegate;
 
+		template<typename TProtocol>
+		typename TFreeSessionDelegate<TProtocol>::type& GetFreeSessionDelegate();
+		template<>
+		typename TFreeSessionDelegate<TTcp>::type& GetFreeSessionDelegate<TTcp>()
+		{
+			return tcpfreeSessionDelegate;
+		}
+		template<>
+		typename TFreeSessionDelegate<TUdp>::type& GetFreeSessionDelegate <TUdp>()
+		{
+			return udpfreeSessionDelegate;
+		}
+#pragma endregion
+
+#pragma region lock
+		typedef _BOOST shared_lock<_BOOST shared_mutex> ReadLock;
+		typedef _BOOST unique_lock<_BOOST shared_mutex> WriteLock;
+		_BOOST shared_mutex mutex;
+#pragma endregion
+		// 池(在freelock里找到的，是否好用待测试)和session存储
+#pragma region pool set
 		_STD allocator<TTcpSession> tcpAlloc;
 		_STD allocator<TUdpSession> udpAlloc;
 		// pool
@@ -83,92 +118,103 @@ namespace FeedTheDog
 		// 用作分配对象的指针存储
 		typename SessionPoolTrait::TSessionSave<TTcp>::MapType tcpSessions;
 		typename SessionPoolTrait::TSessionSave<TUdp>::MapType udpSessions;
-
-
-
-		int id;
-		TCore* corePtr;
-		_ASIO io_service& ios;
-
 		template<typename TProtocol>
-		typename SessionPoolTrait::TSessionSave<TProtocol>::MapType& GetSet();
+		inline typename SessionPoolTrait::TSessionSave<TProtocol>::MapType& GetSet();
 
 		template<>
-		typename SessionPoolTrait::TSessionSave<TTcp>::MapType& GetSet<TTcp>()
+		inline typename SessionPoolTrait::TSessionSave<TTcp>::MapType& GetSet<TTcp>()
 		{
 			return tcpSessions;
 		}
 		template<>
-		typename SessionPoolTrait::TSessionSave<TUdp>::MapType& GetSet<TUdp>()
+		inline typename SessionPoolTrait::TSessionSave<TUdp>::MapType& GetSet<TUdp>()
 		{
 			return udpSessions;
 		}
+		template<typename TProtocol>
+		inline typename SessionPoolTrait::TPoolType<TProtocol>::type& GetSessionPool();
+
+		template<>
+		inline typename SessionPoolTrait::TPoolType<TTcp>::type& GetSessionPool<TTcp>()
+		{
+			return tcpSessionPool;
+		}
+		template<>
+		inline typename SessionPoolTrait::TPoolType<TUdp>::type& GetSessionPool<TUdp>()
+		{
+			return udpSessionPool;
+		}
+#pragma endregion
+		// 统计session个数
+		_BOOST atomic<unsigned int> count;
+
+		unsigned char id;
+		TCore* corePtr;
+		_ASIO io_service& ios;
 
 		template<typename TProtocol>
 		void CloseAll()
 		{
 			// 只关掉连接，删除对象由智能指针处理
+			auto& set = GetSet<TProtocol>();
 #ifdef _DEBUG
 			auto str = std::is_same<TTcp, TProtocol>::value ? "Tcp" : "Udp";
 			corePtr->GetTrace()->TracePoint(LogMsg::CloseAllSocket, true, id, str);
 #endif // _DEBUG
 
-			mutex.lock();
-
-			auto& set = GetSet<TProtocol>();
+			// lock
+			ReadLock lock(mutex);
 			for each (auto& var in set)
 			{
-				auto& socket = var.second->GetSocket();
-				if (socket.is_open())
-				{
-					socket.shutdown(_ASIO socket_base::shutdown_type::shutdown_both);
-					socket.close();
-				}
+				CloseSession<TProtocol>(var.second);
 			}
-			mutex.unlock();
 		}
+
+		// 移除服务session前先会停止服务，此时服务应拒绝新连接
 		template<typename TProtocol>
-		void CloseServiceSession(const char* serviceName)
+		void RemoveServiceSession(const char* serviceName)
 		{
-			// FIX: 锁时间过长
-			mutex.lock();
-			auto& it = tcpSessions.find(serviceName);
-			while (it!=tcpSessions.end())
+			// 锁时间好像有优化空间
+			auto& set = GetSet<TProtocol>();
+			// lock
+			ReadLock readlock(mutex);
+			auto& it = set.find(serviceName);
+			while (it != set.end())
 			{
-				auto& socket = it->second->GetSocket();
-				if (socket.is_open())
-				{
-					socket.shutdown(_ASIO socket_base::shutdown_type::shutdown_both);
-					socket.close();
-				}
+				CloseSession<TProtocol>(it->second);
+				it->second->isErased = true;
 			}
-			tcpSessions.unsafe_erase(serviceName);
-			mutex.unlock();
+			readlock.unlock();
+			// lock
+			WriteLock lock(mutex);
+			set.unsafe_erase(serviceName);
 		}
+
+
 		template<typename TProtocol>
-		typename SessionPoolTrait::TPoolType<TProtocol>::type& GetSessionPool();
-
-		template<>
-		typename SessionPoolTrait::TPoolType<TTcp>::type& GetSessionPool<TTcp>()
+		void CloseSession(typename SessionPoolTrait::TSession<TProtocol>::type* ptr)
 		{
-			return tcpSessionPool;
+			if (!ptr->isClosed)
+			{
+				ptr->isClosed = true;
+				auto& socket = ptr->GetSocket();
+				socket.shutdown(_ASIO socket_base::shutdown_type::shutdown_both);
+				socket.close();
+			}
 		}
-		template<>
-		typename SessionPoolTrait::TPoolType<TUdp>::type& GetSessionPool<TUdp>()
-		{
-			return udpSessionPool;
-		}
-
-
 
 		template<typename TProtocol>
 		void Free(typename SessionPoolTrait::TSession<TProtocol>::type* ptr)
 		{
-
-			mutex.lock();
-			auto& set = GetSet<TProtocol>();
-			set.unsafe_erase(ptr->mapPosition);
-			mutex.unlock();
+			// lock
+			WriteLock lock(mutex);
+			if (!ptr->isErased)
+			{
+				auto& set = GetSet<TProtocol>();
+				set.unsafe_erase(ptr->mapPosition);
+				ptr->isErased = true;
+			}
+			lock.unlock();
 #ifdef _DEBUG
 			corePtr->GetTrace()->TracePoint(LogMsg::FreeMemory, true, id);
 #endif // _DEBUG

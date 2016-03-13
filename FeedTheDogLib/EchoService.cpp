@@ -37,13 +37,14 @@ namespace FeedTheDog
 	{
 		if (!error)
 		{
+			auto& trace = session->GetCore()->GetTrace();
+			auto& endPoint = session->GetSocket().remote_endpoint();
+			_STD ostringstream str;
+			str << "Service " << name_ << ", New Connection: " << endPoint.address().to_string() << ":" << endPoint.port();
+			trace->TracePoint(str.str(), TraceLevel::Trace);
 			ReadSome(session);
 			AsyncStart();
 		}
-		/*else
-		{
-			session.reset();
-		}*/
 	}
 	void EchoService::HandleRead(shared_ptr<TTcpSession>& session, const _BOOST system::error_code & error, size_t bytes_transferred)
 	{
@@ -53,10 +54,6 @@ namespace FeedTheDog
 				_BOOST bind(&EchoService::HandleWrite, this, session, _ASIO placeholders::error)
 				);
 		}
-		/*else
-		{
-			session.reset();
-		}*/
 	}
 
 	void EchoService::HandleWrite(shared_ptr<TTcpSession>& session, const _BOOST system::error_code & error)
@@ -65,10 +62,6 @@ namespace FeedTheDog
 		{
 			ReadSome(session);
 		}
-		/*else
-		{
-			session.reset();
-		}*/
 	}
 	bool EchoService::Init(TCore* corePtr)
 	{
@@ -81,6 +74,7 @@ namespace FeedTheDog
 			acceptor = make_unique<_ASIO ip::tcp::acceptor>(io, _ASIO ip::tcp::endpoint(_ASIO ip::tcp::v4(), port_));
 
 		}
+		core->GetTrace()->TracePoint("Service Initialized", false, 0, name_, TraceLevel::Info);
 		return true;
 	}
 	void EchoService::Stop()

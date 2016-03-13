@@ -6,7 +6,7 @@ namespace FeedTheDog
 	Config::Config()
 	{
 		configPath = ".\\config.json";
-		maxThreadCount = _BOOST thread::hardware_concurrency() * 2;
+		maxThreadCount = _BOOST thread::hardware_concurrency()*2;
 		Json::StreamWriterBuilder sb;
 		// 格式化配置信息
 		// sb["indentation"] = "";
@@ -61,7 +61,7 @@ namespace FeedTheDog
 		}
 		// 无配置文件，使用默认设置
 		// 检查配置时，相应的字段为空的时候就表示需要使用默认设置，由各个类自己管理
-		trace->Init(texts, root["Trace"]);
+		trace->Init(texts, ConfigNode()["Trace"]);
 	}
 	void Config::Save()
 	{
@@ -85,10 +85,6 @@ namespace FeedTheDog
 	Json::Value & Config::ConfigNode()
 	{
 		return root["Config"];
-	}
-	Json::Value & Config::LoggerNode()
-	{
-		return root["Logger"];
 	}
 	Json::Value & Config::ThreadCountMember()
 	{
