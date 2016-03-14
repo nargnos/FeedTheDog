@@ -17,6 +17,9 @@ namespace FeedTheDog
 		Json::Value& FileNameNode(Json::Value& listener);
 		bool isOpen;
 		shared_ptr<_STD ostream> ofs;
+		// Ë¢ÐÂËÙ¶È
+		int flushSpeed;
+		int count;
 	};
 }  // namespace FeedTheDog
 

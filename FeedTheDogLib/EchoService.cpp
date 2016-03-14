@@ -21,7 +21,8 @@ namespace FeedTheDog
 		{
 			return;
 		}
-		auto& session = core->GetIdleSessionPool()->NewSession<_ASIO ip::tcp>(name_);
+		
+		auto& session = core->SelectIdleWorker()->NewSession<_ASIO ip::tcp>(name_);
 		acceptor->async_accept(session->GetSocket(), _BOOST bind(&EchoService::HandleAccept, this, session, _ASIO placeholders::error));
 
 	}

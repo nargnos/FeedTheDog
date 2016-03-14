@@ -10,16 +10,15 @@ namespace FeedTheDog
 		public SessionBase
 	{
 	public:
+		typedef TProtocol TProtocol;
 		typedef Session<TProtocol> TSession;
 		typedef typename TProtocol::socket TSocket;
-		friend typename CoreTrait::TSessionPool;
+		typedef typename CoreTrait::TSessionPool<TProtocol>::type TSessionPool;
+		friend TSessionPool;
 		Session(TCore* corePtr, _ASIO io_service& io):
 			socket_(io),
 			TSessionBase(corePtr,io)
 		{
-#ifdef _DEBUG
-			core->GetTrace()->TracePoint(LogMsg::NewSession);
-#endif // _DEBUG
 		}
 		TSocket& GetSocket()
 		{
@@ -27,15 +26,12 @@ namespace FeedTheDog
 		}
 		~Session()
 		{
-#ifdef _DEBUG
-			core->GetTrace()->TracePoint(LogMsg::FreeSession);
-#endif // _DEBUG
 		}
 	protected:
 		TSocket socket_;
 		// 当前在map中的位置
-		typedef typename SessionPoolTrait::TSessionSave<TProtocol>::SessionSave TSessionSave;
-		TSessionSave mapPosition;		
+		typedef typename SessionPoolTrait::TSessionMultiMap<TProtocol>::type::iterator TMapIterator;
+		TMapIterator mapPosition;
 	};
 
 

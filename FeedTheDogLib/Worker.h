@@ -2,34 +2,92 @@
 #include "Config.h"
 #include "WorkerTrait.h"
 #include "CoreTrait.h"
+#include "ISessionPool.h"
+#include "WorkerBase.h"
 #include "SessionPool.h"
 namespace FeedTheDog
 {
+
 	class Worker :
-		private _BOOST noncopyable
+		public WorkerBase
 	{
 	public:
 		typedef Worker TWorker;
 		typedef typename WorkerTrait::TService TService;
-		typedef typename CoreTrait::TCore TCore;
-		typedef typename WorkerTrait::TSessionPool TSessionPool;
-		Worker(TCore* core);
-		~Worker();
-		TSessionPool* GetSessionPool();
-		_ASIO io_service& GetIoService();
-		int GetID() const;
-		// 只在程序开始使用
-		void Start();
-		// 只在程序结束使用
-		void Stop();
 
-		TCore* GetCore() const;
+		typedef typename SessionPoolTrait::TTcp TTcp;
+		typedef typename SessionPoolTrait::TUdp TUdp;
+
+		typedef typename CoreTrait::TSessionPool<TTcp>::type TTcpSessionPool;
+		typedef typename CoreTrait::TSessionPool<TUdp>::type TUdpSessionPool;
+		enum SessionPoolType
+		{
+			TcpSessionPool,
+			UdpSessionPool,
+			_EndSessionPoolType
+		};
+		Worker(TCore* core) :
+			WorkerBase(core)
+		{
+			sessionPools[TcpSessionPool] = dynamic_pointer_cast<ISessionPoolBase>(make_shared<TTcpSessionPool>(core, ioService));
+			sessionPools[UdpSessionPool] = dynamic_pointer_cast<ISessionPoolBase>(make_shared<TUdpSessionPool>(core, ioService));
+		}
+		~Worker()
+		{
+
+		}
+		
+		void RemoveAllServiceSession(const char* serviceName)
+		{
+			if (!isRunning)
+			{
+				// worker停止，由其它函数移除session
+				return;
+			}
+			for each (auto& var in sessionPools)
+			{
+				strand.post(_BOOST bind(&ISessionPoolBase::RemoveServiceSession, var, serviceName));
+			}
+		}
+		virtual void CloseAllSessions() override
+		{
+			for each (auto& var in sessionPools)
+			{
+				strand.post(_BOOST bind(&ISessionPoolBase::CloseAll, var));
+			}
+		}
+
+		unsigned int GetSessionCount()
+		{
+			unsigned int sum = 0;
+			for each (auto& var in sessionPools)
+			{
+				sum += var->GetSessionCount();
+			}
+			return sum;
+		}
+		template<typename TProtocol>
+		shared_ptr<typename SessionPool<TProtocol>::TSession> NewSession(const char* serviceName)
+		{
+			return GetSessionPool<TProtocol>()->NewSession(serviceName);
+		}
 	private:
-		_ASIO io_service ioService;
-		TSessionPool sessionPool;
-		unique_ptr<_ASIO io_service::work> work;
-		int id;
-		TCore* owner;
-		bool isRunning;
+		shared_ptr<ISessionPoolBase> sessionPools[_EndSessionPoolType];
+		template<typename TProtocol>
+		ISessionPool<TProtocol>* GetSessionPool();
+		template<>
+		ISessionPool<TTcp>* GetSessionPool<TTcp>()
+		{
+			auto result = static_cast<ISessionPool<TTcp>*>(sessionPools[TcpSessionPool].get());
+			assert(result);
+			return result;
+		}
+		template<>
+		ISessionPool<TUdp>* GetSessionPool<TUdp>()
+		{
+			auto result = static_cast<ISessionPool<TUdp>*>(sessionPools[UdpSessionPool].get());
+			assert(result);
+			return result;
+		}
 	};
 }  // namespace FeedTheDog

@@ -9,6 +9,7 @@ namespace FeedTheDog
 	class MemoryPool;
 	class Core;
 	class Worker;
+	template<typename TProtocol>
 	class SessionPool;
 	struct IService;
 }  // namespace FeedTheDog

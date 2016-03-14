@@ -5,7 +5,8 @@ namespace FeedTheDog
 	class TraceSourceBase
 	{
 	public:
-		TraceSourceBase()
+		TraceSourceBase():
+			timeBufferPool(TimeBufferSize)
 		{
 			openTrace = false;
 		}
@@ -22,9 +23,9 @@ namespace FeedTheDog
 				var->WriteLine(str, level);
 			}
 		}
-		
+		_BOOST object_pool<_STD ostringstream> stringBuilderPool;
+		_BOOST pool<> timeBufferPool;
 		static const int TimeBufferSize = 64;
-		char timeBuffer[TimeBufferSize];
 	};
 }  // namespace FeedTheDog
 

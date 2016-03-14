@@ -6,19 +6,18 @@
 
 namespace FeedTheDog
 {
+	// Service Manager & ThreadPool
 	class Core :
-		private _BOOST noncopyable,
-		public _STD enable_shared_from_this<Core>
+		private _BOOST noncopyable
 	{
 	public:
 		typedef typename Core TCore;
 		typedef typename CoreTrait::TWorker TWorker;
 		typedef typename CoreTrait::TService TService;
-		typedef typename CoreTrait::TSessionPool TSessionPool;
+		//typedef typename CoreTrait::TSessionPool TSessionPool;
 		Core();
 		virtual ~Core();
-		// 取空闲Worker的对象池
-		TSessionPool* GetIdleSessionPool();
+		
 		TService* GetService(const char*);
 		bool AddService(const shared_ptr<TService>&);
 		void DeleteService(const shared_ptr<TService>&);
@@ -28,6 +27,7 @@ namespace FeedTheDog
 		// 取空闲Worker
 		TWorker* SelectIdleWorker();
 		shared_ptr<TraceSource<Config::TEnum>>& GetTrace();
+
 	private:
 		bool isStop;
 		// 当core没启动时用的
@@ -36,6 +36,7 @@ namespace FeedTheDog
 		_STD vector<shared_ptr<TWorker>> workers;
 		_BOOST mutex mutex;
 		concurrent_unordered_map<const char*, shared_ptr<TService>> services;
+		int threadCount;
 	};
 
 }  // namespace FeedTheDog

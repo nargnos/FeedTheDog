@@ -7,6 +7,5 @@ namespace FeedTheDog
 	struct WorkerTrait
 	{
 		typedef IService TService;
-		typedef SessionPool TSessionPool;
 	};
 }  // namespace FeedTheDog

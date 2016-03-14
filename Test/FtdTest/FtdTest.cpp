@@ -30,7 +30,7 @@ private:
 };
 
 CrtSetDbgFlag dbg(_CRTDBG_ALLOC_MEM_DF);
-//
+
 int main()
 {
 
@@ -39,12 +39,12 @@ int main()
 	auto& core = make_shared<Core>();
 	auto a = make_shared<EchoService>(9999, "Echo No1");
 	core->AddService(a);
-	auto b = make_shared<EchoService>(8888, "Echo No2");
+	auto b = make_shared<EchoService>(7788, "Echo No2");
 	core->AddService(b);
-#if 0
+#if 1
 	auto& io = core->SelectIdleWorker()->GetIoService();
 	_ASIO deadline_timer t(io);
-	t.expires_from_now(_BOOST posix_time::seconds(100));
+	t.expires_from_now(_BOOST posix_time::seconds(60*9));
 	t.async_wait(_BOOST bind(&Core::Stop, core));
 #endif // fi
 

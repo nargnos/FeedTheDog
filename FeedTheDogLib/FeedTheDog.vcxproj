@@ -158,6 +158,7 @@
     <ClInclude Include="FileListener.h" />
     <ClInclude Include="IEncryptor.h" />
     <ClInclude Include="IListener.h" />
+    <ClInclude Include="ISessionPool.h" />
     <ClInclude Include="ListenerBase.h" />
     <ClInclude Include="Rfc1928.h" />
     <ClInclude Include="Session.h" />
@@ -175,6 +176,7 @@
     <ClInclude Include="CoreTrait.h" />
     <ClInclude Include="SessionPoolTrait.h" />
     <ClInclude Include="Trait.h" />
+    <ClInclude Include="WorkerBase.h" />
     <ClInclude Include="WorkerTrait.h" />
   </ItemGroup>
   <ItemGroup>
@@ -198,6 +200,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="WorkerBase.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\JsonCpp\JsonCpp.vcxproj">

@@ -5,7 +5,9 @@
 #include <boost\asio.hpp>
 #include <boost\bind.hpp>
 #include <boost\atomic.hpp>
-//#include <boost\>
+#include <boost\pool\object_pool.hpp>
+#include <boost\pool\pool.hpp>
+
 #include <boost\utility.hpp>
 #include <boost\thread.hpp>
 #include <boost\lockfree\queue.hpp>

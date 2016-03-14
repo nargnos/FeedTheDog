@@ -5,8 +5,7 @@ namespace FeedTheDog
 	template<typename TProtocol>
 	class Session;
 	struct SessionPoolTrait
-	{
-		
+	{		
 		typedef _ASIO ip::tcp TTcp;
 		typedef _ASIO ip::udp TUdp;		
 		typedef Worker TWorker;
@@ -15,24 +14,22 @@ namespace FeedTheDog
 		{
 			typedef Session<TProtocol> type;
 		};
-		template<typename T>
+		template<typename TProtocol>
 		struct TPool
 		{
-			typedef _BOOST lockfree::detail::freelist_stack<T> type;
+			typedef _BOOST lockfree::detail::freelist_stack<typename TSession<TProtocol>::type> type;
 		};
-		template<typename TProtocol>
-		struct TPoolType
+		/*template<typename TProtocol>
+		struct TQueue
 		{
-			typedef typename TPool<typename TSession<TProtocol>::type>::type type;
-		};
+			typedef _BOOST lockfree::queue<typename TSession<TProtocol>::type*> type;
+		};*/
 		typedef TSession<TTcp>::type TTcpSession;
 		typedef TSession<TUdp>::type TUdpSession;
 		template<typename TProtocol>
-		struct TSessionSave
+		struct TSessionMultiMap
 		{
-			typedef concurrent_unordered_multimap<const char*, typename SessionPoolTrait::TSession<TProtocol>::type*> MapType;
-			typedef typename MapType::iterator SessionSave;
-			typedef typename MapType::value_type MapValue;
+			typedef concurrent_unordered_multimap<const char*, typename SessionPoolTrait::TSession<TProtocol>::type*> type;
 		};
 		
 	};

@@ -45,25 +45,37 @@ namespace FeedTheDog
 				return;
 			}
 			auto time = _STD chrono::system_clock::to_time_t(_STD chrono::system_clock::now());
+			
+			// malloc
 			mutex.lock();
-			stringBuilder.str("");
-			auto result = ctime_s(timeBuffer, TimeBufferSize, &time);
+			auto tmpSb = stringBuilderPool.construct();
+			auto tmpTimeBuffer = (char*)timeBufferPool.malloc();		
+			mutex.unlock();
+
+			auto result = ctime_s(tmpTimeBuffer, TimeBufferSize, &time);
 			// 去掉后面的回车
-			timeBuffer[strnlen_s(timeBuffer, TimeBufferSize) - 1] = 0;
+			tmpTimeBuffer[strnlen_s(tmpTimeBuffer, TimeBufferSize) - 1] = 0;
 			assert(!result);
-			stringBuilder << "[" << timeBuffer << "][" << TraceLevelString[(int)level] << "]\t" << msg;
+			*tmpSb << "[" << tmpTimeBuffer << "][" << TraceLevelString[(int)level] << "]\t" << msg;
 			if (useIndex)
 			{
-				stringBuilder << " (" << index << ")";
+				*tmpSb << " (" << index << ")";
 			}
 			if (str != NULL)
 			{
-				stringBuilder << " (" << str << ")";
+				*tmpSb << " (" << str << ")";
 			}
-			stringBuilder << _STD endl;
-			auto& output = stringBuilder.str();
-			mutex.unlock();
+			*tmpSb << _STD endl;
+
+			auto& output = tmpSb->str();
+
 			WriteLine(output, level);
+
+			// free
+			mutex.lock();
+			stringBuilderPool.destroy(tmpSb);
+			timeBufferPool.free(tmpTimeBuffer);
+			mutex.unlock();
 		}
 		void TracePoint(TEnum msg, bool useIndex = false, int index = 0, const char* str = NULL, TraceLevel level = TraceLevel::Debug)
 		{
@@ -71,7 +83,7 @@ namespace FeedTheDog
 			{
 				return;
 			}
-			TracePoint((*strmap)[msg], useIndex, index,str, level);
+			TracePoint((*strmap)[msg], useIndex, index, str, level);
 		}
 		void TracePoint(const _STD string& msg, TraceLevel level)
 		{
@@ -83,7 +95,6 @@ namespace FeedTheDog
 		}
 	private:
 		shared_ptr<TMap> strmap;
-		_STD ostringstream stringBuilder;
 		template<typename TListener>
 		void ReadListener(Json::Value& listener, const char* fieldName, bool setDefaultConfig = false)
 		{

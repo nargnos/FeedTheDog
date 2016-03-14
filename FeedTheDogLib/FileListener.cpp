@@ -5,19 +5,26 @@ namespace FeedTheDog
 {
 	FileListener::FileListener()
 	{
-		FileNameNode(defaultConfig)= ".\\log.log";
+		FileNameNode(defaultConfig) = ".\\log.log";
+		count = 0;
+		flushSpeed = 100;
 	}
 
 
 	FileListener::~FileListener()
 	{
 	}
+	// WriteLine调用时已lock
 	void FileListener::WriteLine(const std::string & str)
 	{
 		if (isOpen)
 		{
 			*ofs << str;
-			ofs->flush();
+			count = (count + 1) % flushSpeed;
+			if (!count)
+			{
+				ofs->flush();
+			}
 		}
 	}
 	void FileListener::Init(Json::Value & listenerConfig)

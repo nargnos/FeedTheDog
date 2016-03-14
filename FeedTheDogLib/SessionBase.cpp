@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "SessionBase.h"
-#include "Core.h"
 #include "SessionPool.h"
 namespace FeedTheDog
 {

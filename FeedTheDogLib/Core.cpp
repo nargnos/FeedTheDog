@@ -13,7 +13,7 @@ namespace FeedTheDog
 		tmpWorkerIndex = -1;
 		config.Load();
 		GetTrace()->TracePoint(LogMsg::NewCore);
-		auto threadCount = config.GetThreadCount();
+		threadCount = config.GetThreadCount();
 		assert(threadCount > 0 && threadCount <= config.GetMaxThreadCount());
 
 		for (auto i = 0; i < threadCount; i++)
@@ -32,12 +32,12 @@ namespace FeedTheDog
 	{
 		return config.GetTrace();
 	}
-	Core::TSessionPool* Core::GetIdleSessionPool()
-	{
-		auto result = SelectIdleWorker()->GetSessionPool();
-		assert(result != NULL);
-		return result;
-	}
+	//Core::TSessionPool* Core::GetIdleSessionPool()
+	//{
+	//	auto result = SelectIdleWorker()->GetSessionPool();
+	//	assert(result != NULL);
+	//	return result;
+	//}
 
 	Core::TService* Core::GetService(const char* name)
 	{
@@ -78,7 +78,7 @@ namespace FeedTheDog
 		// 把对应服务的所有session关掉
 		for each (auto& var in workers)
 		{
-			var->GetSessionPool()->RemoveServiceSession(svr->Name());
+			var->RemoveAllServiceSession(svr->Name());
 		}
 		mutex.lock();
 		services.unsafe_erase(svr->Name());
@@ -89,7 +89,8 @@ namespace FeedTheDog
 		GetTrace()->TracePoint(LogMsg::CoreStart);
 		isStop = false;
 		_STD vector<shared_ptr<_BOOST thread>> threads;
-		auto tmpCount = workers.size();
+		assert(threadCount == workers.size());
+		auto tmpCount = threadCount;
 		if (tmpCount > 1)
 		{
 			for (size_t i = 1; i < tmpCount; i++)
@@ -107,7 +108,6 @@ namespace FeedTheDog
 		{
 			var->join();
 		}
-		//concurrency::parallel_for(0, (int)workers.size(), [this](int i) {workers[i]->Start(); });
 	}
 	void Core::Stop()
 	{
@@ -124,7 +124,7 @@ namespace FeedTheDog
 			var.second->Stop();
 		}
 		// 此处会关并删掉会话
-		for (size_t i = 0; i < workers.size(); i++)
+		for (size_t i = 0; i < threadCount; i++)
 		{
 			workers[i]->Stop();
 		}
@@ -133,7 +133,6 @@ namespace FeedTheDog
 	{
 		return workers.size();
 	}
-
 	Core::TWorker* Core::SelectIdleWorker()
 	{
 		assert(workers.size() > 0);
@@ -146,18 +145,20 @@ namespace FeedTheDog
 		}
 		else
 		{
-			int index = 0;
-			unsigned int sessionCount = workers[index]->GetSessionPool()->GetSessionCount();
-			for (int i = index+1; i < workers.size(); i++)
+			auto i = workers.begin();
+			result = i->get();
+			unsigned int sessionCount = result->GetSessionCount();
+			++i;
+			auto& end = workers.end();
+			for (; i < end; ++i)
 			{
-				auto tmpSessionCount = workers[i]->GetSessionPool()->GetSessionCount();
+				auto tmpSessionCount = (*i)->GetSessionCount();
 				if (tmpSessionCount < sessionCount)
 				{
-					index = i;
+					result = i->get();
 					sessionCount = tmpSessionCount;
 				}
 			}
-			result = workers[index].get();
 		}
 		assert(result != NULL);
 		return result;

@@ -5,6 +5,7 @@ namespace FeedTheDog
 	enum class Rfc1928ServiceType
 	{
 		Server,
+		
 		// 其它扩展待编写
 	};
 	// 根据协议原文声明类型
@@ -50,11 +51,7 @@ namespace FeedTheDog
 
 #pragma pack(pop)
 
-	void J()
-	{
-		VersionMethodMessage k;
-		k.Methods[0] = 1;
-	}
+	
 	class Rfc1928 :
 		public ServiceBase
 	{
