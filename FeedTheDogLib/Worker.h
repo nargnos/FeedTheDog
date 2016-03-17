@@ -29,14 +29,13 @@ namespace FeedTheDog
 		Worker(TCore* core) :
 			WorkerBase(core)
 		{
-			sessionPools[TcpSessionPool] = dynamic_pointer_cast<ISessionPoolBase>(make_shared<TTcpSessionPool>(core, ioService));
-			sessionPools[UdpSessionPool] = dynamic_pointer_cast<ISessionPoolBase>(make_shared<TUdpSessionPool>(core, ioService));
+			sessionPools[TcpSessionPool] = dynamic_pointer_cast<ISessionPoolBase>(make_shared<TTcpSessionPool>(core, this, ioService));
+			sessionPools[UdpSessionPool] = dynamic_pointer_cast<ISessionPoolBase>(make_shared<TUdpSessionPool>(core, this, ioService));
 		}
 		~Worker()
 		{
-
 		}
-		
+
 		void RemoveAllServiceSession(const char* serviceName)
 		{
 			if (!isRunning)
@@ -46,14 +45,14 @@ namespace FeedTheDog
 			}
 			for each (auto& var in sessionPools)
 			{
-				strand.post(_BOOST bind(&ISessionPoolBase::RemoveServiceSession, var, serviceName));
+				var->RemoveServiceSession(serviceName);
 			}
 		}
 		virtual void CloseAllSessions() override
 		{
 			for each (auto& var in sessionPools)
 			{
-				strand.post(_BOOST bind(&ISessionPoolBase::CloseAll, var));
+				var->CloseAll();
 			}
 		}
 
@@ -70,6 +69,11 @@ namespace FeedTheDog
 		shared_ptr<typename SessionPool<TProtocol>::TSession> NewSession(const char* serviceName)
 		{
 			return GetSessionPool<TProtocol>()->NewSession(serviceName);
+		}
+		template<typename TProtocol>
+		typename SessionPool<TProtocol>::TResolver& GetResolver()
+		{
+			return GetSessionPool<TProtocol>()->GetResolver();
 		}
 	private:
 		shared_ptr<ISessionPoolBase> sessionPools[_EndSessionPoolType];

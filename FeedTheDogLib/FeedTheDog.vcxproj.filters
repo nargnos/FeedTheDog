@@ -3,7 +3,7 @@
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="Core.cpp">
-      <Filter>Core</Filter>
+      <Filter>Service Manager</Filter>
     </ClCompile>
     <ClCompile Include="Worker.cpp">
       <Filter>Worker</Filter>
@@ -21,19 +21,19 @@
       <Filter>Config</Filter>
     </ClCompile>
     <ClCompile Include="ConsoleListener.cpp">
-      <Filter>Listener</Filter>
+      <Filter>TraceListener</Filter>
     </ClCompile>
     <ClCompile Include="FileListener.cpp">
-      <Filter>Listener</Filter>
+      <Filter>TraceListener</Filter>
     </ClCompile>
     <ClCompile Include="ListenerBase.cpp">
-      <Filter>Listener</Filter>
+      <Filter>TraceListener</Filter>
     </ClCompile>
     <ClCompile Include="TraceSource.cpp">
       <Filter>Config</Filter>
     </ClCompile>
     <ClCompile Include="DebugListener.cpp">
-      <Filter>Listener</Filter>
+      <Filter>TraceListener</Filter>
     </ClCompile>
     <ClCompile Include="TraceDefine.cpp">
       <Filter>Type</Filter>
@@ -71,7 +71,7 @@
       <Filter>Type</Filter>
     </ClInclude>
     <ClInclude Include="Core.h">
-      <Filter>Core</Filter>
+      <Filter>Service Manager</Filter>
     </ClInclude>
     <ClInclude Include="Worker.h">
       <Filter>Worker</Filter>
@@ -104,16 +104,16 @@
       <Filter>Config</Filter>
     </ClInclude>
     <ClInclude Include="ConsoleListener.h">
-      <Filter>Listener</Filter>
+      <Filter>TraceListener</Filter>
     </ClInclude>
     <ClInclude Include="FileListener.h">
-      <Filter>Listener</Filter>
+      <Filter>TraceListener</Filter>
     </ClInclude>
     <ClInclude Include="ListenerBase.h">
-      <Filter>Listener</Filter>
+      <Filter>TraceListener</Filter>
     </ClInclude>
     <ClInclude Include="DebugListener.h">
-      <Filter>Listener</Filter>
+      <Filter>TraceListener</Filter>
     </ClInclude>
     <ClInclude Include="TraceDefine.h">
       <Filter>Type</Filter>
@@ -135,9 +135,6 @@
     <Filter Include="Interface">
       <UniqueIdentifier>{c5ac5a81-5a4f-4ff9-a9b6-b9b7a521ff4b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Core">
-      <UniqueIdentifier>{9ddb68ea-5ad6-4213-b9d0-e7d7f9510ce1}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Worker">
       <UniqueIdentifier>{d8450132-530c-4f30-95e3-c9e09fd492de}</UniqueIdentifier>
     </Filter>
@@ -153,11 +150,14 @@
     <Filter Include="Config">
       <UniqueIdentifier>{9c10a1a2-7680-4894-934e-6e8abce4f3ac}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Listener">
-      <UniqueIdentifier>{b9e8a6fb-c7ec-4321-a073-48736af2e30a}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Type">
       <UniqueIdentifier>{04ab5aa8-270a-47d7-a955-2cae8e638617}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="TraceListener">
+      <UniqueIdentifier>{b9e8a6fb-c7ec-4321-a073-48736af2e30a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Service Manager">
+      <UniqueIdentifier>{9ddb68ea-5ad6-4213-b9d0-e7d7f9510ce1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

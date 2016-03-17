@@ -8,13 +8,13 @@ namespace FeedTheDog
 {
 	// Service Manager & ThreadPool
 	class Core :
-		private _BOOST noncopyable
+		private _BOOST noncopyable,
+		public _STD enable_shared_from_this<Core>
 	{
 	public:
 		typedef typename Core TCore;
 		typedef typename CoreTrait::TWorker TWorker;
 		typedef typename CoreTrait::TService TService;
-		//typedef typename CoreTrait::TSessionPool TSessionPool;
 		Core();
 		virtual ~Core();
 		

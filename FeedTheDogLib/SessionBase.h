@@ -11,22 +11,25 @@ namespace FeedTheDog
 		typedef _STD array<unsigned char, Config::BufferSize> TBufferType;
 		typedef SessionBase TSessionBase;
 		typedef typename CoreTrait::TCore TCore;
-
-		SessionBase(TCore* corePtr, _ASIO io_service& io);
+		typedef typename CoreTrait::TWorker TWorker;
+		SessionBase(TWorker* worker, _ASIO io_service& io);
 		virtual ~SessionBase();
 		TBufferType& GetBuffer();
 		// 取得Core
-		TCore* GetCore() const;
+		shared_ptr<TCore>& GetCore();
 		_ASIO io_service& GetIoService();
+		void Close();
+		_ASIO deadline_timer& GetTimer();
+		SessionBase::TWorker * SessionBase::GetWorker();
 	protected:
+		TWorker* worker_;
 		TBufferType buffer;
-		TCore* core;
+		shared_ptr<TCore> core;
 		_ASIO io_service& ios;
-		// 只在创建时赋值false，使用的部分不需要线程同步
-		// 表示session有没有被关闭过，不用socket.is_open()
-		bool isClosed;
 		// 表示是否已从存储结构清除，使用时都在lock，这里也不需同步了
 		bool isErased;
+		_ASIO deadline_timer timer;
+		boost::system::error_code ignored_ec;
 	};
 }  // namespace FeedTheDog
 

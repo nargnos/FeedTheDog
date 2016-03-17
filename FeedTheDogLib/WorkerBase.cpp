@@ -38,8 +38,7 @@ namespace FeedTheDog
 	{
 		return ioService;
 	}
-	WorkerBase::WorkerBase(TCore * core) :
-		strand(ioService)
+	WorkerBase::WorkerBase(TCore * core)
 	{
 		isRunning = false;
 		static int wid = 0;

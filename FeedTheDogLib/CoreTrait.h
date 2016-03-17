@@ -7,7 +7,6 @@ namespace FeedTheDog
 		typedef Core TCore;
 		typedef Worker TWorker;
 		typedef IService TService;
-		//typedef SessionPool TSessionPool;
 		template<typename TProtocol>
 		struct TSessionPool
 		{

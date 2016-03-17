@@ -24,7 +24,6 @@ namespace FeedTheDog
 		int id;
 		TCore* owner;
 		bool isRunning;
-		_ASIO io_service::strand strand;
 		virtual void CloseAllSessions() = 0;
 	};
 }  // namespace FeedTheDog

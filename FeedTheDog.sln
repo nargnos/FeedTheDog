@@ -11,9 +11,13 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ServerTest", "Test\ServerTe
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FeedTheDogLib", "FeedTheDogLib\FeedTheDog.vcxproj", "{9004B66B-C2FA-499C-B4C7-3A986FA1EE60}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F1ECC13A-E873-4394-B4D9-11EA3C9E8C19} = {F1ECC13A-E873-4394-B4D9-11EA3C9E8C19}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FtdTest", "Test\FtdTest\FtdTest.vcxproj", "{3F1C5B8E-3186-40F9-93C2-EA3AB11BFD4D}"
 	ProjectSection(ProjectDependencies) = postProject
+		{F1ECC13A-E873-4394-B4D9-11EA3C9E8C19} = {F1ECC13A-E873-4394-B4D9-11EA3C9E8C19}
 		{9004B66B-C2FA-499C-B4C7-3A986FA1EE60} = {9004B66B-C2FA-499C-B4C7-3A986FA1EE60}
 	EndProjectSection
 EndProject

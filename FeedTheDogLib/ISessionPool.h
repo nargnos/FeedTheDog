@@ -12,6 +12,8 @@ namespace FeedTheDog
 	template<typename TProtocol>
 	struct ISessionPool :public ISessionPoolBase
 	{
+		typedef typename TProtocol::resolver TResolver;
+		virtual TResolver& GetResolver()=0;
 		virtual shared_ptr<typename SessionPoolTrait::TSession<TProtocol>::type> NewSession(const char* serviceName) = 0;
 	};
 }  // namespace FeedTheDog

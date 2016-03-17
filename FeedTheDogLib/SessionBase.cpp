@@ -1,19 +1,28 @@
 #include "stdafx.h"
 #include "SessionBase.h"
 #include "SessionPool.h"
+#include "Worker.h"
 namespace FeedTheDog
 {
-	SessionBase::SessionBase(TCore* ptr, _ASIO io_service& io) :
-		ios(io)
+	SessionBase::SessionBase(TWorker* worker, _ASIO io_service& io) :
+		ios(io),
+		timer(io),
+		worker_(worker)
 	{
-		core = ptr;
-		isClosed = false;
+		core = worker->GetCore()->shared_from_this();
 		isErased = false;
+	}
+	void SessionBase::Close()
+	{
+		timer.cancel(ignored_ec);
+	}
+	_ASIO deadline_timer & SessionBase::GetTimer()
+	{
+		return timer;
 	}
 	SessionBase::~SessionBase()
 	{
-
-
+		Close();
 	}
 	SessionBase::TBufferType& SessionBase::GetBuffer()
 	{
@@ -23,11 +32,14 @@ namespace FeedTheDog
 	{
 		return ios;
 	}
-	SessionBase::TCore* SessionBase::GetCore() const
+	shared_ptr<SessionBase::TCore>& SessionBase::GetCore()
 	{
 		return core;
 	}
-
+	SessionBase::TWorker* SessionBase::GetWorker()
+	{
+		return worker_;
+	}
 }  // namespace FeedTheDog
 
 

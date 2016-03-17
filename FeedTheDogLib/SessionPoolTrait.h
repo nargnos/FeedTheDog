@@ -29,7 +29,7 @@ namespace FeedTheDog
 		template<typename TProtocol>
 		struct TSessionMultiMap
 		{
-			typedef concurrent_unordered_multimap<const char*, typename SessionPoolTrait::TSession<TProtocol>::type*> type;
+			typedef _STD unordered_multimap<const char*, typename SessionPoolTrait::TSession<TProtocol>::type*> type;
 		};
 		
 	};

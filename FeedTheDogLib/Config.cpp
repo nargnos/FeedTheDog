@@ -6,7 +6,7 @@ namespace FeedTheDog
 	Config::Config()
 	{
 		configPath = ".\\config.json";
-		maxThreadCount = _BOOST thread::hardware_concurrency()*2;
+		maxThreadCount = _BOOST thread::hardware_concurrency();
 		Json::StreamWriterBuilder sb;
 		// 格式化配置信息
 		// sb["indentation"] = "";

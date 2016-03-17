@@ -41,7 +41,7 @@ namespace FeedTheDog
 			auto& trace = session->GetCore()->GetTrace();
 			auto& endPoint = session->GetSocket().remote_endpoint();
 			_STD ostringstream str;
-			str << "Service " << name_ << ", New Connection: " << endPoint.address().to_string() << ":" << endPoint.port();
+			str << "Service " << name_ << ", New Connection: " << endPoint;
 			trace->TracePoint(str.str(), TraceLevel::Trace);
 			ReadSome(session);
 			AsyncStart();

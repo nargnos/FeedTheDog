@@ -3,8 +3,6 @@
 #include "SessionPool.h"
 #include "Worker.h"
 
-// TODO: 查找性能瓶颈，优化
-
 namespace FeedTheDog
 {
 	Core::Core()
@@ -32,13 +30,6 @@ namespace FeedTheDog
 	{
 		return config.GetTrace();
 	}
-	//Core::TSessionPool* Core::GetIdleSessionPool()
-	//{
-	//	auto result = SelectIdleWorker()->GetSessionPool();
-	//	assert(result != NULL);
-	//	return result;
-	//}
-
 	Core::TService* Core::GetService(const char* name)
 	{
 		if (services.count(name) > 0)
