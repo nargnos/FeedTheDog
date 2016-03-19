@@ -38,32 +38,36 @@ namespace FeedTheDog
 			count(0),
 			sessionPool(alloc, 0),
 			freeSessionDelegate(_BOOST bind(&TSelf::Free, this, _1)),
-			strand(io),
+		//	strand(io),
 			worker_(worker),
 			resolver(io)
 		{
+			corePtr->GetTrace()->DebugPoint(LogMsg::NewSessionPool);
 			isDestruct = false;
 		}
 
 		~SessionPool()
 		{
+			corePtr->GetTrace()->DebugPoint(LogMsg::FreeSessionPool);
 			isDestruct = true;
 			if (count > 0)
 			{
 				CloseAll();
 			}
 		}
-
+		// 多线程同时new多次有一定概率出现线程争用
 		virtual shared_ptr<TSession> NewSession(const char* serviceName) override
 		{
+			corePtr->GetTrace()->DebugPoint(LogMsg::NewSession);
 			++count;
 			TSession* result = NULL;
 
+			// FIX: 看有什么更快的方案可以换
 			// 构建session
-			result = sessionPool.construct<true, false>(worker_, _STD ref(ios));
+			result = sessionPool.construct<true, false>(worker_);
 
 			// 析构的erase执行时间绝对会在insert执行之后，所以在析构时不会出现未设置map插入位置的情况
-			strand.post(_BOOST bind(&TSelf::InsertSession, this, serviceName, result));
+			ios.post(_BOOST bind(&TSelf::InsertSession, this, serviceName, result));
 
 			return shared_ptr<TSession>(result, freeSessionDelegate);
 		}
@@ -80,24 +84,15 @@ namespace FeedTheDog
 #ifdef _DEBUG
 			corePtr->GetTrace()->TracePoint(LogMsg::CloseAllSocket);
 #endif // _DEBUG
-			/*if (isDestruct)
-			{
-				AsyncCloseAll();
-				return;
-			}*/
-			strand.post(_BOOST bind(&TSelf::AsyncCloseAll, this));
+			
+			ios.post(_BOOST bind(&TSelf::AsyncCloseAll, this));
 		}
 
 		// 移除服务session前先会停止服务，此时服务应拒绝新连接
 		// 只在运行状态调用
 		virtual void RemoveServiceSession(const char* serviceName) override
-		{/*
-			if (isDestruct)
-			{
-				RemoveServiceSessionStrand(serviceName);
-				return;
-			}*/
-			strand.post(_BOOST bind(&TSelf::RemoveServiceSessionStrand, this, serviceName));
+		{
+			ios.post(_BOOST bind(&TSelf::RemoveServiceSessionStrand, this, serviceName));
 		}
 		TResolver& GetResolver()
 		{
@@ -105,7 +100,7 @@ namespace FeedTheDog
 		}
 	private:
 		TWorker* worker_;
-		_ASIO strand strand;
+		//_ASIO strand strand;
 		// 表示是否处于析构状态
 		bool isDestruct;
 		// 简化调用bind
@@ -138,6 +133,7 @@ namespace FeedTheDog
 		}
 		void FreeSession(TSession* ptr)
 		{
+			corePtr->GetTrace()->DebugPoint(LogMsg::FreeSession);
 			if (!ptr->isErased)
 			{
 				// 析构时不erase减少析构时间
@@ -164,18 +160,9 @@ namespace FeedTheDog
 			sessionMap.erase(eraseIt, sessionMap.end());
 		}
 		void Free(TSession* ptr)
-		{/*
-			if (isDestruct)
-			{
-				FreeSession(ptr);
-				return;
-			}*/
-			strand.post(_BOOST bind(&TSelf::FreeSession, this, ptr));
-		}/*
-		void DestructSession(TSession* ptr)
 		{
-			sessionPool.destruct<true>(ptr);
-		}*/
+			ios.post(_BOOST bind(&TSelf::FreeSession, this, ptr));
+		}
 	};
 
 }  // namespace FeedTheDog

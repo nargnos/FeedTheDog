@@ -17,6 +17,7 @@ namespace FeedTheDog
 		template<typename TProtocol>
 		struct TPool
 		{
+			
 			typedef _BOOST lockfree::detail::freelist_stack<typename TSession<TProtocol>::type> type;
 		};
 		/*template<typename TProtocol>

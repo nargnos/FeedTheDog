@@ -15,40 +15,35 @@ namespace FeedTheDog
 		typedef typename TProtocol::socket TSocket;
 		typedef typename CoreTrait::TSessionPool<TProtocol>::type TSessionPool;
 		friend TSessionPool;
-		Session(TWorker* worker, _ASIO io_service& io) :
-			socket_(io),
-			TSessionBase(worker, io)
+		Session(TWorker* worker) :
+			socket_(worker->GetIoService()),
+			TSessionBase(worker)
 		{
 		}
 		TSocket& GetSocket()
 		{
 			return socket_;
 		}
-		// 一并关闭timer
 		void Close()
 		{
-			TSessionBase::Close();
-			CloseSocket();
+			if (socket_.is_open())
+			{
+				//socket_.shutdown(_ASIO socket_base::shutdown_type::shutdown_both);
+				socket_.close(errorCode);
+			}
+
 		}
 		~Session()
 		{
-			CloseSocket();
+			Close();
 		}
-	protected:
 
+	protected:
 		TSocket socket_;
 		// 当前在map中的位置
 		typedef typename SessionPoolTrait::TSessionMultiMap<TProtocol>::type::iterator TMapIterator;
 		TMapIterator mapPosition;
-		void CloseSocket()
-		{
-			if (socket_.is_open())
-			{
-				
-				//socket_.shutdown(_ASIO socket_base::shutdown_type::shutdown_both);
-				socket_.close(ignored_ec);
-			}
-		}
+
 	};
 
 

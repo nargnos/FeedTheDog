@@ -12,15 +12,14 @@ namespace FeedTheDog
 		typedef SessionBase TSessionBase;
 		typedef typename CoreTrait::TCore TCore;
 		typedef typename CoreTrait::TWorker TWorker;
-		SessionBase(TWorker* worker, _ASIO io_service& io);
+		SessionBase(TWorker* worker);
 		virtual ~SessionBase();
 		TBufferType& GetBuffer();
 		// 取得Core
 		shared_ptr<TCore>& GetCore();
 		_ASIO io_service& GetIoService();
-		void Close();
-		_ASIO deadline_timer& GetTimer();
 		SessionBase::TWorker * SessionBase::GetWorker();
+		_BOOST system::error_code& GetErrorCode();
 	protected:
 		TWorker* worker_;
 		TBufferType buffer;
@@ -28,8 +27,8 @@ namespace FeedTheDog
 		_ASIO io_service& ios;
 		// 表示是否已从存储结构清除，使用时都在lock，这里也不需同步了
 		bool isErased;
-		_ASIO deadline_timer timer;
-		boost::system::error_code ignored_ec;
+		//_ASIO deadline_timer timer;
+		_BOOST system::error_code errorCode;
 	};
 }  // namespace FeedTheDog
 

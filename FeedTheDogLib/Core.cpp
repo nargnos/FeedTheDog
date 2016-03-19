@@ -10,7 +10,7 @@ namespace FeedTheDog
 		isStop = true;
 		tmpWorkerIndex = -1;
 		config.Load();
-		GetTrace()->TracePoint(LogMsg::NewCore);
+		GetTrace()->DebugPoint(LogMsg::NewCore);
 		threadCount = config.GetThreadCount();
 		assert(threadCount > 0 && threadCount <= config.GetMaxThreadCount());
 
@@ -19,11 +19,11 @@ namespace FeedTheDog
 			workers.push_back(make_shared<TWorker>(this));
 		}
 		config.Save();
-		GetTrace()->TracePoint(LogMsg::Initialized);
+		GetTrace()->DebugPoint(LogMsg::Initialized);
 	}
 	Core::~Core()
 	{
-		GetTrace()->TracePoint(LogMsg::FreeCore);
+		GetTrace()->DebugPoint(LogMsg::FreeCore);
 		Stop();
 	}
 	shared_ptr<TraceSource<Config::TEnum>>& Core::GetTrace()
@@ -52,7 +52,7 @@ namespace FeedTheDog
 			return false;
 		}
 		services.insert(_STD pair<const char*, shared_ptr<TService>>(svr->Name(), svr));
-		GetTrace()->TracePoint(LogMsg::AddService, false, 0, svr->Name());
+		GetTrace()->DebugPoint(LogMsg::AddService, false, 0, svr->Name());
 		svr->AsyncStart();
 		return true;
 	}
@@ -65,7 +65,7 @@ namespace FeedTheDog
 		}
 		// 由服务控制是否接受新连接
 		find->Stop();
-		GetTrace()->TracePoint(LogMsg::AddService, false, 0, svr->Name());
+		GetTrace()->DebugPoint(LogMsg::AddService, false, 0, svr->Name());
 		// 把对应服务的所有session关掉
 		for each (auto& var in workers)
 		{
@@ -77,7 +77,7 @@ namespace FeedTheDog
 	}
 	void Core::Start()
 	{
-		GetTrace()->TracePoint(LogMsg::CoreStart);
+		GetTrace()->DebugPoint(LogMsg::CoreStart);
 		isStop = false;
 		_STD vector<shared_ptr<_BOOST thread>> threads;
 		assert(threadCount == workers.size());
@@ -107,7 +107,7 @@ namespace FeedTheDog
 		{
 			return;
 		}
-		GetTrace()->TracePoint(LogMsg::CoreStop);
+		GetTrace()->DebugPoint(LogMsg::CoreStop);
 		isStop = true;
 		// 此处停止服务不会关掉会话
 		for each (auto& var in services)

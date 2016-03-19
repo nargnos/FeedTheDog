@@ -10,4 +10,11 @@
 // 用于 CppUnitTest 的头文件
 #include "CppUnitTest.h"
 
-// TODO:  在此处引用程序需要的其他头文件
+//#define CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#include <Common.h>
+#include <boost\container\vector.hpp>
+
+#include <Core.h>
+#include <worker.h>

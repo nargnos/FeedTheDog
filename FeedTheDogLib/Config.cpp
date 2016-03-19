@@ -27,13 +27,13 @@ namespace FeedTheDog
 		texts->insert(TPair(TEnum::FreeSessionPool, "Free SessionPool"));
 		texts->insert(TPair(TEnum::NewSession, "New Session"));
 		texts->insert(TPair(TEnum::FreeSession, "Free Session"));
-		texts->insert(TPair(TEnum::AllocMemory, "Alloc Memory: SessionPool"));
-		texts->insert(TPair(TEnum::FreeMemory, "Free Memory: SessionPool"));
+		texts->insert(TPair(TEnum::AllocMemory, "Alloc Memory"));
+		texts->insert(TPair(TEnum::FreeMemory, "Free Memory"));
 		texts->insert(TPair(TEnum::CoreStart, "Core Start"));
-		texts->insert(TPair(TEnum::CoreStop, "Core Stop"));
+		texts->insert(TPair(TEnum::CoreStop, "=> Core Stop"));
 		texts->insert(TPair(TEnum::StartWorker, "Start Worker"));
 		texts->insert(TPair(TEnum::StopWorker, "Stop Worker"));
-		texts->insert(TPair(TEnum::CloseAllSocket, "Close All Socket: SessionPool"));
+		texts->insert(TPair(TEnum::CloseAllSocket, "Close All Socket"));
 		texts->insert(TPair(TEnum::MainEnd, "=> End Process"));
 		texts->insert(TPair(TEnum::Exit, "Exit"));
 		texts->insert(TPair(TEnum::AddService, "Add Service"));

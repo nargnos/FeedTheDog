@@ -224,7 +224,7 @@ namespace FeedTheDog
 			auto bufferData = buffer.data();
 			auto& sessionSocket = session->GetSocket();
 			auto leftSize = buffer.max_size() - alreadyTransferred;
-			assert(leftSize <= buffer.max_size());
+			assert(leftSize > 0);
 			sessionSocket.async_read_some(_ASIO buffer(bufferData + alreadyTransferred, leftSize), handler);
 		}
 
@@ -246,14 +246,14 @@ namespace FeedTheDog
 			new (buffer) _ASIO ip::address_v4(_ASIO detail::socket_ops::network_to_host_long(val->Ipv4));
 		}
 		// FIX: ipv6字节序
-		EndPointParser(const IPv6* val):
+		EndPointParser(const IPv6* val) :
 			aytp(AtypIPv6),
 			port(_ASIO detail::socket_ops::network_to_host_short(val->Port))
 		{
 			new (buffer) _ASIO ip::address_v6(val->Ipv6);
 		}
 		// domainPtr字符串（无NULL结尾）后必须跟2位端口号
-		EndPointParser(const char* domainPtr, size_t domainLen):
+		EndPointParser(const char* domainPtr, size_t domainLen) :
 			aytp(AtypDomainName),
 			port(_ASIO detail::socket_ops::network_to_host_short(*reinterpret_cast<const unsigned short*>(domainPtr + domainLen)))
 		{
@@ -264,20 +264,20 @@ namespace FeedTheDog
 			this->aytp = val.aytp;
 			this->port = val.port;
 			memcpy_s(buffer, UnionTypeSize, val.buffer, val.UnionTypeSize);
-			
+
 		}
 		~EndPointParser()
 		{
 			switch (aytp)
 			{
 			case FeedTheDog::EndPointParser::AtypIPv4:
-				// GetV4Addr();
+				GetV4Addr()->~address_v4();
 				break;
 			case FeedTheDog::EndPointParser::AtypDomainName:
 				GetDomain()->~basic_string();
 				break;
 			case FeedTheDog::EndPointParser::AtypIPv6:
-				// GetV6Addr();
+				GetV6Addr()->~address_v6();
 				break;
 			default:
 				break;
@@ -304,7 +304,7 @@ namespace FeedTheDog
 		template<typename TProtocol>
 		typename TProtocol::resolver::query ParseDomain()
 		{
-			assert(aytp == EndPointParser::AtypDomainName);			
+			assert(aytp == EndPointParser::AtypDomainName);
 			return typename TProtocol::resolver::query(*GetDomain(), _BOOST lexical_cast<_STD string>(port));
 		}
 		Atyp GetAtyp() const
@@ -319,7 +319,7 @@ namespace FeedTheDog
 			_ASIO ip::address_v6 ipv6;
 			_STD string domain;
 		}UnionType;
-		enum 
+		enum
 		{
 			UnionTypeSize = sizeof(UnionType)
 		};
@@ -338,6 +338,42 @@ namespace FeedTheDog
 		unsigned char buffer[UnionTypeSize];
 		unsigned short port;
 	};
+	template<typename TProtocol>
+	class DeadlineSession
+	{
+	public:
+		DeadlineSession(shared_ptr<typename SessionPoolTrait::TSession<TProtocol>::type>& val):
+			timer(val->GetIoService())
+		{
+			session = val;
+		}
+
+		~DeadlineSession()
+		{
+			CancelTimer();
+		}
+		void Close()			
+		{
+			CancelTimer();
+			session->Close();
+		}
+		void CancelTimer()
+		{
+			timer.cancel();
+		}
+		shared_ptr<typename SessionPoolTrait::TSession<TProtocol>::type>& GetSession()
+		{
+			return session;
+		}
+		_ASIO deadline_timer& GetTimer()
+		{
+			return timer;
+		}
+	private:
+		shared_ptr<typename SessionPoolTrait::TSession<TProtocol>::type> session;
+		_ASIO deadline_timer timer;
+	};
+
 	// FIX: 代码结构是什么鬼, 一些函数过长需要分割
 	class Rfc1928 :
 		public ServiceBase
@@ -353,49 +389,36 @@ namespace FeedTheDog
 			ReservedBegin = 0x80,
 			ReservedEnd = 0xfe,
 		};
-		Rfc1928(int port, const char* name, int timeout = 3, int closeDelay = 1);
+		Rfc1928(int port, const char* name, int timeout = 3);
 		~Rfc1928();
 		virtual void AsyncStart() override;
 
 		virtual void Stop() override;
 		virtual bool Init(TCore *) override;
 	private:
-		enum AsyncCheckPoint :unsigned char
-		{
-			CheckPoint0,
-			CheckPoint1,
-			CheckPoint2,
-			CheckPoint3,
-			CheckPoint4,
-		};
 		bool isStopped;
 		bool supportMethods[0xff];
 		TCore* core;
 		int port_;
 
 		_BOOST posix_time::seconds timeoutSecond;
-		_BOOST posix_time::seconds closeSocketDelaySecond;
 		unique_ptr<_ASIO ip::tcp::acceptor> acceptor;
 
-		void CheckDeadline(shared_ptr<TTcpSession>& session, const _BOOST system::error_code& error);
-		void HandleAccept(shared_ptr<TTcpSession>&, const _BOOST system::error_code& error);
-		//void DoCmd(shared_ptr<TTcpSession>& session, unsigned char cmd, const _ASIO ip::tcp::resolver::iterator & endpoint_iterator);
-		void DoCmd(shared_ptr<TTcpSession>& session, shared_ptr<EndPointParser>& parser, unsigned char cmd);
-		void HandleReadVersionMessage(shared_ptr<TTcpSession>& session, size_t alreadyTransferred, size_t bytes_transferred, const _BOOST system::error_code & error);
-		bool CheckVersionMessage(size_t alreadyTransferred, const VersionMessage * vmHeader);
-		void HandleNoAuthenticationRequired(shared_ptr<TTcpSession>& session, size_t alreadyTransferred, size_t bytes_transferred, const _BOOST system::error_code & error);
-		unsigned char ReplySelectedMethod(_ASIO ip::tcp::socket& sessionSocket, VersionMessage * vmHeader, _BOOST system::error_code & error);
-		int BuildCmdConnectReplyMessage(ServerReplieMessage * reply, shared_ptr<TTcpSession>& remote, const _BOOST system::error_code & error);
-		void RunMethod(shared_ptr<TTcpSession>& session, unsigned char selectedMethod);
-		void HandleCmdConnectReply(shared_ptr<TTcpSession>& client, shared_ptr<TTcpSession>& remote, const _BOOST system::error_code & error);
-		void DoCmdConnect(shared_ptr<TTcpSession>& session, shared_ptr<EndPointParser>& parser);
-		void CreateForward(shared_ptr<TTcpSession>& client, shared_ptr<TTcpSession>& remote);
-
-		void HandleForwardRead(TTcpSession* read, shared_ptr<TTcpSession>& write, size_t bytes_transferred, const _BOOST system::error_code & error);
-
-		void HandleForwardWrite(TTcpSession* read, shared_ptr<TTcpSession>& write, size_t bytes_transferred, const _BOOST system::error_code & error);
-
-		void HandleResolver(shared_ptr<TTcpSession>& session, const _ASIO ip::tcp::resolver::iterator & endpoint_iterator, const _BOOST system::error_code & error);
+		bool CheckVersionMessage(size_t, const VersionMessage *);
+		int BuildCmdConnectReplyMessage(ServerReplieMessage *, shared_ptr<TTcpSession>&, const _BOOST system::error_code &);
+		unsigned char ReplySelectedMethod(_ASIO ip::tcp::socket&, VersionMessage *, _BOOST system::error_code &);
+		void CheckDeadline(shared_ptr<DeadlineSession<_ASIO ip::tcp>>&, const _BOOST system::error_code&);
+		void CreateForward(shared_ptr<TTcpSession>&, shared_ptr<TTcpSession>&);
+		void DoCmd(shared_ptr<DeadlineSession<_ASIO ip::tcp>>&, unique_ptr<EndPointParser>&, unsigned char);
+		void DoCmdConnect(shared_ptr<DeadlineSession<_ASIO ip::tcp>>&, unique_ptr<EndPointParser>&);
+		void HandleAccept(shared_ptr<DeadlineSession<_ASIO ip::tcp>>&, const _BOOST system::error_code&);
+		void HandleCmdConnectReply(shared_ptr<DeadlineSession<_ASIO ip::tcp>>&, shared_ptr<TTcpSession>&, const _BOOST system::error_code &);
+		void HandleForwardRead(TTcpSession*, shared_ptr<TTcpSession>&, size_t, const _BOOST system::error_code &);
+		void HandleForwardWrite(TTcpSession*, shared_ptr<TTcpSession>&, size_t, const _BOOST system::error_code &);
+		void HandleNoAuthenticationRequired(shared_ptr<DeadlineSession<_ASIO ip::tcp>>&, size_t, size_t, const _BOOST system::error_code &);
+		void HandleReadVersionMessage(shared_ptr<DeadlineSession<_ASIO ip::tcp>>&, size_t, size_t, const _BOOST system::error_code &);
+		void HandleResolver(shared_ptr<DeadlineSession<_ASIO ip::tcp>>&, const _ASIO ip::tcp::resolver::iterator &, const _BOOST system::error_code &);
+		void RunMethod(shared_ptr<DeadlineSession<_ASIO ip::tcp>>&, unsigned char);
 	};
 }  // namespace FeedTheDog
 

@@ -4,25 +4,15 @@
 #include "Worker.h"
 namespace FeedTheDog
 {
-	SessionBase::SessionBase(TWorker* worker, _ASIO io_service& io) :
-		ios(io),
-		timer(io),
+	SessionBase::SessionBase(TWorker* worker) :
+		ios(worker->GetIoService()),
 		worker_(worker)
 	{
-		core = worker->GetCore()->shared_from_this();
+		core = _STD move(worker->GetCore()->shared_from_this());
 		isErased = false;
-	}
-	void SessionBase::Close()
-	{
-		timer.cancel(ignored_ec);
-	}
-	_ASIO deadline_timer & SessionBase::GetTimer()
-	{
-		return timer;
 	}
 	SessionBase::~SessionBase()
 	{
-		Close();
 	}
 	SessionBase::TBufferType& SessionBase::GetBuffer()
 	{
@@ -39,6 +29,10 @@ namespace FeedTheDog
 	SessionBase::TWorker* SessionBase::GetWorker()
 	{
 		return worker_;
+	}
+	_BOOST system::error_code & SessionBase::GetErrorCode()
+	{
+		return errorCode;
 	}
 }  // namespace FeedTheDog
 

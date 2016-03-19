@@ -65,13 +65,15 @@ namespace FeedTheDog
 			}
 			return sum;
 		}
+		
+
 		template<typename TProtocol>
-		shared_ptr<typename SessionPool<TProtocol>::TSession> NewSession(const char* serviceName)
+		inline shared_ptr<typename SessionPool<TProtocol>::TSession> NewSession(const char* serviceName)
 		{
 			return GetSessionPool<TProtocol>()->NewSession(serviceName);
 		}
 		template<typename TProtocol>
-		typename SessionPool<TProtocol>::TResolver& GetResolver()
+		inline typename SessionPool<TProtocol>::TResolver& GetResolver()
 		{
 			return GetSessionPool<TProtocol>()->GetResolver();
 		}
@@ -80,14 +82,14 @@ namespace FeedTheDog
 		template<typename TProtocol>
 		ISessionPool<TProtocol>* GetSessionPool();
 		template<>
-		ISessionPool<TTcp>* GetSessionPool<TTcp>()
+		inline ISessionPool<TTcp>* GetSessionPool<TTcp>()
 		{
 			auto result = static_cast<ISessionPool<TTcp>*>(sessionPools[TcpSessionPool].get());
 			assert(result);
 			return result;
 		}
 		template<>
-		ISessionPool<TUdp>* GetSessionPool<TUdp>()
+		inline ISessionPool<TUdp>* GetSessionPool<TUdp>()
 		{
 			auto result = static_cast<ISessionPool<TUdp>*>(sessionPools[UdpSessionPool].get());
 			assert(result);

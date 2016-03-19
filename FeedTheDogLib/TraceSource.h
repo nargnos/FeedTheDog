@@ -6,6 +6,9 @@
 #include "TraceDefine.h"
 namespace FeedTheDog
 {
+#ifdef _DEBUG
+//#define OPEN_DEBUGPOINT
+#endif // _DEBUG
 
 	template<typename TEnum>
 	class TraceSource :
@@ -37,7 +40,19 @@ namespace FeedTheDog
 			ReadListener<DebugListener>(listener, "Debug", needSetDefaultCofig);
 
 		}
-		
+		void DebugPoint(const _STD string& msg, bool useIndex = false, int index = 0, const char* str = NULL)
+		{
+#ifdef OPEN_DEBUGPOINT
+			TracePoint(msg, useIndex, index, str, TraceLevel::Debug);
+#endif // OPEN_DEBUGPOINT
+		}
+		void DebugPoint(TEnum msg, bool useIndex = false, int index = 0, const char* str = NULL)
+		{
+#ifdef OPEN_DEBUGPOINT
+			TracePoint(msg, useIndex, index, str, TraceLevel::Debug);
+#endif // OPEN_DEBUGPOINT
+		}
+
 		void TracePoint(const _STD string& msg, bool useIndex = false, int index = 0, const char* str = NULL, TraceLevel level = TraceLevel::Debug)
 		{
 			if (!openTrace)
@@ -84,7 +99,7 @@ namespace FeedTheDog
 			TracePoint(msg, false, 0, NULL, level);
 		}
 	private:
-		
+
 		shared_ptr<TMap> strmap;
 		template<typename TListener>
 		void ReadListener(Json::Value& listener, const char* fieldName, bool setDefaultConfig = false)

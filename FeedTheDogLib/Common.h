@@ -11,6 +11,7 @@
 #include <boost\utility.hpp>
 #include <boost\thread.hpp>
 #include <boost\lockfree\queue.hpp>
+#include <boost\lockfree\spsc_queue.hpp>
 #include <boost\lexical_cast.hpp>
 
 #include <filesystem>

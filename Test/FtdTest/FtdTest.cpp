@@ -46,7 +46,7 @@ int main()
 #if 1
 	auto& io = core->SelectIdleWorker()->GetIoService();
 	_ASIO deadline_timer t(io);
-	t.expires_from_now(_BOOST posix_time::seconds(60*5));
+	t.expires_from_now(_BOOST posix_time::seconds(60*60));
 	t.async_wait(_BOOST bind(&Core::Stop, core));
 #endif // fi
 

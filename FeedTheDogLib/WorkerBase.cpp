@@ -5,7 +5,7 @@ namespace FeedTheDog
 {
 	WorkerBase::~WorkerBase()
 	{
-		owner->GetTrace()->TracePoint(LogMsg::FreeWorker, true, id);
+		owner->GetTrace()->DebugPoint(LogMsg::FreeWorker, true, id);
 	}
 	int WorkerBase::GetID() const
 	{
@@ -21,7 +21,7 @@ namespace FeedTheDog
 		ioService.reset();
 		work = make_unique<_ASIO io_service::work>(ioService);
 		isRunning = true;
-		owner->GetTrace()->TracePoint(LogMsg::StartWorker, true, id);
+		owner->GetTrace()->DebugPoint(LogMsg::StartWorker, true, id);
 		ioService.run();
 	}
 
@@ -32,7 +32,7 @@ namespace FeedTheDog
 		work.reset();
 		//ioService.stop();
 
-		owner->GetTrace()->TracePoint(LogMsg::StopWorker, true, id);
+		owner->GetTrace()->DebugPoint(LogMsg::StopWorker, true, id);
 	}
 	_ASIO io_service & WorkerBase::GetIoService()
 	{
@@ -44,6 +44,6 @@ namespace FeedTheDog
 		static int wid = 0;
 		id = wid++;
 		owner = core;
-		owner->GetTrace()->TracePoint(LogMsg::NewWorker, true, id);
+		owner->GetTrace()->DebugPoint(LogMsg::NewWorker, true, id);
 	}
 }  // namespace FeedTheDog
