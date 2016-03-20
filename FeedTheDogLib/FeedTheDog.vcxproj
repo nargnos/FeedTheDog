@@ -191,7 +191,6 @@
     <ClCompile Include="FileListener.cpp" />
     <ClCompile Include="ListenerBase.cpp" />
     <ClCompile Include="Rfc1928.cpp" />
-    <ClCompile Include="SessionPool.cpp" />
     <ClCompile Include="TraceDefine.cpp" />
     <ClCompile Include="TraceSource.cpp" />
     <ClCompile Include="TraceSourceBase.cpp" />

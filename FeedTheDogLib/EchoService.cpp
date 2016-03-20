@@ -23,13 +23,13 @@ namespace FeedTheDog
 		}
 		
 		auto& session = core->SelectIdleWorker()->NewSession<_ASIO ip::tcp>(name_);
-		acceptor->async_accept(session->GetSocket(), _BOOST bind(&EchoService::HandleAccept, this, session, _ASIO placeholders::error));
+		acceptor->async_accept(*session, _BOOST bind(&EchoService::HandleAccept, this, session, _ASIO placeholders::error));
 
 	}
 	void EchoService::ReadSome(shared_ptr<TTcpSession>& session)
 	{
 
-		session->GetSocket().async_read_some(
+		session->async_read_some(
 			_ASIO buffer(session->GetBuffer()),
 			_BOOST bind(&EchoService::HandleRead, this, session, _ASIO placeholders::error, _ASIO placeholders::bytes_transferred)
 			);
@@ -39,10 +39,10 @@ namespace FeedTheDog
 		if (!error)
 		{
 			auto& trace = session->GetCore()->GetTrace();
-			auto& endPoint = session->GetSocket().remote_endpoint();
+			auto& endPoint = session->remote_endpoint();
 			_STD ostringstream str;
 			str << "Service " << name_ << ", New Connection: " << endPoint;
-			trace->TracePoint(str.str(), TraceLevel::Trace);
+			trace->TracePoint(str.str().c_str(), TraceLevel::Trace);
 			ReadSome(session);
 			AsyncStart();
 		}
@@ -51,7 +51,7 @@ namespace FeedTheDog
 	{
 		if (!error)
 		{
-			session->GetSocket().async_write_some(_ASIO buffer(session->GetBuffer(), bytes_transferred),
+			session->async_write_some(_ASIO buffer(session->GetBuffer(), bytes_transferred),
 				_BOOST bind(&EchoService::HandleWrite, this, session, _ASIO placeholders::error)
 				);
 		}
@@ -80,6 +80,7 @@ namespace FeedTheDog
 	}
 	void EchoService::Stop()
 	{
+		core->GetTrace()->DebugPoint("stop echo");
 		isStop = true;
 		acceptor->close();
 	}

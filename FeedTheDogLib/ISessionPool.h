@@ -5,9 +5,14 @@ namespace FeedTheDog
 {
 	struct ISessionPoolBase
 	{
+		virtual void __PreDestruct()=0;
 		virtual unsigned int GetSessionCount() const = 0;
 		virtual void CloseAll() = 0;
 		virtual void RemoveServiceSession(const char* serviceName) = 0;
+		virtual ~ISessionPoolBase()
+		{
+
+		}
 	};
 	template<typename TProtocol>
 	struct ISessionPool :public ISessionPoolBase

@@ -38,7 +38,6 @@ namespace FeedTheDog
 			count(0),
 			sessionPool(alloc, 0),
 			freeSessionDelegate(_BOOST bind(&TSelf::Free, this, _1)),
-		//	strand(io),
 			worker_(worker),
 			resolver(io)
 		{
@@ -46,7 +45,7 @@ namespace FeedTheDog
 			isDestruct = false;
 		}
 
-		~SessionPool()
+		 ~SessionPool()
 		{
 			corePtr->GetTrace()->DebugPoint(LogMsg::FreeSessionPool);
 			isDestruct = true;
@@ -54,17 +53,16 @@ namespace FeedTheDog
 			{
 				CloseAll();
 			}
+			assert(count == 0);
 		}
 		// 多线程同时new多次有一定概率出现线程争用
 		virtual shared_ptr<TSession> NewSession(const char* serviceName) override
 		{
-			corePtr->GetTrace()->DebugPoint(LogMsg::NewSession);
+			corePtr->GetTrace()->DebugPoint(LogMsg::NewSession, false, 0, serviceName);
 			++count;
-			TSession* result = NULL;
-
 			// FIX: 看有什么更快的方案可以换
 			// 构建session
-			result = sessionPool.construct<true, false>(worker_);
+			TSession* result = sessionPool.construct<true, false>(worker_);
 
 			// 析构的erase执行时间绝对会在insert执行之后，所以在析构时不会出现未设置map插入位置的情况
 			ios.post(_BOOST bind(&TSelf::InsertSession, this, serviceName, result));
@@ -81,10 +79,12 @@ namespace FeedTheDog
 		virtual void CloseAll() override
 		{
 			// 只关掉连接，删除对象由智能指针处理			
-#ifdef _DEBUG
-			corePtr->GetTrace()->TracePoint(LogMsg::CloseAllSocket);
-#endif // _DEBUG
-			
+			corePtr->GetTrace()->DebugPoint(LogMsg::CloseAllSocket);
+			if (isDestruct)
+			{
+				AsyncCloseAll();
+				return;
+			}
 			ios.post(_BOOST bind(&TSelf::AsyncCloseAll, this));
 		}
 
@@ -97,6 +97,10 @@ namespace FeedTheDog
 		TResolver& GetResolver()
 		{
 			return resolver;
+		}
+		void __PreDestruct()
+		{
+			isDestruct = true;
 		}
 	private:
 		TWorker* worker_;
@@ -111,10 +115,10 @@ namespace FeedTheDog
 		_BOOST atomic<unsigned int> count;
 
 		TResolver resolver;
+		_BOOST system::error_code ignore;
 
-		// 池(在freelock里找到的，是否好用待测试)
 		_STD allocator<TSession> alloc;
-
+		// FIX:池(在freelock里找到的，是否好用待测试)
 		TPool sessionPool;
 		// 用作分配对象的指针存储
 		// FIX: 这里insert和erase耗费cpu非常多
@@ -128,23 +132,22 @@ namespace FeedTheDog
 		{
 			for each (auto& var in sessionMap)
 			{
-				var.second->Close();
+				var.second->close(ignore);
 			}
 		}
 		void FreeSession(TSession* ptr)
 		{
 			corePtr->GetTrace()->DebugPoint(LogMsg::FreeSession);
-			if (!ptr->isErased)
-			{
+
 				// 析构时不erase减少析构时间
-				if (!isDestruct)
-				{
-					// FIX: cpu
-					sessionMap.erase(ptr->mapPosition);
-				}
-				ptr->isErased = true;
+			if (!isDestruct)
+			{
+				// FIX: cpu
+				sessionMap.erase(ptr->mapPosition);
 			}
+
 			// FIX: cpu
+			// 在这种情况下使用lockfree可能会拖慢速度
 			sessionPool.destruct<true>(ptr);
 			--count;
 		}
@@ -154,13 +157,18 @@ namespace FeedTheDog
 			auto eraseIt = it;
 			while (it != sessionMap.end())
 			{
-				it->second->Close();
-				it->second->isErased = true;
+				it->second->close(ignore);
 			}
 			sessionMap.erase(eraseIt, sessionMap.end());
 		}
 		void Free(TSession* ptr)
 		{
+			if (isDestruct)
+			{
+				// ioservice会在free之前停止，所以不能post
+				FreeSession(ptr);
+				return;
+			}
 			ios.post(_BOOST bind(&TSelf::FreeSession, this, ptr));
 		}
 	};

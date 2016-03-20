@@ -5,11 +5,9 @@
 namespace FeedTheDog
 {
 	SessionBase::SessionBase(TWorker* worker) :
-		ios(worker->GetIoService()),
-		worker_(worker)
+		worker_(worker),
+		core(worker->GetCore())
 	{
-		core = _STD move(worker->GetCore()->shared_from_this());
-		isErased = false;
 	}
 	SessionBase::~SessionBase()
 	{
@@ -18,21 +16,13 @@ namespace FeedTheDog
 	{
 		return buffer;
 	}
-	_ASIO io_service& SessionBase::GetIoService()
-	{
-		return ios;
-	}
-	shared_ptr<SessionBase::TCore>& SessionBase::GetCore()
+	SessionBase::TReturnCore SessionBase::GetCore()
 	{
 		return core;
 	}
 	SessionBase::TWorker* SessionBase::GetWorker()
 	{
 		return worker_;
-	}
-	_BOOST system::error_code & SessionBase::GetErrorCode()
-	{
-		return errorCode;
 	}
 }  // namespace FeedTheDog
 

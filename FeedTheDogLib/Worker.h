@@ -29,8 +29,8 @@ namespace FeedTheDog
 		Worker(TCore* core) :
 			WorkerBase(core)
 		{
-			sessionPools[TcpSessionPool] = dynamic_pointer_cast<ISessionPoolBase>(make_shared<TTcpSessionPool>(core, this, ioService));
-			sessionPools[UdpSessionPool] = dynamic_pointer_cast<ISessionPoolBase>(make_shared<TUdpSessionPool>(core, this, ioService));
+			sessionPools[TcpSessionPool] = make_unique<TTcpSessionPool>(core, this, ioService);
+			sessionPools[UdpSessionPool] = make_unique<TUdpSessionPool>(core, this, ioService);
 		}
 		~Worker()
 		{
@@ -52,6 +52,7 @@ namespace FeedTheDog
 		{
 			for each (auto& var in sessionPools)
 			{
+				var->__PreDestruct();
 				var->CloseAll();
 			}
 		}
@@ -78,9 +79,9 @@ namespace FeedTheDog
 			return GetSessionPool<TProtocol>()->GetResolver();
 		}
 	private:
-		shared_ptr<ISessionPoolBase> sessionPools[_EndSessionPoolType];
+		unique_ptr<ISessionPoolBase> sessionPools[_EndSessionPoolType];
 		template<typename TProtocol>
-		ISessionPool<TProtocol>* GetSessionPool();
+		inline ISessionPool<TProtocol>* GetSessionPool();
 		template<>
 		inline ISessionPool<TTcp>* GetSessionPool<TTcp>()
 		{

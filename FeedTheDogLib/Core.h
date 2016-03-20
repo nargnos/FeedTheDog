@@ -8,8 +8,7 @@ namespace FeedTheDog
 {
 	// Service Manager & ThreadPool
 	class Core :
-		private _BOOST noncopyable,
-		public _STD enable_shared_from_this<Core>
+		private _BOOST noncopyable
 	{
 	public:
 		typedef typename Core TCore;

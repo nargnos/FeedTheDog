@@ -30,7 +30,8 @@ namespace FeedTheDog
 	class Config
 	{
 	public:
-		static const int BufferSize = 1024 * 10;
+		// 1w多次正常浏览网页所需buffer大小平均为5000+（可能是浏览器限制）
+		static const unsigned int BufferSize = 1024 * 6;
 		typedef LogMsg TEnum;
 		Config();
 		~Config();

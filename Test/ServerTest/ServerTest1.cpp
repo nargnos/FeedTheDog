@@ -1,5 +1,6 @@
 #include "stdafx.h"
-
+#include <Core.h>
+#include <worker.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -19,15 +20,15 @@ namespace ServerTest
 	public:
 		ServerTest1()
 		{
-			//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-			core = make_shared<Core>();
+			_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+			//core = make_shared<Core>();
 
 		}
 		TEST_METHOD(CoreTest)
 		{
-			auto worker = core->SelectIdleWorker();
+			auto worker = core.SelectIdleWorker();
 			worker->GetIoService().post(_BOOST bind(&ServerTest1::NewSessionTest, this, worker));
-			core->Start();
+			core.Start();
 			end = clock();
 			// 并不能得出正确结果，只作为参考
 			// 时间中少了分配内存的部分，测得的结果是new的速度与delete的速度等同时的结果
@@ -46,7 +47,7 @@ namespace ServerTest
 			Logger::WriteMessage(os.str().c_str());
 		}
 	private:
-		shared_ptr<FeedTheDog::Core> core;
+		FeedTheDog::Core core;
 		_STD ostringstream os;
 		clock_t startNewSession;
 		clock_t endNewSession;
@@ -54,7 +55,7 @@ namespace ServerTest
 		int count;
 		void NewSessionTest(Worker* worker)
 		{
-			count = 150000;
+			count = 100000;
 			// 单纯测试创建析构session的速度，这里分配之后立马析构			
 			startNewSession = clock();
 			for (size_t i = 0; i < count; i++)
@@ -63,7 +64,7 @@ namespace ServerTest
 			}
 			// 不是new结束时间，newsession把最耗时的部分post进队列了
 			endNewSession = clock();
-			core->Stop();
+			core.Stop();
 		}
 
 	};

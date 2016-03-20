@@ -222,10 +222,9 @@ namespace FeedTheDog
 		{
 			auto& buffer = session->GetBuffer();
 			auto bufferData = buffer.data();
-			auto& sessionSocket = session->GetSocket();
 			auto leftSize = buffer.max_size() - alreadyTransferred;
 			assert(leftSize > 0);
-			sessionSocket.async_read_some(_ASIO buffer(bufferData + alreadyTransferred, leftSize), handler);
+			session->async_read_some(_ASIO buffer(bufferData + alreadyTransferred, leftSize), handler);
 		}
 
 	};
@@ -343,23 +342,23 @@ namespace FeedTheDog
 	{
 	public:
 		DeadlineSession(shared_ptr<typename SessionPoolTrait::TSession<TProtocol>::type>& val):
-			timer(val->GetIoService())
+			timer(val->get_io_service())
 		{
 			session = val;
 		}
 
 		~DeadlineSession()
 		{
-			CancelTimer();
+			//CancelTimer(_BOOST system::error_code());
 		}
-		void Close()			
+		void Close(_BOOST system::error_code& ignore)
 		{
-			CancelTimer();
-			session->Close();
+			CancelTimer(ignore);
+			session->cancel(ignore);
 		}
-		void CancelTimer()
+		void CancelTimer(_BOOST system::error_code& ignore)
 		{
-			timer.cancel();
+			timer.cancel(ignore);
 		}
 		shared_ptr<typename SessionPoolTrait::TSession<TProtocol>::type>& GetSession()
 		{
@@ -371,9 +370,32 @@ namespace FeedTheDog
 		}
 	private:
 		shared_ptr<typename SessionPoolTrait::TSession<TProtocol>::type> session;
-		_ASIO deadline_timer timer;
+		_ASIO deadline_timer timer;		
 	};
+	template<typename TProtocol>
+	class Forward
+	{
+	public:
+		typedef typename SessionPoolTrait::TSession<TProtocol>::type TSession;
+		Forward(shared_ptr<TSession>& read_,
+			shared_ptr<TSession>& write_)
+		{
+			read = read_;
+			write = write_;
+		}
+		inline TSession* GetReadSession()
+		{
+			return read.get();
+		}
+		inline TSession* GetWriteSession()
+		{
+			return write.get();
+		}
+	private:
+		shared_ptr<TSession> read;
+		shared_ptr<TSession> write;
 
+	};
 	// FIX: 代码结构是什么鬼, 一些函数过长需要分割
 	class Rfc1928 :
 		public ServiceBase
@@ -400,10 +422,11 @@ namespace FeedTheDog
 		bool supportMethods[0xff];
 		TCore* core;
 		int port_;
-
+		_BOOST system::error_code ignore;
 		_BOOST posix_time::seconds timeoutSecond;
 		unique_ptr<_ASIO ip::tcp::acceptor> acceptor;
-
+		//_BOOST atomic<long long> countBufferSize;
+		//_BOOST atomic<long> writeTimes;
 		bool CheckVersionMessage(size_t, const VersionMessage *);
 		int BuildCmdConnectReplyMessage(ServerReplieMessage *, shared_ptr<TTcpSession>&, const _BOOST system::error_code &);
 		unsigned char ReplySelectedMethod(_ASIO ip::tcp::socket&, VersionMessage *, _BOOST system::error_code &);
@@ -413,8 +436,8 @@ namespace FeedTheDog
 		void DoCmdConnect(shared_ptr<DeadlineSession<_ASIO ip::tcp>>&, unique_ptr<EndPointParser>&);
 		void HandleAccept(shared_ptr<DeadlineSession<_ASIO ip::tcp>>&, const _BOOST system::error_code&);
 		void HandleCmdConnectReply(shared_ptr<DeadlineSession<_ASIO ip::tcp>>&, shared_ptr<TTcpSession>&, const _BOOST system::error_code &);
-		void HandleForwardRead(TTcpSession*, shared_ptr<TTcpSession>&, size_t, const _BOOST system::error_code &);
-		void HandleForwardWrite(TTcpSession*, shared_ptr<TTcpSession>&, size_t, const _BOOST system::error_code &);
+		void HandleForwardRead(shared_ptr<Forward<_ASIO ip::tcp>>&, size_t, const _BOOST system::error_code &);
+		void HandleForwardWrite(shared_ptr<Forward<_ASIO ip::tcp>>&, size_t, const _BOOST system::error_code &);
 		void HandleNoAuthenticationRequired(shared_ptr<DeadlineSession<_ASIO ip::tcp>>&, size_t, size_t, const _BOOST system::error_code &);
 		void HandleReadVersionMessage(shared_ptr<DeadlineSession<_ASIO ip::tcp>>&, size_t, size_t, const _BOOST system::error_code &);
 		void HandleResolver(shared_ptr<DeadlineSession<_ASIO ip::tcp>>&, const _ASIO ip::tcp::resolver::iterator &, const _BOOST system::error_code &);

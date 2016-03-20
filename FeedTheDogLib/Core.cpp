@@ -24,7 +24,7 @@ namespace FeedTheDog
 	Core::~Core()
 	{
 		GetTrace()->DebugPoint(LogMsg::FreeCore);
-		Stop();
+		//Stop();
 	}
 	shared_ptr<TraceSource<Config::TEnum>>& Core::GetTrace()
 	{
@@ -78,6 +78,10 @@ namespace FeedTheDog
 	void Core::Start()
 	{
 		GetTrace()->DebugPoint(LogMsg::CoreStart);
+		/*for each (auto& var in services)
+		{
+			var.second->AsyncStart();
+		}*/
 		isStop = false;
 		_STD vector<shared_ptr<_BOOST thread>> threads;
 		assert(threadCount == workers.size());

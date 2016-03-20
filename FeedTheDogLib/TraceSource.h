@@ -40,7 +40,7 @@ namespace FeedTheDog
 			ReadListener<DebugListener>(listener, "Debug", needSetDefaultCofig);
 
 		}
-		void DebugPoint(const _STD string& msg, bool useIndex = false, int index = 0, const char* str = NULL)
+		void DebugPoint(const char* msg, bool useIndex = false, int index = 0, const char* str = NULL)
 		{
 #ifdef OPEN_DEBUGPOINT
 			TracePoint(msg, useIndex, index, str, TraceLevel::Debug);
@@ -53,7 +53,7 @@ namespace FeedTheDog
 #endif // OPEN_DEBUGPOINT
 		}
 
-		void TracePoint(const _STD string& msg, bool useIndex = false, int index = 0, const char* str = NULL, TraceLevel level = TraceLevel::Debug)
+		void TracePoint(const char* msg, bool useIndex = false, int index = 0, const char* str = NULL, TraceLevel level = TraceLevel::Debug)
 		{
 			if (!openTrace)
 			{
@@ -88,9 +88,9 @@ namespace FeedTheDog
 			{
 				return;
 			}
-			TracePoint((*strmap)[msg], useIndex, index, str, level);
+			TracePoint(((*strmap)[msg]).c_str(), useIndex, index, str, level);
 		}
-		void TracePoint(const _STD string& msg, TraceLevel level)
+		void TracePoint(const char* msg, TraceLevel level)
 		{
 			TracePoint(msg, false, 0, NULL, level);
 		}

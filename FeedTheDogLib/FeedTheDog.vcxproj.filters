@@ -38,9 +38,6 @@
     <ClCompile Include="TraceDefine.cpp">
       <Filter>Type</Filter>
     </ClCompile>
-    <ClCompile Include="SessionPool.cpp">
-      <Filter>SessionPool</Filter>
-    </ClCompile>
     <ClCompile Include="WorkerBase.cpp">
       <Filter>Worker</Filter>
     </ClCompile>

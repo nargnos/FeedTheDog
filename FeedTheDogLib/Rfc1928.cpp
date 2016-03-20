@@ -8,6 +8,8 @@ namespace FeedTheDog
 		timeoutSecond(timeout)
 	{
 		isStopped = false;
+		//countBufferSize = 0;
+		//writeTimes = 0;
 	}
 
 
@@ -36,18 +38,18 @@ namespace FeedTheDog
 	}
 	void Rfc1928::AsyncStart()
 	{
-		core->GetTrace()->DebugPoint(__func__);
 		if (isStopped)
 		{
 			return;
 		}
+		core->GetTrace()->DebugPoint(__func__);
 		auto& session = core->SelectIdleWorker()->NewSession<_ASIO ip::tcp>(name_);
-		// buffer大于1k
+		// buffer建议大于1k
 		assert(session->GetBuffer().max_size() > 1024);
 		auto& deadlineSession = make_shared<DeadlineSession<_ASIO ip::tcp>>(_STD ref(session));
 		deadlineSession->GetTimer().async_wait(_BOOST bind(&Rfc1928::CheckDeadline, this, deadlineSession, _ASIO placeholders::error));
 
-		acceptor->async_accept(session->GetSocket(),
+		acceptor->async_accept(*session,
 			_BOOST bind(&Rfc1928::HandleAccept, this, deadlineSession, _ASIO placeholders::error));
 
 	}
@@ -59,21 +61,22 @@ namespace FeedTheDog
 		{
 			return;
 		}
-			auto& timer = deadlineSession->GetTimer();
-			if (timer.expires_at() <= _ASIO deadline_timer::traits_type::now())
-			{
-				deadlineSession->GetSession()->Close();
-				return;
-			}
-			timer.async_wait(_BOOST bind(&Rfc1928::CheckDeadline, this, deadlineSession, _ASIO placeholders::error));
+		auto& timer = deadlineSession->GetTimer();
+		if (timer.expires_at() <= _ASIO deadline_timer::traits_type::now())
+		{
+			deadlineSession->GetSession()->close(ignore);
+			return;
+		}
+		timer.async_wait(_BOOST bind(&Rfc1928::CheckDeadline, this, deadlineSession, _ASIO placeholders::error));
 
-			
+
 	}
 	void Rfc1928::Stop()
 	{
-		core->GetTrace()->DebugPoint(__func__);
+		core->GetTrace()->DebugPoint("stop rfc1928");
 		isStopped = true;
 		acceptor->close();
+		//_STD cout << "平均每次传输长度"<< countBufferSize / ( double) writeTimes << _STD endl;
 	}
 
 	void Rfc1928::HandleAccept(shared_ptr<DeadlineSession<_ASIO ip::tcp>>& deadlineSession, const _BOOST system::error_code & error)
@@ -81,12 +84,12 @@ namespace FeedTheDog
 		core->GetTrace()->DebugPoint(__func__);
 		if (error || isStopped)
 		{
-			deadlineSession->Close();
+			deadlineSession->Close(ignore);
 			return;
 		}
 		deadlineSession->GetTimer().expires_from_now(timeoutSecond);
 		auto& session = deadlineSession->GetSession();
-		session->GetSocket().async_read_some(_ASIO buffer(session->GetBuffer()), _BOOST bind(&Rfc1928::HandleReadVersionMessage, this, deadlineSession,
+		session->async_read_some(_ASIO buffer(session->GetBuffer()), _BOOST bind(&Rfc1928::HandleReadVersionMessage, this, deadlineSession,
 			0, _ASIO placeholders::bytes_transferred, _ASIO placeholders::error));
 		AsyncStart();
 	}
@@ -96,7 +99,7 @@ namespace FeedTheDog
 		core->GetTrace()->DebugPoint(__func__);
 		if (error || isStopped)
 		{
-			deadlineSession->Close();
+			deadlineSession->Close(ignore);
 			return;
 		}
 		auto& session = deadlineSession->GetSession();
@@ -104,14 +107,14 @@ namespace FeedTheDog
 		timer.expires_at(_BOOST posix_time::pos_infin);
 		alreadyTransferred += bytes_transferred;
 
-		auto& sessionSocket = session->GetSocket();
+		auto& sessionSocket = *session;
 		auto& buffer = session->GetBuffer();
 		auto bufferData = buffer.data();
 
 		auto vmHeader = reinterpret_cast<VersionMessage*>(bufferData);
 		if (vmHeader->Ver != VersionMessage::VerValue)
 		{
-			deadlineSession->Close();
+			deadlineSession->Close(ignore);
 			return;
 		}
 		if (!CheckVersionMessage(alreadyTransferred, vmHeader))
@@ -189,7 +192,7 @@ namespace FeedTheDog
 			else
 			{
 				// ff
-				deadlineSession->Close();
+				deadlineSession->Close(ignore);
 			}
 			return;
 		}
@@ -203,7 +206,7 @@ namespace FeedTheDog
 		core->GetTrace()->DebugPoint(__func__);
 		if (isStopped || error)
 		{
-			deadlineSession->Close();
+			deadlineSession->Close(ignore);
 			return;
 		}
 		auto& session = deadlineSession->GetSession();
@@ -222,7 +225,7 @@ namespace FeedTheDog
 		if (requestDetail->Ver != ClientRequestDetailMessage::VerValue ||
 			requestDetail->Rsv != ClientRequestDetailMessage::RsvValue)
 		{
-			deadlineSession->Close();
+			deadlineSession->Close(ignore);
 			return;
 		}
 
@@ -274,7 +277,7 @@ namespace FeedTheDog
 			if (alreadyTransferred >= requestLen)
 			{
 				// 读取长度足够,表示aytp错误
-				deadlineSession->Close();
+				deadlineSession->Close(ignore);
 				return;
 			}
 			break;
@@ -300,7 +303,7 @@ namespace FeedTheDog
 			break;
 		default:
 			// X'07' Command not supported
-			deadlineSession->Close();
+			deadlineSession->Close(ignore);
 			break;
 		}
 	}
@@ -316,7 +319,7 @@ namespace FeedTheDog
 			// 必须创建跟session属于同一个ioservice的连接
 			auto& remote = session->GetWorker()->NewSession<_ASIO ip::tcp>(name_);
 
-			remote->GetSocket().async_connect(parser->ParseEndpoint<_ASIO ip::tcp>(),
+			remote->async_connect(parser->ParseEndpoint<_ASIO ip::tcp>(),
 				_BOOST bind(&Rfc1928::HandleCmdConnectReply, this, deadlineSession, remote, _ASIO placeholders::error));
 		}
 		return;
@@ -340,20 +343,20 @@ namespace FeedTheDog
 		core->GetTrace()->DebugPoint(__func__);
 		if (isStopped)
 		{
-			deadlineSession->Close();
+			deadlineSession->Close(ignore);
 			return;
 		}
 		if (error)
 		{
 			// FIX: 返回解析错误，关闭连接
-			deadlineSession->Close();
+			deadlineSession->Close(ignore);
 			return;
 		}
 
 		auto& session = deadlineSession->GetSession();
 		auto& remote = session->GetWorker()->NewSession<_ASIO ip::tcp>(name_);
 
-		_ASIO async_connect(remote->GetSocket(), endpoint_iterator, _BOOST bind(&Rfc1928::HandleCmdConnectReply,
+		_ASIO async_connect(*remote, endpoint_iterator, _BOOST bind(&Rfc1928::HandleCmdConnectReply,
 			this, deadlineSession, remote, _ASIO placeholders::error));
 	}
 
@@ -372,7 +375,7 @@ namespace FeedTheDog
 			reply->Rep = ServerReplieMessage::Succeeded;
 
 			auto addrPtr = reinterpret_cast<char*>(reply + 1);
-			auto& socket = remote->GetSocket();
+			auto& socket = *remote;
 			auto& ep = socket.local_endpoint();
 			auto& addr = ep.address();
 
@@ -432,8 +435,8 @@ namespace FeedTheDog
 		core->GetTrace()->DebugPoint(__func__);
 		if (isStopped)
 		{
-			deadlineSession->Close();
-			remote->Close();
+			deadlineSession->Close(ignore);
+			remote->close(ignore);
 			return;
 		}
 
@@ -445,54 +448,63 @@ namespace FeedTheDog
 		auto tmpRequestLen = BuildCmdConnectReplyMessage(reply, remote, error);
 		// 如果有错误返回的是除了地址之外的数据然后关闭连接，文档没写失败了地址发什么
 		_BOOST system::error_code writeError;
-		_ASIO write(client->GetSocket(), _ASIO buffer(reply, tmpRequestLen), writeError);
+		_ASIO write(*client, _ASIO buffer(reply, tmpRequestLen), writeError);
 		//	auto& timer = deadlineSession->GetTimer();
 		if (error || writeError)
 		{
 			// client 写失败
 			// remote connect 失败
 			//timer.expires_from_now(closeSocketDelaySecond);
-			deadlineSession->Close();
-			remote->Close();
+			deadlineSession->Close(ignore);
+			remote->close(ignore);
 			return;
 		}
 		// session脱离deadline
-		deadlineSession->CancelTimer();
+		deadlineSession->CancelTimer(ignore);
 		// 创建转发关系
 		CreateForward(client, remote);
 
 	}
+
 	void Rfc1928::CreateForward(shared_ptr<TTcpSession>& client, shared_ptr<TTcpSession>& remote)
 	{
 		core->GetTrace()->DebugPoint(__func__);
-		client->GetSocket().async_read_some(_ASIO buffer(client->GetBuffer()), _BOOST bind(&Rfc1928::HandleForwardRead, this,
-			client.get(), remote, _ASIO placeholders::bytes_transferred, _ASIO placeholders::error));
-		remote->GetSocket().async_read_some(_ASIO buffer(remote->GetBuffer()), _BOOST bind(&Rfc1928::HandleForwardRead, this,
-			remote.get(), client, _ASIO placeholders::bytes_transferred, _ASIO placeholders::error));
+		auto clientForward = make_shared<Forward<_ASIO ip::tcp>>(client, remote);
+		auto remoteForward = make_shared<Forward<_ASIO ip::tcp>>(remote, client);
+
+		client->async_read_some(_ASIO buffer(client->GetBuffer()), _BOOST bind(&Rfc1928::HandleForwardRead, this,
+			clientForward, _ASIO placeholders::bytes_transferred, _ASIO placeholders::error));
+		remote->async_read_some(_ASIO buffer(remote->GetBuffer()), _BOOST bind(&Rfc1928::HandleForwardRead, this,
+			remoteForward, _ASIO placeholders::bytes_transferred, _ASIO placeholders::error));
 	}
 
 	// FIX: 智能指针和bind很耗性能
-	void Rfc1928::HandleForwardRead(TTcpSession* read, shared_ptr<TTcpSession>& write, size_t bytes_transferred,
+	void Rfc1928::HandleForwardRead(shared_ptr<Forward<_ASIO ip::tcp>>& forward, size_t bytes_transferred,
 		const _BOOST system::error_code & error)
 	{
+		auto write = forward->GetWriteSession();
 		if (error || isStopped)
 		{
-			write->Close();
+			write->close(ignore);
 			return;
 		}
-		_ASIO async_write(write->GetSocket(), _ASIO buffer(read->GetBuffer(), bytes_transferred),
-			_BOOST bind(&Rfc1928::HandleForwardWrite, this, read, write, _ASIO placeholders::bytes_transferred, _ASIO placeholders::error));
+		auto read = forward->GetReadSession();
+		_ASIO async_write(*write, _ASIO buffer(read->GetBuffer(), bytes_transferred),
+			_BOOST bind(&Rfc1928::HandleForwardWrite, this, forward, _ASIO placeholders::bytes_transferred, _ASIO placeholders::error));
 	}
-	void Rfc1928::HandleForwardWrite(TTcpSession* read, shared_ptr<TTcpSession>& write, size_t bytes_transferred,
+	void Rfc1928::HandleForwardWrite(shared_ptr<Forward<_ASIO ip::tcp>>& forward, size_t bytes_transferred,
 		const _BOOST system::error_code & error)
 	{
+		auto read = forward->GetReadSession();
 		if (error || isStopped)
 		{
-			read->Close();
+			read->close(ignore);
 			return;
 		}
-		read->GetSocket().async_read_some(_ASIO buffer(read->GetBuffer()), _BOOST bind(&Rfc1928::HandleForwardRead, this,
-			read, write, _ASIO placeholders::bytes_transferred, _ASIO placeholders::error));
+		//countBufferSize += bytes_transferred;
+		//writeTimes++;
+		read->async_read_some(_ASIO buffer(read->GetBuffer()),
+			_BOOST bind(&Rfc1928::HandleForwardRead, this, forward, _ASIO placeholders::bytes_transferred, _ASIO placeholders::error));
 	}
 }  // namespace FeedTheDog
 

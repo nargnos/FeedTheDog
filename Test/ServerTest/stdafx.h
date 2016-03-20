@@ -16,5 +16,3 @@
 #include <Common.h>
 #include <boost\container\vector.hpp>
 
-#include <Core.h>
-#include <worker.h>
