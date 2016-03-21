@@ -47,7 +47,7 @@ int main()
 	core->AddService(d);
 	auto e = make_shared<Rfc1928>(9090, "rfc1928 server No 2");
 	core->AddService(e);
-#if 1
+#if 0
 	// 测试运行中途退出的情况
 	auto& io = core->SelectIdleWorker()->GetIoService();
 	_ASIO deadline_timer t(io);
@@ -57,7 +57,7 @@ int main()
 
 	core->Start();
 	core->GetTrace()->TracePoint(LogMsg::MainEnd, FeedTheDog::TraceLevel::Trace);
-	t.cancel();
+//	t.cancel();
 	core.reset();
 	return 0;
 }

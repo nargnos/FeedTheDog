@@ -33,15 +33,19 @@ namespace ServerTest
 			// 并不能得出正确结果，只作为参考
 			// 时间中少了分配内存的部分，测得的结果是new的速度与delete的速度等同时的结果
 			auto total = end - startNewSession;
-			os << "运行总时间" << total << _STD endl;
+			os << "运行总时间 " << total << _STD endl;
 			auto plus = endNewSession - startNewSession;
-			os << "执行完new操作的时间点" << plus << _STD endl;			
-			os << "善后时间" << end - endNewSession << _STD endl;
-
+			os << "执行完new操作的时间 " << plus << _STD endl;	
+			auto avgNew = plus / (double)count;
+			os << "平均new时间 " << avgNew << _STD endl;
+			os << "每秒可new " << 1 / avgNew << _STD endl;
+			os << "善后时间 " << end - endNewSession << _STD endl;
+			
 			// 善后和析构部分从开头记起，加上单独的new部分得到较正确的总时间
 			auto avgTime = (total + plus) / (double)count;
-			os << "单操作时间" << avgTime << _STD endl;
-			os << "每秒可处理" << 1 / avgTime << _STD endl;
+			
+			os << "new/delete时间 " << avgTime << _STD endl;
+			os << "每秒可处理new/delete次数 " << 1 / avgTime << _STD endl;
 
 			os << "结束" << _STD endl;
 			Logger::WriteMessage(os.str().c_str());
