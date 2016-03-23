@@ -19,7 +19,7 @@ namespace FeedTheDog
 		
 		TService* GetService(const char*);
 		bool AddService(const shared_ptr<TService>&);
-		void DeleteService(const shared_ptr<TService>&);
+		//void DeleteService(const shared_ptr<TService>&);
 		void Start();
 		void Stop();
 		int GetWorkerCount() const;

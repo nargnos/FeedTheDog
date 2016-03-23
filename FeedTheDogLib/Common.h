@@ -2,8 +2,10 @@
 
 
 #include <json\json.h>
+#define ASIO_HAS_MOVE
 #include <boost\asio.hpp>
 #include <boost\bind.hpp>
+#include <boost\bind\protect.hpp>
 #include <boost\atomic.hpp>
 #include <boost\pool\object_pool.hpp>
 #include <boost\pool\pool.hpp>
@@ -17,6 +19,7 @@
 #include <filesystem>
 #include <fstream>
 #include <vector>
+#include <list>
 #include <concurrent_unordered_map.h>
 #include <concurrent_unordered_set.h>
 #include <unordered_map>

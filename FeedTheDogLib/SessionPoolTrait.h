@@ -28,9 +28,10 @@ namespace FeedTheDog
 		typedef TSession<TTcp>::type TTcpSession;
 		typedef TSession<TUdp>::type TUdpSession;
 		template<typename TProtocol>
-		struct TSessionMultiMap
+		struct TSessionStorage
 		{
-			typedef _STD unordered_multimap<const char*, typename SessionPoolTrait::TSession<TProtocol>::type*> type;
+			typedef typename SessionPoolTrait::TSession<TProtocol>::type TValue;
+			typedef _STD list<TValue*> type;
 		};
 		
 	};

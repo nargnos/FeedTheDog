@@ -20,58 +20,51 @@ namespace FeedTheDog
 
 		typedef typename CoreTrait::TSessionPool<TTcp>::type TTcpSessionPool;
 		typedef typename CoreTrait::TSessionPool<TUdp>::type TUdpSessionPool;
-		enum SessionPoolType
-		{
-			TcpSessionPool,
-			UdpSessionPool,
-			_EndSessionPoolType
-		};
+
 		Worker(TCore* core) :
 			WorkerBase(core)
 		{
-			sessionPools[TcpSessionPool] = make_unique<TTcpSessionPool>(core, this, ioService);
-			sessionPools[UdpSessionPool] = make_unique<TUdpSessionPool>(core, this, ioService);
+			tcpSessionPool = make_unique<TTcpSessionPool>(core, this, ioService);
+			udpSessionPool = make_unique<TUdpSessionPool>(core, this, ioService);
 		}
 		~Worker()
 		{
 		}
 
-		void RemoveAllServiceSession(const char* serviceName)
-		{
-			if (!isRunning)
-			{
-				// worker停止，由其它函数移除session
-				return;
-			}
-			for each (auto& var in sessionPools)
-			{
-				var->RemoveServiceSession(serviceName);
-			}
-		}
+		//void RemoveAllServiceSession(const char* serviceName)
+		//{
+		//	if (!isRunning)
+		//	{
+		//		// worker停止，由其它函数移除session
+		//		return;
+		//	}
+		//	tcpSessionPool->RemoveServiceSession(serviceName);
+		//	udpSessionPool->RemoveServiceSession(serviceName);
+
+		//}
 		virtual void CloseAllSessions() override
 		{
-			for each (auto& var in sessionPools)
-			{
-				var->__PreDestruct();
-				var->CloseAll();
-			}
+			tcpSessionPool->__PreDestruct();
+			tcpSessionPool->CloseAll();
+
+			udpSessionPool->__PreDestruct();
+			udpSessionPool->CloseAll();
+
 		}
 
 		unsigned int GetSessionCount()
 		{
 			unsigned int sum = 0;
-			for each (auto& var in sessionPools)
-			{
-				sum += var->GetSessionCount();
-			}
+			sum += tcpSessionPool->GetSessionCount();
+			sum += udpSessionPool->GetSessionCount();
 			return sum;
 		}
 		
 
 		template<typename TProtocol>
-		inline shared_ptr<typename SessionPool<TProtocol>::TSession> NewSession(const char* serviceName)
+		inline shared_ptr<typename SessionPool<TProtocol>::TSession> NewSession()
 		{
-			return GetSessionPool<TProtocol>()->NewSession(serviceName);
+			return GetSessionPool<TProtocol>()->NewSession();
 		}
 		template<typename TProtocol>
 		inline typename SessionPool<TProtocol>::TResolver& GetResolver()
@@ -79,22 +72,21 @@ namespace FeedTheDog
 			return GetSessionPool<TProtocol>()->GetResolver();
 		}
 	private:
-		unique_ptr<ISessionPoolBase> sessionPools[_EndSessionPoolType];
+		unique_ptr<TTcpSessionPool> tcpSessionPool;
+		unique_ptr<TUdpSessionPool> udpSessionPool;
+
 		template<typename TProtocol>
-		inline ISessionPool<TProtocol>* GetSessionPool();
+		inline unique_ptr<typename CoreTrait::TSessionPool<TProtocol>::type>& GetSessionPool();
+
 		template<>
-		inline ISessionPool<TTcp>* GetSessionPool<TTcp>()
+		inline unique_ptr<typename CoreTrait::TSessionPool<TTcp>::type>& GetSessionPool<TTcp>()
 		{
-			auto result = static_cast<ISessionPool<TTcp>*>(sessionPools[TcpSessionPool].get());
-			assert(result);
-			return result;
+			return tcpSessionPool;
 		}
 		template<>
-		inline ISessionPool<TUdp>* GetSessionPool<TUdp>()
+		inline unique_ptr<typename CoreTrait::TSessionPool<TUdp>::type>& GetSessionPool<TUdp>()
 		{
-			auto result = static_cast<ISessionPool<TUdp>*>(sessionPools[UdpSessionPool].get());
-			assert(result);
-			return result;
+			return udpSessionPool;
 		}
 	};
 }  // namespace FeedTheDog

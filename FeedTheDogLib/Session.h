@@ -30,8 +30,8 @@ namespace FeedTheDog
 	protected:
 		
 		// 当前在map中的位置
-		typedef typename SessionPoolTrait::TSessionMultiMap<TProtocol>::type::iterator TMapIterator;
-		TMapIterator mapPosition;
+		typedef typename SessionPoolTrait::TSessionStorage<TProtocol>::type::iterator TStorageIterator;
+		TStorageIterator insertPosition;
 
 	};
 

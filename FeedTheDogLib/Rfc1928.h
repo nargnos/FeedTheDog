@@ -341,10 +341,10 @@ namespace FeedTheDog
 	class DeadlineSession
 	{
 	public:
-		DeadlineSession(shared_ptr<typename SessionPoolTrait::TSession<TProtocol>::type>& val):
-			timer(val->get_io_service())
+		DeadlineSession(shared_ptr<typename SessionPoolTrait::TSession<TProtocol>::type>&& val) :
+			timer(val->get_io_service()),
+			session(val)
 		{
-			session = val;
 		}
 
 		~DeadlineSession()
@@ -370,33 +370,11 @@ namespace FeedTheDog
 		}
 	private:
 		shared_ptr<typename SessionPoolTrait::TSession<TProtocol>::type> session;
-		_ASIO deadline_timer timer;		
+		_ASIO deadline_timer timer;
 	};
 	template<typename TProtocol>
-	class Forward
-	{
-	public:
-		typedef typename SessionPoolTrait::TSession<TProtocol>::type TSession;
-		Forward(shared_ptr<TSession>& read_,
-			shared_ptr<TSession>& write_)
-		{
-			read = read_;
-			write = write_;
-		}
-		inline TSession* GetReadSession()
-		{
-			return read.get();
-		}
-		inline TSession* GetWriteSession()
-		{
-			return write.get();
-		}
-	private:
-		shared_ptr<TSession> read;
-		shared_ptr<TSession> write;
+	class Forward;
 
-	};
-	// FIX: 代码结构是什么鬼, 一些函数过长需要分割
 	class Rfc1928 :
 		public ServiceBase
 	{
@@ -411,6 +389,7 @@ namespace FeedTheDog
 			ReservedBegin = 0x80,
 			ReservedEnd = 0xfe,
 		};
+		friend Forward<_ASIO ip::tcp>;
 		Rfc1928(int port, const char* name, int timeout = 3);
 		~Rfc1928();
 		virtual void AsyncStart() override;
@@ -425,8 +404,7 @@ namespace FeedTheDog
 		_BOOST system::error_code ignore;
 		_BOOST posix_time::seconds timeoutSecond;
 		unique_ptr<_ASIO ip::tcp::acceptor> acceptor;
-		//_BOOST atomic<long long> countBufferSize;
-		//_BOOST atomic<long> writeTimes;
+
 		bool CheckVersionMessage(size_t, const VersionMessage *);
 		int BuildCmdConnectReplyMessage(ServerReplieMessage *, shared_ptr<TTcpSession>&, const _BOOST system::error_code &);
 		unsigned char ReplySelectedMethod(_ASIO ip::tcp::socket&, VersionMessage *, _BOOST system::error_code &);
@@ -436,12 +414,81 @@ namespace FeedTheDog
 		void DoCmdConnect(shared_ptr<DeadlineSession<_ASIO ip::tcp>>&, unique_ptr<EndPointParser>&);
 		void HandleAccept(shared_ptr<DeadlineSession<_ASIO ip::tcp>>&, const _BOOST system::error_code&);
 		void HandleCmdConnectReply(shared_ptr<DeadlineSession<_ASIO ip::tcp>>&, shared_ptr<TTcpSession>&, const _BOOST system::error_code &);
-		void HandleForwardRead(shared_ptr<Forward<_ASIO ip::tcp>>&, size_t, const _BOOST system::error_code &);
-		void HandleForwardWrite(shared_ptr<Forward<_ASIO ip::tcp>>&, size_t, const _BOOST system::error_code &);
+
 		void HandleNoAuthenticationRequired(shared_ptr<DeadlineSession<_ASIO ip::tcp>>&, size_t, size_t, const _BOOST system::error_code &);
 		void HandleReadVersionMessage(shared_ptr<DeadlineSession<_ASIO ip::tcp>>&, size_t, size_t, const _BOOST system::error_code &);
 		void HandleResolver(shared_ptr<DeadlineSession<_ASIO ip::tcp>>&, const _ASIO ip::tcp::resolver::iterator &, const _BOOST system::error_code &);
 		void RunMethod(shared_ptr<DeadlineSession<_ASIO ip::tcp>>&, unsigned char);
+	};
+
+
+	template<typename TProtocol>
+	class Forward
+	{
+	public:
+		typedef typename SessionPoolTrait::TSession<TProtocol>::type TSession;
+		struct _Forward
+		{
+			shared_ptr<TSession> read;
+			shared_ptr<TSession> write;
+			_ASIO mutable_buffers_1 readBuffer;
+			bool isRead;
+			Rfc1928* rfc;
+			_Forward(shared_ptr<TSession>& read_,
+				shared_ptr<TSession>& write_, Rfc1928* rfc_, bool isRead_) :
+				read(read_),
+				write(write_),
+				isRead(isRead_),
+				rfc(rfc_),
+				readBuffer(_ASIO buffer(read->GetBuffer()))
+			{
+
+			}
+		};
+		
+		Forward(shared_ptr<TSession>& read_, shared_ptr<TSession>& write_, Rfc1928* rfc_, bool isRead_ = true)
+		{
+			forward = make_shared<_Forward>(read_, write_, rfc_, isRead_);
+		}
+		Forward(Forward&& val) :
+			forward(_BOOST move(val.forward))
+		{
+		}
+		Forward(const Forward& val) :
+			forward(val.forward)
+		{
+		}
+		void operator()(const _BOOST system::error_code & error, size_t bytes_transferred)
+		{
+			if (forward->isRead)
+			{
+				if (error || forward->rfc->isStopped)
+				{
+					forward->write->close(forward->rfc->ignore);
+					return;
+				}
+				forward->isRead = false;
+
+				_ASIO async_write(*forward->write, _ASIO buffer(forward->read->GetBuffer(), bytes_transferred), _STD move(*this));
+			}
+			else
+			{
+				if (error || forward->rfc->isStopped)
+				{
+					forward->read->close(forward->rfc->ignore);
+					return;
+				}
+				forward->isRead = true;
+
+				forward->read->async_read_some(forward->readBuffer, _STD move(*this));
+			}
+		}
+		_ASIO mutable_buffers_1& GetReadBuffer()
+		{
+			return forward->readBuffer;
+		}
+	private:
+		shared_ptr<_Forward> forward;
 	};
 }  // namespace FeedTheDog
 

@@ -6,6 +6,7 @@
 #include <Core.h>
 #include <EchoService.h>
 #include <Rfc1928.h>
+#ifdef CRTDBG
 class CrtSetDbgFlag
 {
 public:
@@ -30,7 +31,7 @@ private:
 };
 
 CrtSetDbgFlag dbg(_CRTDBG_ALLOC_MEM_DF);
-
+#endif
 int main()
 {
 
@@ -47,7 +48,7 @@ int main()
 	core->AddService(d);
 	auto e = make_shared<Rfc1928>(9090, "rfc1928 server No 2");
 	core->AddService(e);
-#if 0
+#if 1
 	// 测试运行中途退出的情况
 	auto& io = core->SelectIdleWorker()->GetIoService();
 	_ASIO deadline_timer t(io);
@@ -57,7 +58,7 @@ int main()
 
 	core->Start();
 	core->GetTrace()->TracePoint(LogMsg::MainEnd, FeedTheDog::TraceLevel::Trace);
-//	t.cancel();
+	t.cancel();
 	core.reset();
 	return 0;
 }

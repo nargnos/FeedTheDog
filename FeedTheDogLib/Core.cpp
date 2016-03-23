@@ -56,25 +56,25 @@ namespace FeedTheDog
 		svr->AsyncStart();
 		return true;
 	}
-	void Core::DeleteService(const shared_ptr<TService>& svr)
-	{
-		auto find = GetService(svr->Name());
-		if (find == NULL)
-		{
-			return;
-		}
-		// 由服务控制是否接受新连接
-		find->Stop();
-		GetTrace()->DebugPoint(LogMsg::AddService, false, 0, svr->Name());
-		// 把对应服务的所有session关掉
-		for each (auto& var in workers)
-		{
-			var->RemoveAllServiceSession(svr->Name());
-		}
-		mutex.lock();
-		services.unsafe_erase(svr->Name());
-		mutex.unlock();
-	}
+	//void Core::DeleteService(const shared_ptr<TService>& svr)
+	//{
+	//	auto find = GetService(svr->Name());
+	//	if (find == NULL)
+	//	{
+	//		return;
+	//	}
+	//	// 由服务控制是否接受新连接
+	//	find->Stop();
+	//	GetTrace()->DebugPoint(LogMsg::AddService, false, 0, svr->Name());
+	//	// 把对应服务的所有session关掉
+	//	for each (auto& var in workers)
+	//	{
+	//		//var->RemoveAllServiceSession(svr->Name());
+	//	}
+	//	mutex.lock();
+	//	services.unsafe_erase(svr->Name());
+	//	mutex.unlock();
+	//}
 	void Core::Start()
 	{
 		GetTrace()->DebugPoint(LogMsg::CoreStart);

@@ -43,13 +43,13 @@ namespace FeedTheDog
 			return;
 		}
 		core->GetTrace()->DebugPoint(__func__);
-		auto& session = core->SelectIdleWorker()->NewSession<_ASIO ip::tcp>(name_);
+		auto& session = core->SelectIdleWorker()->NewSession<_ASIO ip::tcp>();
 		// buffer建议大于1k
 		assert(session->GetBuffer().max_size() > 1024);
-		auto& deadlineSession = make_shared<DeadlineSession<_ASIO ip::tcp>>(_STD ref(session));
+		auto& deadlineSession = make_shared<DeadlineSession<_ASIO ip::tcp>>(_STD move(session));
 		deadlineSession->GetTimer().async_wait(_BOOST bind(&Rfc1928::CheckDeadline, this, deadlineSession, _ASIO placeholders::error));
 
-		acceptor->async_accept(*session,
+		acceptor->async_accept(*deadlineSession->GetSession(),
 			_BOOST bind(&Rfc1928::HandleAccept, this, deadlineSession, _ASIO placeholders::error));
 
 	}
@@ -317,7 +317,7 @@ namespace FeedTheDog
 		case EndPointParser::AtypIPv6:
 		{
 			// 必须创建跟session属于同一个ioservice的连接
-			auto& remote = session->GetWorker()->NewSession<_ASIO ip::tcp>(name_);
+			auto& remote = session->GetWorker()->NewSession<_ASIO ip::tcp>();
 
 			remote->async_connect(parser->ParseEndpoint<_ASIO ip::tcp>(),
 				_BOOST bind(&Rfc1928::HandleCmdConnectReply, this, deadlineSession, remote, _ASIO placeholders::error));
@@ -354,7 +354,7 @@ namespace FeedTheDog
 		}
 
 		auto& session = deadlineSession->GetSession();
-		auto& remote = session->GetWorker()->NewSession<_ASIO ip::tcp>(name_);
+		auto& remote = session->GetWorker()->NewSession<_ASIO ip::tcp>();
 
 		_ASIO async_connect(*remote, endpoint_iterator, _BOOST bind(&Rfc1928::HandleCmdConnectReply,
 			this, deadlineSession, remote, _ASIO placeholders::error));
@@ -465,47 +465,17 @@ namespace FeedTheDog
 		CreateForward(client, remote);
 
 	}
-
 	void Rfc1928::CreateForward(shared_ptr<TTcpSession>& client, shared_ptr<TTcpSession>& remote)
 	{
 		core->GetTrace()->DebugPoint(__func__);
-		auto clientForward = make_shared<Forward<_ASIO ip::tcp>>(client, remote);
-		auto remoteForward = make_shared<Forward<_ASIO ip::tcp>>(remote, client);
 
-		client->async_read_some(_ASIO buffer(client->GetBuffer()), _BOOST bind(&Rfc1928::HandleForwardRead, this,
-			clientForward, _ASIO placeholders::bytes_transferred, _ASIO placeholders::error));
-		remote->async_read_some(_ASIO buffer(remote->GetBuffer()), _BOOST bind(&Rfc1928::HandleForwardRead, this,
-			remoteForward, _ASIO placeholders::bytes_transferred, _ASIO placeholders::error));
+		Forward<_ASIO ip::tcp> clientForward(client, remote, this);
+		Forward<_ASIO ip::tcp> remoteForward(remote, client, this);
+
+		client->async_read_some(clientForward.GetReadBuffer(), _STD move(clientForward));
+		remote->async_read_some(remoteForward.GetReadBuffer(), _STD move(remoteForward));
 	}
 
-	// FIX: 智能指针和bind很耗性能
-	void Rfc1928::HandleForwardRead(shared_ptr<Forward<_ASIO ip::tcp>>& forward, size_t bytes_transferred,
-		const _BOOST system::error_code & error)
-	{
-		auto write = forward->GetWriteSession();
-		if (error || isStopped)
-		{
-			write->close(ignore);
-			return;
-		}
-		auto read = forward->GetReadSession();
-		_ASIO async_write(*write, _ASIO buffer(read->GetBuffer(), bytes_transferred),
-			_BOOST bind(&Rfc1928::HandleForwardWrite, this, forward, _ASIO placeholders::bytes_transferred, _ASIO placeholders::error));
-	}
-	void Rfc1928::HandleForwardWrite(shared_ptr<Forward<_ASIO ip::tcp>>& forward, size_t bytes_transferred,
-		const _BOOST system::error_code & error)
-	{
-		auto read = forward->GetReadSession();
-		if (error || isStopped)
-		{
-			read->close(ignore);
-			return;
-		}
-		//countBufferSize += bytes_transferred;
-		//writeTimes++;
-		read->async_read_some(_ASIO buffer(read->GetBuffer()),
-			_BOOST bind(&Rfc1928::HandleForwardRead, this, forward, _ASIO placeholders::bytes_transferred, _ASIO placeholders::error));
-	}
 }  // namespace FeedTheDog
 
 

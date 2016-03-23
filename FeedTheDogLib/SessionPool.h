@@ -8,15 +8,15 @@ namespace FeedTheDog
 {
 	template<typename TProtocol>
 	class SessionPool :
-		public ISessionPool<TProtocol>
+		private _BOOST noncopyable
 	{
 	public:
 		typedef typename SessionPool<TProtocol> TSelf;
 		typedef typename SessionPoolTrait::TSession<TProtocol>::type TSession;
 		typedef typename SessionPoolTrait::TPool<TProtocol>::type TPool;
-		typedef typename SessionPoolTrait::TSessionMultiMap<TProtocol>::type TMap;
-		typedef typename TMap::iterator TMapIterator;
-		typedef typename TMap::value_type TMapValue;
+		typedef typename SessionPoolTrait::TSessionStorage<TProtocol>::type TStorage;
+		typedef typename TStorage::iterator TStorageIterator;
+		typedef typename TStorage::value_type TStorageValue;
 		typedef typename CoreTrait::TCore TCore;
 		typedef typename CoreTrait::TWorker TWorker;
 
@@ -45,7 +45,7 @@ namespace FeedTheDog
 			isDestruct = false;
 		}
 
-		 ~SessionPool()
+		~SessionPool()
 		{
 			corePtr->GetTrace()->DebugPoint(LogMsg::FreeSessionPool);
 			isDestruct = true;
@@ -56,27 +56,27 @@ namespace FeedTheDog
 			assert(count == 0);
 		}
 		// 多线程同时new多次有一定概率出现线程争用
-		virtual shared_ptr<TSession> NewSession(const char* serviceName) override
+		shared_ptr<TSession> NewSession()
 		{
-			corePtr->GetTrace()->DebugPoint(LogMsg::NewSession, false, 0, serviceName);
+			corePtr->GetTrace()->DebugPoint(LogMsg::NewSession);
 			++count;
 			// FIX: 看有什么更快的方案可以换
 			// 构建session
 			TSession* result = sessionPool.construct<true, false>(worker_);
 
-			// 析构的erase执行时间绝对会在insert执行之后，所以在析构时不会出现未设置map插入位置的情况
-			ios.post(_BOOST bind(&TSelf::InsertSession, this, serviceName, result));
+			// 析构的erase执行时间绝对会在insert执行之后，所以在析构时不会出现未设置插入位置的情况
+			ios.post(_BOOST bind(&TSelf::InsertSession, this, result));
 
 			return shared_ptr<TSession>(result, freeSessionDelegate);
 		}
 
 
-		virtual unsigned int GetSessionCount() const override
+		unsigned int GetSessionCount() const
 		{
 			return count;
 		}
 		// 可在运行时和停止前调用
-		virtual void CloseAll() override
+		void CloseAll()
 		{
 			// 只关掉连接，删除对象由智能指针处理			
 			corePtr->GetTrace()->DebugPoint(LogMsg::CloseAllSocket);
@@ -90,10 +90,10 @@ namespace FeedTheDog
 
 		// 移除服务session前先会停止服务，此时服务应拒绝新连接
 		// 只在运行状态调用
-		virtual void RemoveServiceSession(const char* serviceName) override
+		/*void RemoveServiceSession(const char* serviceName)
 		{
 			ios.post(_BOOST bind(&TSelf::RemoveServiceSessionStrand, this, serviceName));
-		}
+		}*/
 		TResolver& GetResolver()
 		{
 			return resolver;
@@ -121,29 +121,28 @@ namespace FeedTheDog
 		// FIX:池(在freelock里找到的，是否好用待测试)
 		TPool sessionPool;
 		// 用作分配对象的指针存储
-		// FIX: 这里insert和erase耗费cpu非常多
-		TMap sessionMap;
 
-		void InsertSession(const char* serviceName, TSession* session)
+		TStorage sessionStorage;
+
+		void InsertSession(TSession* session)
 		{
-			session->mapPosition = sessionMap.insert(TMapValue(serviceName, session));
+			session->insertPosition = sessionStorage.insert(sessionStorage.end(), session);
 		}
 		void AsyncCloseAll()
 		{
-			for each (auto& var in sessionMap)
+			for each (auto& var in sessionStorage)
 			{
-				var.second->close(ignore);
+				var->close(ignore);
 			}
 		}
 		void FreeSession(TSession* ptr)
 		{
 			corePtr->GetTrace()->DebugPoint(LogMsg::FreeSession);
 
-				// 析构时不erase减少析构时间
+			// 析构时不erase减少析构时间
 			if (!isDestruct)
 			{
-				// FIX: cpu
-				sessionMap.erase(ptr->mapPosition);
+				sessionStorage.erase(ptr->insertPosition);
 			}
 
 			// FIX: cpu
@@ -151,16 +150,16 @@ namespace FeedTheDog
 			sessionPool.destruct<true>(ptr);
 			--count;
 		}
-		void RemoveServiceSessionStrand(const char* serviceName)
-		{
-			auto& it = sessionMap.find(serviceName);
-			auto eraseIt = it;
-			while (it != sessionMap.end())
+		/*	void RemoveServiceSessionStrand(const char* serviceName)
 			{
-				it->second->close(ignore);
-			}
-			sessionMap.erase(eraseIt, sessionMap.end());
-		}
+				auto& it = sessionStorage.find(serviceName);
+				auto eraseIt = it;
+				while (it != sessionStorage.end())
+				{
+					it->second->close(ignore);
+				}
+				sessionStorage.erase(eraseIt, sessionStorage.end());
+			}*/
 		void Free(TSession* ptr)
 		{
 			if (isDestruct)

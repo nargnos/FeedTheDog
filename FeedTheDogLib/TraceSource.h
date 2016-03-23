@@ -7,7 +7,7 @@
 namespace FeedTheDog
 {
 #ifdef _DEBUG
-//#define OPEN_DEBUGPOINT
+#define OPEN_DEBUGPOINT
 #endif // _DEBUG
 
 	template<typename TEnum>
@@ -98,8 +98,11 @@ namespace FeedTheDog
 		{
 			TracePoint(msg, false, 0, NULL, level);
 		}
+		bool IsOpenTrace() const
+		{
+			return openTrace;
+		}
 	private:
-
 		shared_ptr<TMap> strmap;
 		template<typename TListener>
 		void ReadListener(Json::Value& listener, const char* fieldName, bool setDefaultConfig = false)

@@ -30,21 +30,23 @@ namespace FeedTheDog
 	class Config
 	{
 	public:
+		
 		// 1w多次正常浏览网页所需buffer大小平均为5000+（可能是浏览器限制）
 		static const unsigned int BufferSize = 1024 * 6;
 		typedef LogMsg TEnum;
+		typedef TraceSource<TEnum> TTraceSource;
 		Config();
 		~Config();
 		void Load();
 		void Save();
 		int GetThreadCount();
 		int GetMaxThreadCount() const;
-		shared_ptr<TraceSource<TEnum>>& GetTrace();
+		shared_ptr<TTraceSource>& GetTrace();
 	private:
 		int maxThreadCount;
 		char* configPath;
-		shared_ptr<TraceSource<TEnum>> trace;
-		shared_ptr<typename TraceSource<TEnum>::TMap> texts;
+		shared_ptr<TTraceSource> trace;
+		shared_ptr<typename TTraceSource::TMap> texts;
 		shared_ptr<Json::StreamWriter> writer;
 		Json::Value root;
 		Json::Value& ConfigNode();

@@ -22,7 +22,7 @@ namespace FeedTheDog
 			return;
 		}
 		
-		auto& session = core->SelectIdleWorker()->NewSession<_ASIO ip::tcp>(name_);
+		auto& session = core->SelectIdleWorker()->NewSession<_ASIO ip::tcp>();
 		acceptor->async_accept(*session, _BOOST bind(&EchoService::HandleAccept, this, session, _ASIO placeholders::error));
 
 	}
