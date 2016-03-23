@@ -354,7 +354,7 @@ namespace FeedTheDog
 		void Close(_BOOST system::error_code& ignore)
 		{
 			CancelTimer(ignore);
-			session->cancel(ignore);
+			session->close(ignore);
 		}
 		void CancelTimer(_BOOST system::error_code& ignore)
 		{

@@ -52,14 +52,13 @@ int main()
 	// 测试运行中途退出的情况
 	auto& io = core->SelectIdleWorker()->GetIoService();
 	_ASIO deadline_timer t(io);
-	t.expires_from_now(_BOOST posix_time::seconds(60*10));
+	t.expires_from_now(_BOOST posix_time::seconds(60*1));
 	t.async_wait(_BOOST bind(&Core::Stop, core));
 #endif // fi
 
 	core->Start();
 	core->GetTrace()->TracePoint(LogMsg::MainEnd, FeedTheDog::TraceLevel::Trace);
-	t.cancel();
-	core.reset();
+
 	return 0;
 }
 
