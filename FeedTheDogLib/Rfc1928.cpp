@@ -8,8 +8,6 @@ namespace FeedTheDog
 		timeoutSecond(timeout)
 	{
 		isStopped = false;
-		//countBufferSize = 0;
-		//writeTimes = 0;
 	}
 
 
@@ -46,7 +44,7 @@ namespace FeedTheDog
 		auto& session = core->SelectIdleWorker()->NewSession<_ASIO ip::tcp>();
 		// buffer建议大于1k
 		assert(session->GetBuffer().max_size() > 1024);
-		auto& deadlineSession = make_shared<DeadlineSession<_ASIO ip::tcp>>(_STD move(session));
+		auto& deadlineSession = make_shared<TTcpDeadlineSession>(_STD move(session));
 		deadlineSession->GetTimer().async_wait(_BOOST bind(&Rfc1928::CheckDeadline, this, deadlineSession, _ASIO placeholders::error));
 
 		acceptor->async_accept(*deadlineSession->GetSession(),
@@ -54,7 +52,7 @@ namespace FeedTheDog
 
 	}
 
-	void Rfc1928::CheckDeadline(shared_ptr<DeadlineSession<_ASIO ip::tcp>>& deadlineSession, const _BOOST system::error_code& error)
+	void Rfc1928::CheckDeadline(shared_ptr<TTcpDeadlineSession>& deadlineSession, const _BOOST system::error_code& error)
 	{
 		core->GetTrace()->DebugPoint(__func__);
 		if (error || isStopped)
@@ -73,13 +71,12 @@ namespace FeedTheDog
 	}
 	void Rfc1928::Stop()
 	{
-		core->GetTrace()->DebugPoint("stop rfc1928");
+		core->GetTrace()->DebugPoint("stop",false,0,name_);
 		isStopped = true;
 		acceptor->close();
-		//_STD cout << "平均每次传输长度"<< countBufferSize / ( double) writeTimes << _STD endl;
 	}
 
-	void Rfc1928::HandleAccept(shared_ptr<DeadlineSession<_ASIO ip::tcp>>& deadlineSession, const _BOOST system::error_code & error)
+	void Rfc1928::HandleAccept(shared_ptr<TTcpDeadlineSession>& deadlineSession, const _BOOST system::error_code & error)
 	{
 		core->GetTrace()->DebugPoint(__func__);
 		if (error || isStopped)
@@ -93,7 +90,7 @@ namespace FeedTheDog
 			0, _ASIO placeholders::bytes_transferred, _ASIO placeholders::error));
 		AsyncStart();
 	}
-	void Rfc1928::HandleReadVersionMessage(shared_ptr<DeadlineSession<_ASIO ip::tcp>>& deadlineSession, size_t alreadyTransferred,
+	void Rfc1928::HandleReadVersionMessage(shared_ptr<TTcpDeadlineSession>& deadlineSession, size_t alreadyTransferred,
 		size_t bytes_transferred, const _BOOST system::error_code & error)
 	{
 		core->GetTrace()->DebugPoint(__func__);
@@ -120,7 +117,7 @@ namespace FeedTheDog
 		if (!CheckVersionMessage(alreadyTransferred, vmHeader))
 		{
 			timer.expires_from_now(timeoutSecond);
-			Async::TcpReadMore(session, _BOOST bind(&Rfc1928::HandleReadVersionMessage, this, deadlineSession, alreadyTransferred,
+			TUtil::TcpReadMore(session, _BOOST bind(&Rfc1928::HandleReadVersionMessage, this, deadlineSession, alreadyTransferred,
 				_ASIO placeholders::bytes_transferred, _ASIO placeholders::error), alreadyTransferred);
 			return;
 		}
@@ -160,7 +157,7 @@ namespace FeedTheDog
 		_ASIO write(sessionSocket, _ASIO buffer(replyBuffer, sizeof(MethodSelectionMessage)), error);
 		return replyBuffer->Method;
 	}
-	void Rfc1928::RunMethod(shared_ptr<DeadlineSession<_ASIO ip::tcp>>& deadlineSession, unsigned char selectedMethod)
+	void Rfc1928::RunMethod(shared_ptr<TTcpDeadlineSession>& deadlineSession, unsigned char selectedMethod)
 	{
 		core->GetTrace()->DebugPoint(__func__);
 		auto& timer = deadlineSession->GetTimer();
@@ -169,7 +166,7 @@ namespace FeedTheDog
 		{
 		case NoAuthenticationRequired:
 			timer.expires_from_now(timeoutSecond);
-			Async::TcpReadMore(session, _BOOST bind(&Rfc1928::HandleNoAuthenticationRequired, this, deadlineSession, 0,
+			TUtil::TcpReadMore(session, _BOOST bind(&Rfc1928::HandleNoAuthenticationRequired, this, deadlineSession, 0,
 				_ASIO placeholders::bytes_transferred, _ASIO placeholders::error));
 			return;
 		case Gssapi:
@@ -200,7 +197,7 @@ namespace FeedTheDog
 	}
 
 	// FIX: 函数过长
-	void Rfc1928::HandleNoAuthenticationRequired(shared_ptr<DeadlineSession<_ASIO ip::tcp>>& deadlineSession, size_t alreadyTransferred,
+	void Rfc1928::HandleNoAuthenticationRequired(shared_ptr<TTcpDeadlineSession>& deadlineSession, size_t alreadyTransferred,
 		size_t bytes_transferred, const _BOOST system::error_code & error)
 	{
 		core->GetTrace()->DebugPoint(__func__);
@@ -229,7 +226,7 @@ namespace FeedTheDog
 			return;
 		}
 
-		unique_ptr<EndPointParser> endpointParser;
+		
 		// 假设读取足够长度，预先处理aytp
 		switch (requestDetail->Atyp)
 		{
@@ -242,7 +239,7 @@ namespace FeedTheDog
 				break;
 			}
 			auto ipv4 = reinterpret_cast<IPv4*>(addrPtr);
-			endpointParser = make_unique<EndPointParser>(ipv4);
+			auto& endpointParser = make_unique<TEndPointParser>(ipv4);
 			DoCmd(deadlineSession, endpointParser, requestDetail->Cmd);
 		}
 		return;
@@ -256,7 +253,7 @@ namespace FeedTheDog
 			}
 			char* domainPtr = reinterpret_cast<char*>(addrPtr) + ClientRequestDetailMessage::DomainLenSize;
 
-			endpointParser = make_unique<EndPointParser>(domainPtr, domainLen);
+			auto& endpointParser = make_unique<TEndPointParser>(domainPtr, domainLen);
 			DoCmd(deadlineSession, endpointParser, requestDetail->Cmd);
 		}
 		return;
@@ -269,7 +266,7 @@ namespace FeedTheDog
 			}
 			auto ipv6 = reinterpret_cast<IPv6*>(addrPtr);
 
-			endpointParser = make_unique<EndPointParser>(ipv6);
+			auto& endpointParser = make_unique<TEndPointParser>(ipv6);
 			DoCmd(deadlineSession, endpointParser, requestDetail->Cmd);
 		}
 		return;
@@ -284,10 +281,10 @@ namespace FeedTheDog
 		}
 		// 读取长度不足继续读
 		timer.expires_from_now(timeoutSecond);
-		Async::TcpReadMore(session, _BOOST bind(&Rfc1928::HandleNoAuthenticationRequired, this, deadlineSession, alreadyTransferred,
+		TUtil::TcpReadMore(session, _BOOST bind(&Rfc1928::HandleNoAuthenticationRequired, this, deadlineSession, alreadyTransferred,
 			_ASIO placeholders::bytes_transferred, _ASIO placeholders::error), alreadyTransferred);
 	}
-	void Rfc1928::DoCmd(shared_ptr<DeadlineSession<_ASIO ip::tcp>>& deadlineSession, unique_ptr<EndPointParser>& parser, unsigned char cmd)
+	void Rfc1928::DoCmd(shared_ptr<TTcpDeadlineSession>& deadlineSession, unique_ptr<TEndPointParser>& parser, unsigned char cmd)
 	{
 		core->GetTrace()->DebugPoint(__func__);
 		switch (cmd)
@@ -307,14 +304,14 @@ namespace FeedTheDog
 			break;
 		}
 	}
-	void Rfc1928::DoCmdConnect(shared_ptr<DeadlineSession<_ASIO ip::tcp>>& deadlineSession, unique_ptr<EndPointParser>& parser)
+	void Rfc1928::DoCmdConnect(shared_ptr<TTcpDeadlineSession>& deadlineSession, unique_ptr<TEndPointParser>& parser)
 	{
 		core->GetTrace()->DebugPoint(__func__);
 		auto& session = deadlineSession->GetSession();
 		switch (parser->GetAtyp())
 		{
-		case EndPointParser::AtypIPv4:
-		case EndPointParser::AtypIPv6:
+		case TEndPointParser::AtypIPv4:
+		case TEndPointParser::AtypIPv6:
 		{
 			// 必须创建跟session属于同一个ioservice的连接
 			auto& remote = session->GetWorker()->NewSession<_ASIO ip::tcp>();
@@ -323,7 +320,7 @@ namespace FeedTheDog
 				_BOOST bind(&Rfc1928::HandleCmdConnectReply, this, deadlineSession, remote, _ASIO placeholders::error));
 		}
 		return;
-		case EndPointParser::AtypDomainName:
+		case TEndPointParser::AtypDomainName:
 		{
 			session->GetWorker()->GetResolver<_ASIO ip::tcp>().async_resolve(
 				parser->ParseDomain<_ASIO ip::tcp>(),
@@ -337,7 +334,7 @@ namespace FeedTheDog
 	}
 
 
-	void Rfc1928::HandleResolver(shared_ptr<DeadlineSession<_ASIO ip::tcp>>& deadlineSession, const _ASIO ip::tcp::resolver::iterator& endpoint_iterator,
+	void Rfc1928::HandleResolver(shared_ptr<TTcpDeadlineSession>& deadlineSession, const _ASIO ip::tcp::resolver::iterator& endpoint_iterator,
 		const _BOOST system::error_code & error)
 	{
 		core->GetTrace()->DebugPoint(__func__);
@@ -430,7 +427,7 @@ namespace FeedTheDog
 		}
 		return result;
 	}
-	void Rfc1928::HandleCmdConnectReply(shared_ptr<DeadlineSession<_ASIO ip::tcp>>& deadlineSession, shared_ptr<TTcpSession>& remote, const _BOOST system::error_code & error)
+	void Rfc1928::HandleCmdConnectReply(shared_ptr<TTcpDeadlineSession>& deadlineSession, shared_ptr<TTcpSession>& remote, const _BOOST system::error_code & error)
 	{
 		core->GetTrace()->DebugPoint(__func__);
 		if (isStopped)
@@ -469,8 +466,8 @@ namespace FeedTheDog
 	{
 		core->GetTrace()->DebugPoint(__func__);
 
-		Forward<_ASIO ip::tcp> clientForward(client, remote, this);
-		Forward<_ASIO ip::tcp> remoteForward(remote, client, this);
+		TTcpForward clientForward(client, remote, this);
+		TTcpForward remoteForward(remote, client, this);
 
 		client->async_read_some(clientForward.GetReadBuffer(), _STD move(clientForward));
 		remote->async_read_some(remoteForward.GetReadBuffer(), _STD move(remoteForward));

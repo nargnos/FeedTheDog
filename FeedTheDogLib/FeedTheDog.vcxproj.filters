@@ -124,6 +124,9 @@
     <ClInclude Include="ServiceBase.h">
       <Filter>Service\ServiceBase</Filter>
     </ClInclude>
+    <ClInclude Include="Rfc1928Def.h">
+      <Filter>Service</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />

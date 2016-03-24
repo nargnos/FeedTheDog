@@ -118,6 +118,8 @@
       <AdditionalIncludeDirectories>$(SolutionDir)..\Boost;$(SolutionDir)JsonCpp\include</AdditionalIncludeDirectories>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <MinimalRebuild>true</MinimalRebuild>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -165,6 +167,7 @@
     <ClInclude Include="ISessionPool.h" />
     <ClInclude Include="ListenerBase.h" />
     <ClInclude Include="Rfc1928.h" />
+    <ClInclude Include="Rfc1928Def.h" />
     <ClInclude Include="Session.h" />
     <ClInclude Include="SessionBase.h" />
     <ClInclude Include="SessionPool.h" />

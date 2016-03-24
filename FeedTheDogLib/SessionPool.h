@@ -21,9 +21,9 @@ namespace FeedTheDog
 		typedef typename CoreTrait::TWorker TWorker;
 
 		typedef typename TProtocol::socket TSocket;
-		typedef typename _BOOST shared_mutex TMutex;
-		typedef _BOOST shared_lock<TMutex> ReadLock;
-		typedef _BOOST unique_lock<TMutex> WriteLock;
+		//typedef typename _BOOST shared_mutex TMutex;
+		//typedef _BOOST shared_lock<TMutex> ReadLock;
+		//typedef _BOOST unique_lock<TMutex> WriteLock;
 		typedef typename TProtocol::resolver TResolver;
 
 		// sessionµÄÎö¹¹Î¯ÍÐ
@@ -126,7 +126,7 @@ namespace FeedTheDog
 
 		void InsertSession(TSession* session)
 		{
-			session->insertPosition = sessionStorage.insert(sessionStorage.end(), session);
+			session->insertPosition = _STD move(sessionStorage.insert(sessionStorage.end(), session));
 		}
 		void AsyncCloseAll()
 		{

@@ -33,7 +33,7 @@ namespace FeedTheDog
 		int tmpWorkerIndex;
 		Config config;
 		_STD vector<shared_ptr<TWorker>> workers;
-		_BOOST mutex mutex;
+		// _BOOST mutex mutex;
 		concurrent_unordered_map<const char*, shared_ptr<TService>> services;
 		int threadCount;
 	};
