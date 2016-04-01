@@ -21,23 +21,14 @@ namespace FeedTheDog
 		typedef typename CoreTrait::TWorker TWorker;
 
 		typedef typename TProtocol::socket TSocket;
-		//typedef typename _BOOST shared_mutex TMutex;
-		//typedef _BOOST shared_lock<TMutex> ReadLock;
-		//typedef _BOOST unique_lock<TMutex> WriteLock;
-		typedef typename TProtocol::resolver TResolver;
 
-		// session的析构委托
-		typedef _BOOST _bi::bind_t<
-			void, _BOOST _mfi::mf1<void, TSelf, TSession *>,
-			_BOOST _bi::list2<_BOOST _bi::value<TSelf*>, _BOOST arg<1>>
-		> TFreeSessionDelegate;
+		typedef typename TProtocol::resolver TResolver;
 
 		SessionPool(TCore* core, TWorker* worker, _ASIO io_service& io) :
 			corePtr(core),
 			ios(io),
 			count(0),
 			sessionPool(alloc, 0),
-			freeSessionDelegate(_BOOST bind(&TSelf::Free, this, _1)),
 			worker_(worker),
 			resolver(io)
 		{
@@ -56,7 +47,7 @@ namespace FeedTheDog
 			assert(count == 0);
 		}
 		// 多线程同时new多次有一定概率出现线程争用
-		shared_ptr<TSession> NewSession()
+		shared_ptr<TSession> __fastcall NewSession()
 		{
 			corePtr->GetTrace()->DebugPoint(LogMsg::NewSession);
 			++count;
@@ -64,12 +55,10 @@ namespace FeedTheDog
 			// 构建session
 			TSession* result = sessionPool.construct<true, false>(worker_);
 
-			// 析构的erase执行时间绝对会在insert执行之后，所以在析构时不会出现未设置插入位置的情况
-			ios.post(_BOOST bind(&TSelf::InsertSession, this, result));
-
-			return shared_ptr<TSession>(result, freeSessionDelegate);
+			// 加快返回速度，析构的erase执行时间绝对会在insert执行之后			
+			ios.post([&, result]() {result->insertPosition = _STD move(sessionStorage.insert(sessionStorage.end(), result)); });
+			return shared_ptr<TSession>(result, [this](TSession* ptr) {Free(ptr); });
 		}
-
 
 		unsigned int GetSessionCount() const
 		{
@@ -88,12 +77,6 @@ namespace FeedTheDog
 			ios.post(_BOOST bind(&TSelf::AsyncCloseAll, this));
 		}
 
-		// 移除服务session前先会停止服务，此时服务应拒绝新连接
-		// 只在运行状态调用
-		/*void RemoveServiceSession(const char* serviceName)
-		{
-			ios.post(_BOOST bind(&TSelf::RemoveServiceSessionStrand, this, serviceName));
-		}*/
 		TResolver& GetResolver()
 		{
 			return resolver;
@@ -107,8 +90,6 @@ namespace FeedTheDog
 		//_ASIO strand strand;
 		// 表示是否处于析构状态
 		bool isDestruct;
-		// 简化调用bind
-		TFreeSessionDelegate freeSessionDelegate;
 
 		TCore* corePtr;
 		_ASIO io_service& ios;
@@ -135,6 +116,7 @@ namespace FeedTheDog
 				var->close(ignore);
 			}
 		}
+
 		void FreeSession(TSession* ptr)
 		{
 			corePtr->GetTrace()->DebugPoint(LogMsg::FreeSession);
@@ -150,16 +132,7 @@ namespace FeedTheDog
 			sessionPool.destruct<true>(ptr);
 			--count;
 		}
-		/*	void RemoveServiceSessionStrand(const char* serviceName)
-			{
-				auto& it = sessionStorage.find(serviceName);
-				auto eraseIt = it;
-				while (it != sessionStorage.end())
-				{
-					it->second->close(ignore);
-				}
-				sessionStorage.erase(eraseIt, sessionStorage.end());
-			}*/
+
 		void Free(TSession* ptr)
 		{
 			if (isDestruct)
@@ -168,7 +141,8 @@ namespace FeedTheDog
 				FreeSession(ptr);
 				return;
 			}
-			ios.post(_BOOST bind(&TSelf::FreeSession, this, ptr));
+			// 不能dispatch，此时插入位置不一定已经设置
+			ios.post([this, ptr]() {FreeSession(ptr); });
 		}
 	};
 

@@ -17,24 +17,6 @@
     <ClCompile Include="Config.cpp">
       <Filter>Config</Filter>
     </ClCompile>
-    <ClCompile Include="TraceSourceBase.cpp">
-      <Filter>Config</Filter>
-    </ClCompile>
-    <ClCompile Include="ConsoleListener.cpp">
-      <Filter>TraceListener</Filter>
-    </ClCompile>
-    <ClCompile Include="FileListener.cpp">
-      <Filter>TraceListener</Filter>
-    </ClCompile>
-    <ClCompile Include="ListenerBase.cpp">
-      <Filter>TraceListener</Filter>
-    </ClCompile>
-    <ClCompile Include="TraceSource.cpp">
-      <Filter>Config</Filter>
-    </ClCompile>
-    <ClCompile Include="DebugListener.cpp">
-      <Filter>TraceListener</Filter>
-    </ClCompile>
     <ClCompile Include="TraceDefine.cpp">
       <Filter>Type</Filter>
     </ClCompile>
@@ -43,6 +25,24 @@
     </ClCompile>
     <ClCompile Include="Rfc1928.cpp">
       <Filter>Service</Filter>
+    </ClCompile>
+    <ClCompile Include="ConsoleListener.cpp">
+      <Filter>Trace\Listener</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugListener.cpp">
+      <Filter>Trace\Listener</Filter>
+    </ClCompile>
+    <ClCompile Include="FileListener.cpp">
+      <Filter>Trace\Listener</Filter>
+    </ClCompile>
+    <ClCompile Include="ListenerBase.cpp">
+      <Filter>Trace\Listener</Filter>
+    </ClCompile>
+    <ClCompile Include="TraceSourceBase.cpp">
+      <Filter>Trace</Filter>
+    </ClCompile>
+    <ClCompile Include="TraceSource.cpp">
+      <Filter>Trace</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -88,26 +88,8 @@
     <ClInclude Include="Config.h">
       <Filter>Config</Filter>
     </ClInclude>
-    <ClInclude Include="TraceSource.h">
-      <Filter>Config</Filter>
-    </ClInclude>
     <ClInclude Include="IListener.h">
       <Filter>Interface</Filter>
-    </ClInclude>
-    <ClInclude Include="TraceSourceBase.h">
-      <Filter>Config</Filter>
-    </ClInclude>
-    <ClInclude Include="ConsoleListener.h">
-      <Filter>TraceListener</Filter>
-    </ClInclude>
-    <ClInclude Include="FileListener.h">
-      <Filter>TraceListener</Filter>
-    </ClInclude>
-    <ClInclude Include="ListenerBase.h">
-      <Filter>TraceListener</Filter>
-    </ClInclude>
-    <ClInclude Include="DebugListener.h">
-      <Filter>TraceListener</Filter>
     </ClInclude>
     <ClInclude Include="TraceDefine.h">
       <Filter>Type</Filter>
@@ -126,6 +108,24 @@
     </ClInclude>
     <ClInclude Include="Rfc1928Def.h">
       <Filter>Service</Filter>
+    </ClInclude>
+    <ClInclude Include="ConsoleListener.h">
+      <Filter>Trace\Listener</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugListener.h">
+      <Filter>Trace\Listener</Filter>
+    </ClInclude>
+    <ClInclude Include="FileListener.h">
+      <Filter>Trace\Listener</Filter>
+    </ClInclude>
+    <ClInclude Include="ListenerBase.h">
+      <Filter>Trace\Listener</Filter>
+    </ClInclude>
+    <ClInclude Include="TraceSourceBase.h">
+      <Filter>Trace</Filter>
+    </ClInclude>
+    <ClInclude Include="TraceSource.h">
+      <Filter>Trace</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -153,11 +153,14 @@
     <Filter Include="Type">
       <UniqueIdentifier>{04ab5aa8-270a-47d7-a955-2cae8e638617}</UniqueIdentifier>
     </Filter>
-    <Filter Include="TraceListener">
-      <UniqueIdentifier>{b9e8a6fb-c7ec-4321-a073-48736af2e30a}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Service Manager">
       <UniqueIdentifier>{9ddb68ea-5ad6-4213-b9d0-e7d7f9510ce1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Trace">
+      <UniqueIdentifier>{b9e8a6fb-c7ec-4321-a073-48736af2e30a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Trace\Listener">
+      <UniqueIdentifier>{52b7ee6e-ecf0-4496-b413-88f5d6c944e8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

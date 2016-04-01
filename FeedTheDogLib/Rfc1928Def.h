@@ -11,6 +11,7 @@ namespace FeedTheDog
 	};
 	// 根据协议原文声明类型
 #pragma pack(push,1)
+#pragma warning(disable : 4200)
 	// client连接server发送 版本标识和认证函数选择 信息
 	// +----+----------+----------+
 	// |VER | NMETHODS | METHODS  |
@@ -19,10 +20,11 @@ namespace FeedTheDog
 	// +----+----------+----------+
 	struct VersionMessage
 	{
-		enum : unsigned char
+		enum : unsigned short
 		{
 			FirstTwoBytes = 2,
 			VerValue = 0x05,
+			MaxSize = 255 + FirstTwoBytes
 		};
 		unsigned char Ver;
 		unsigned char NMethods;
@@ -218,11 +220,14 @@ namespace FeedTheDog
 	struct Async
 	{
 		template<typename ReadHandler>
-		static void TcpReadMore(shared_ptr<TTcpSession>& session, BOOST_ASIO_MOVE_ARG(ReadHandler) handler, size_t alreadyTransferred = 0)
+		static void TcpReadMore(shared_ptr<TTcpSession>& session, BOOST_ASIO_MOVE_ARG(ReadHandler) handler, size_t alreadyTransferred = 0, size_t maxSize = 0)
 		{
+
 			auto& buffer = session->GetBuffer();
+			assert(maxSize <= buffer.max_size());
 			auto bufferData = buffer.data();
-			auto leftSize = buffer.max_size() - alreadyTransferred;
+
+			auto leftSize = (maxSize == 0 ? buffer.max_size() : maxSize) - alreadyTransferred;
 			assert(leftSize > 0);
 			session->async_read_some(_ASIO buffer(bufferData + alreadyTransferred, leftSize), handler);
 		}
@@ -375,75 +380,33 @@ namespace FeedTheDog
 	};
 
 	template<typename TService>
-	class TcpForward
+	class TcpForward :private _BOOST noncopyable
 	{
 	public:
 		typedef typename SessionPoolTrait::TSession<_ASIO ip::tcp>::type TSession;
-		struct _Forward
-		{
-			shared_ptr<TSession> read;
-			shared_ptr<TSession> write;
-			_ASIO mutable_buffers_1 readBuffer;
-			bool isRead;
-			TService* svc;
-			_Forward(shared_ptr<TSession>& read_,
-				shared_ptr<TSession>& write_, TService* svc_, bool isRead_) :
-				read(read_),
-				write(write_),
-				isRead(isRead_),
-				svc(svc_),
-				readBuffer(_ASIO buffer(read->GetBuffer()))
-			{
 
-			}
-		};
-
-		TcpForward(shared_ptr<TSession>& read_, shared_ptr<TSession>& write_, TService* svc_, bool isRead_ = true)
-		{
-			forward = make_shared<_Forward>(read_, write_, svc_, isRead_);
-		}
-		TcpForward(TcpForward&& val) :
-			forward(_BOOST move(val.forward))
+		TcpForward(shared_ptr<TSession>& read_, shared_ptr<TSession>& write_) :
+			readBuffer(_ASIO buffer(read->GetBuffer())),
+			read(read_),
+			write(write_)
 		{
 		}
-		TcpForward(const TcpForward& val)
-		{
-			if (&val == this)
-			{
-				return;
-			}
-			forward = val.forward;
-		}
-		void operator()(const _BOOST system::error_code & error, size_t bytes_transferred)
-		{
-			if (forward->isRead)
-			{
-				if (error || forward->svc->isStopped)
-				{
-					forward->write->close(forward->svc->ignore);
-					return;
-				}
-				forward->isRead = false;
 
-				_ASIO async_write(*forward->write, _ASIO buffer(forward->read->GetBuffer(), bytes_transferred), _STD move(*this));
-			}
-			else
-			{
-				if (error || forward->svc->isStopped)
-				{
-					forward->read->close(forward->svc->ignore);
-					return;
-				}
-				forward->isRead = true;
-
-				forward->read->async_read_some(forward->readBuffer, _STD move(*this));
-			}
-		}
 		_ASIO mutable_buffers_1& GetReadBuffer()
 		{
-			return forward->readBuffer;
+			return readBuffer;
+		}
+		shared_ptr<TSession>& GetReadSession()
+		{
+			return read;
+		}
+		shared_ptr<TSession>& GetWriteSession()
+		{
+			return write;
 		}
 	private:
-		shared_ptr<_Forward> forward;
+		shared_ptr<TSession> read;
+		shared_ptr<TSession> write;
+		_ASIO mutable_buffers_1 readBuffer;
 	};
 }  // namespace FeedTheDog

@@ -14,7 +14,7 @@ namespace FeedTheDog
 		threadCount = config.GetThreadCount();
 		assert(threadCount > 0 && threadCount <= config.GetMaxThreadCount());
 
-		for (auto i = 0; i < threadCount; i++)
+		for (size_t i = 0; i < threadCount; i++)
 		{
 			workers.push_back(make_shared<TWorker>(this));
 		}
@@ -85,10 +85,9 @@ namespace FeedTheDog
 		isStop = false;
 		_STD vector<shared_ptr<_BOOST thread>> threads;
 		assert(threadCount == workers.size());
-		auto tmpCount = threadCount;
-		if (tmpCount > 1)
+		if (threadCount > 1)
 		{
-			for (size_t i = 1; i < tmpCount; i++)
+			for (size_t i = 1; i < threadCount; i++)
 			{
 				auto tmpThread = make_shared<_BOOST thread>(_BOOST bind(&TWorker::Start, workers[i]));
 

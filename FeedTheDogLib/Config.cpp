@@ -6,7 +6,7 @@ namespace FeedTheDog
 	Config::Config()
 	{
 		configPath = ".\\config.json";
-		maxThreadCount = _BOOST thread::hardware_concurrency();
+		maxThreadCount = _BOOST thread::hardware_concurrency() * 2;
 		Json::StreamWriterBuilder sb;
 		// 格式化配置信息
 		// sb["indentation"] = "";
@@ -69,12 +69,12 @@ namespace FeedTheDog
 		writer->write(root, &ofs);
 		ofs.close();
 	}
-	int Config::GetThreadCount()
+	unsigned int Config::GetThreadCount()
 	{
-		auto result = ThreadCountMember().asInt();
+		auto result = ThreadCountMember().asUInt();
 		return result == 0 ? maxThreadCount : result;
 	}
-	int Config::GetMaxThreadCount() const
+	unsigned int Config::GetMaxThreadCount() const
 	{
 		return maxThreadCount;
 	}

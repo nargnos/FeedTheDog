@@ -40,20 +40,20 @@ namespace FeedTheDog
 			ReadListener<DebugListener>(listener, "Debug", needSetDefaultCofig);
 
 		}
-		void DebugPoint(const char* msg, bool useIndex = false, int index = 0, const char* str = NULL)
+		void __fastcall DebugPoint(const char* msg, bool useIndex = false, int index = 0, const char* str = NULL)
 		{
 #ifdef OPEN_DEBUGPOINT
 			TracePoint(msg, useIndex, index, str, TraceLevel::Debug);
 #endif // OPEN_DEBUGPOINT
 		}
-		void DebugPoint(TEnum msg, bool useIndex = false, int index = 0, const char* str = NULL)
+		void __fastcall DebugPoint(TEnum msg, bool useIndex = false, int index = 0, const char* str = NULL)
 		{
 #ifdef OPEN_DEBUGPOINT
 			TracePoint(msg, useIndex, index, str, TraceLevel::Debug);
 #endif // OPEN_DEBUGPOINT
 		}
 
-		void TracePoint(const char* msg, bool useIndex = false, int index = 0, const char* str = NULL, TraceLevel level = TraceLevel::Debug)
+		void __fastcall TracePoint(const char* msg, bool useIndex = false, int index = 0, const char* str = NULL, TraceLevel level = TraceLevel::Debug)
 		{
 			if (!openTrace)
 			{
@@ -82,7 +82,7 @@ namespace FeedTheDog
 
 			WriteLine(output, level);
 		}
-		void TracePoint(TEnum msg, bool useIndex = false, int index = 0, const char* str = NULL, TraceLevel level = TraceLevel::Debug)
+		void __fastcall TracePoint(TEnum msg, bool useIndex = false, int index = 0, const char* str = NULL, TraceLevel level = TraceLevel::Debug)
 		{
 			if (!openTrace)
 			{
@@ -90,11 +90,11 @@ namespace FeedTheDog
 			}
 			TracePoint(((*strmap)[msg]).c_str(), useIndex, index, str, level);
 		}
-		void TracePoint(const char* msg, TraceLevel level)
+		void __fastcall TracePoint(const char* msg, TraceLevel level)
 		{
 			TracePoint(msg, false, 0, NULL, level);
 		}
-		void TracePoint(TEnum msg, TraceLevel level)
+		void __fastcall TracePoint(TEnum msg, TraceLevel level)
 		{
 			TracePoint(msg, false, 0, NULL, level);
 		}

@@ -39,11 +39,11 @@ namespace FeedTheDog
 		~Config();
 		void Load();
 		void Save();
-		int GetThreadCount();
-		int GetMaxThreadCount() const;
+		unsigned int GetThreadCount();
+		unsigned int GetMaxThreadCount() const;
 		shared_ptr<TTraceSource>& GetTrace();
 	private:
-		int maxThreadCount;
+		unsigned int maxThreadCount;
 		char* configPath;
 		shared_ptr<TTraceSource> trace;
 		shared_ptr<typename TTraceSource::TMap> texts;

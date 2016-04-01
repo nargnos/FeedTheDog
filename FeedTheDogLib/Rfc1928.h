@@ -3,6 +3,7 @@
 #include "Rfc1928Def.h"
 namespace FeedTheDog
 {
+	// FIX: 协商部分需要限制读取最大长度，防止恶意请求
 	class Rfc1928;
 	struct Rfc1928Trait
 	{
@@ -46,21 +47,23 @@ namespace FeedTheDog
 		_BOOST system::error_code ignore;
 		_BOOST posix_time::seconds timeoutSecond;
 		unique_ptr<_ASIO ip::tcp::acceptor> acceptor;
+		
+		bool __fastcall CheckVersionMessage(size_t, const VersionMessage *);
+		int __fastcall BuildCmdConnectReplyMessage(ServerReplieMessage *, shared_ptr<TTcpSession>&, const _BOOST system::error_code &);
+		unsigned char __fastcall ReplySelectedMethod(_ASIO ip::tcp::socket&, VersionMessage *, _BOOST system::error_code &);
+		void __fastcall CheckDeadline(shared_ptr<TTcpDeadlineSession>&, const _BOOST system::error_code&);
+		void __fastcall ForwardRead(shared_ptr<TTcpForward>& forward, const _BOOST system::error_code & error, size_t bytes_transferred);
+		void __fastcall ForwardWrite(shared_ptr<TTcpForward>& forward, const _BOOST system::error_code & error, size_t bytes_transferred);
+		void __fastcall CreateForward(shared_ptr<TTcpSession>&, shared_ptr<TTcpSession>&);
+		void __fastcall DoCmd(shared_ptr<TTcpDeadlineSession>&, unique_ptr<TEndPointParser>&, unsigned char);
+		void __fastcall DoCmdConnect(shared_ptr<TTcpDeadlineSession>&, unique_ptr<TEndPointParser>&);
+		void __fastcall HandleAccept(shared_ptr<TTcpDeadlineSession>&, const _BOOST system::error_code&);
+		void __fastcall HandleCmdConnectReply(shared_ptr<TTcpDeadlineSession>&, shared_ptr<TTcpSession>&, const _BOOST system::error_code &);
 
-		bool CheckVersionMessage(size_t, const VersionMessage *);
-		int BuildCmdConnectReplyMessage(ServerReplieMessage *, shared_ptr<TTcpSession>&, const _BOOST system::error_code &);
-		unsigned char ReplySelectedMethod(_ASIO ip::tcp::socket&, VersionMessage *, _BOOST system::error_code &);
-		void CheckDeadline(shared_ptr<TTcpDeadlineSession>&, const _BOOST system::error_code&);
-		void CreateForward(shared_ptr<TTcpSession>&, shared_ptr<TTcpSession>&);
-		void DoCmd(shared_ptr<TTcpDeadlineSession>&, unique_ptr<TEndPointParser>&, unsigned char);
-		void DoCmdConnect(shared_ptr<TTcpDeadlineSession>&, unique_ptr<TEndPointParser>&);
-		void HandleAccept(shared_ptr<TTcpDeadlineSession>&, const _BOOST system::error_code&);
-		void HandleCmdConnectReply(shared_ptr<TTcpDeadlineSession>&, shared_ptr<TTcpSession>&, const _BOOST system::error_code &);
-
-		void HandleNoAuthenticationRequired(shared_ptr<TTcpDeadlineSession>&, size_t, size_t, const _BOOST system::error_code &);
-		void HandleReadVersionMessage(shared_ptr<TTcpDeadlineSession>&, size_t, size_t, const _BOOST system::error_code &);
-		void HandleResolver(shared_ptr<TTcpDeadlineSession>&, const _ASIO ip::tcp::resolver::iterator &, const _BOOST system::error_code &);
-		void RunMethod(shared_ptr<TTcpDeadlineSession>&, unsigned char);
+		void __fastcall HandleNoAuthenticationRequired(shared_ptr<TTcpDeadlineSession>&, size_t, size_t, const _BOOST system::error_code &);
+		void __fastcall HandleReadVersionMessage(shared_ptr<TTcpDeadlineSession>&, size_t, size_t, const _BOOST system::error_code &);
+		void __fastcall HandleResolver(shared_ptr<TTcpDeadlineSession>&, const _ASIO ip::tcp::resolver::iterator &, const _BOOST system::error_code &);
+		void __fastcall RunMethod(shared_ptr<TTcpDeadlineSession>&, unsigned char);
 	};
 
 

@@ -35,7 +35,7 @@ namespace FeedTheDog
 		_STD vector<shared_ptr<TWorker>> workers;
 		// _BOOST mutex mutex;
 		concurrent_unordered_map<const char*, shared_ptr<TService>> services;
-		int threadCount;
+		unsigned int threadCount;
 	};
 
 }  // namespace FeedTheDog

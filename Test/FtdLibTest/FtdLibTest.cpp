@@ -13,7 +13,7 @@ clock_t end;
 int count;
 void NewSessionTest(FeedTheDog::Core*core,Worker* worker)
 {
-	count = 100000;
+	count = 150000;
 	// 单纯测试创建析构session的速度，这里分配之后立马析构			
 	startNewSession = clock();
 	for (size_t i = 0; i < count; i++)
@@ -66,7 +66,7 @@ int main()
 
 	os << "结束" << _STD endl;
 	
-	TestLog(os, core.GetTrace());
+	//TestLog(os, core.GetTrace());
 	//Logger::WriteMessage(os.str().c_str());
 	_STD cout << os.str();
 	return 0;
