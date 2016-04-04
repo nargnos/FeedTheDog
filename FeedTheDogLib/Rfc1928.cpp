@@ -533,7 +533,14 @@ namespace FeedTheDog
 		auto& writeSession = forward->GetWriteSession();
 		if (error || isStopped)
 		{
-			writeSession->close(ignore);
+			if (writeSession->is_open())
+			{
+				if (error == _ASIO error::eof)
+				{
+					writeSession->shutdown(_ASIO socket_base::shutdown_both, ignore);
+				}
+				writeSession->close(ignore);
+			}
 			return;
 		}
 		auto& readSession = forward->GetReadSession();
@@ -549,7 +556,14 @@ namespace FeedTheDog
 		auto& readSession = forward->GetReadSession();
 		if (error || isStopped)
 		{
-			readSession->close(ignore);
+			if (readSession->is_open())
+			{
+				if (error == _ASIO error::eof)
+				{
+					readSession->shutdown(_ASIO socket_base::shutdown_both, ignore);
+				}
+				readSession->close(ignore);
+			}
 			return;
 		}
 		auto& readBuffer = forward->GetReadBuffer();

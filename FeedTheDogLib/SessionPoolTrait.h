@@ -14,6 +14,8 @@ namespace FeedTheDog
 		{
 			typedef Session<TProtocol> type;
 		};
+		// FIX: 每个池初始的大小，这里可以改到配置文件里
+		enum { PoolDefaultSize = 1024 };
 		template<typename TProtocol>
 		struct TPool
 		{

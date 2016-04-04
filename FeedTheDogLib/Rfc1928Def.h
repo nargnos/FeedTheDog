@@ -265,6 +265,10 @@ namespace FeedTheDog
 		}
 		EndPointParser(const EndPointParser& val)
 		{
+			if (this==&val)
+			{
+				return;
+			}
 			this->aytp = val.aytp;
 			this->port = val.port;
 			memcpy_s(buffer, UnionTypeSize, val.buffer, val.UnionTypeSize);

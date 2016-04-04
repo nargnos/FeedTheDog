@@ -28,7 +28,7 @@ namespace FeedTheDog
 			corePtr(core),
 			ios(io),
 			count(0),
-			sessionPool(alloc, 0),
+			sessionPool(alloc, SessionPoolTrait::PoolDefaultSize),
 			worker_(worker),
 			resolver(io)
 		{

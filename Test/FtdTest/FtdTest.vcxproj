@@ -121,6 +121,9 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(SolutionDir)FeedTheDogLib;$(SolutionDir)\..\jsoncpp\include;$(SolutionDir)\..\Boost;</AdditionalIncludeDirectories>
       <MinimalRebuild>true</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <ControlFlowGuard>Guard</ControlFlowGuard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -141,6 +144,9 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(SolutionDir)FeedTheDogLib;$(SolutionDir)\..\jsoncpp\include;$(SolutionDir)\..\Boost;</AdditionalIncludeDirectories>
       <MinimalRebuild>true</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <ControlFlowGuard>Guard</ControlFlowGuard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
