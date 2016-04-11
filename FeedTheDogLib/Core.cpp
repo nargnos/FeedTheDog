@@ -16,7 +16,7 @@ namespace FeedTheDog
 
 		for (size_t i = 0; i < threadCount; i++)
 		{
-			workers.push_back(make_shared<Worker>(this));
+			workers.push_back(make_shared<TWorker>(this));
 		}
 		config.Save();
 		GetTrace()->DebugPoint(LogMsg::Initialized);
@@ -89,7 +89,7 @@ namespace FeedTheDog
 		{
 			for (size_t i = 1; i < threadCount; i++)
 			{
-				auto tmpThread = make_shared<_BOOST thread>(_BOOST bind(&Worker::Start, workers[i]));
+				auto tmpThread = make_shared<_BOOST thread>(_BOOST bind(&TWorker::Start, workers[i]));
 
 				threads.push_back(tmpThread);
 			}
@@ -127,10 +127,10 @@ namespace FeedTheDog
 	{
 		return workers.size();
 	}
-	Worker* Core::SelectIdleWorker()
+	Core::TWorker* Core::SelectIdleWorker()
 	{
 		assert(workers.size() > 0);
-		Worker* result = NULL;
+		TWorker* result = NULL;
 		if (isStop)
 		{
 			// 当core未开时用于分散此时添加的服务

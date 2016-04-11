@@ -14,7 +14,7 @@ namespace FeedTheDog
 	{
 	}
 
-	bool Rfc1928::Init(TCore * corePtr)
+	bool Rfc1928::Init(TServiceManager * corePtr)
 	{
 		isStopped = false;
 		core = corePtr;

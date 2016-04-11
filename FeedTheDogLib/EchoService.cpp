@@ -64,7 +64,7 @@ namespace FeedTheDog
 			ReadSome(session);
 		}
 	}
-	bool EchoService::Init(TCore* corePtr)
+	bool EchoService::Init(TServiceManager* corePtr)
 	{
 		isStop = false;
 		core = corePtr;

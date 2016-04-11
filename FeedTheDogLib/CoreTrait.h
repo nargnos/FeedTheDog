@@ -2,18 +2,13 @@
 #include "Trait.h"
 namespace FeedTheDog
 {
-	class Worker;
-	struct MemoryPoolStrategy;
-	struct SessionStorageStrategy;
 	struct CoreTrait
 	{
-		typedef Core TCore;
-		typedef Worker TWorker;
-		typedef IService TService;
-		template<typename TProtocol>
-		struct TSessionPool
+		template<typename TOwner>
+		struct TCore
 		{
-			typedef SessionPool<TProtocol,Worker,SessionPoolTrait,MemoryPoolStrategy, SessionStorageStrategy> type;
+			typedef Worker<TOwner> TWorkerType;
+			typedef IService<TOwner> TService;
 		};
 	};
 

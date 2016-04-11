@@ -8,8 +8,21 @@
 namespace FeedTheDog
 {
 	struct ServiceBase :
-		public IService
+		public IService<Core>
 	{
+		typedef typename Core::TWorker::TTcp TTcp;
+		typedef typename Core::TWorker::TUdp TUdp;
+		typedef typename Core::TWorker::TTcpSessionPool TTcpSessionPool;
+		typedef typename Core::TWorker::TTcpSession TTcpSession;
+		typedef typename Core::TWorker::TUdpSessionPool TUdpSessionPool;
+		typedef typename Core::TWorker::TUdpSession TUdpSession;
+
+		template<typename TProtocol>
+		struct TSession
+		{
+			typedef typename Core::TWorker::TSession<TProtocol>::TSessionType TSessionType;
+		};
+
 		ServiceBase(const char* name)
 		{
 			name_ = name;

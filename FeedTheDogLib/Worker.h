@@ -1,26 +1,38 @@
 #pragma once
-#include "Config.h"
 #include "WorkerTrait.h"
-#include "CoreTrait.h"
-#include "ISessionPool.h"
 #include "WorkerBase.h"
 #include "SessionPool.h"
 namespace FeedTheDog
 {
-	class Core;
-//	template<typename TOwner>
+	template<typename TOwner>
 	class Worker :
 		public WorkerBase<Core>
 	{
 	public:
 		//typedef Worker TWorker;
-		typedef typename WorkerTrait::TService TService;
+		typedef WorkerTrait TWorkerTrait;
+		//typedef typename TWorkerTrait::TService TService;
 
-		typedef typename SessionPoolTrait::TTcp TTcp;
-		typedef typename SessionPoolTrait::TUdp TUdp;
+		typedef typename TWorkerTrait::TTcp TTcp;
+		typedef typename TWorkerTrait::TUdp TUdp;
 
-		typedef typename CoreTrait::TSessionPool<TTcp>::type TTcpSessionPool;
-		typedef typename CoreTrait::TSessionPool<TUdp>::type TUdpSessionPool;
+		typedef typename TWorkerTrait::TSessionPool<TTcp, Worker>::TSessionPoolType TTcpSessionPool;
+		typedef typename TWorkerTrait::TSessionPool<TUdp, Worker>::TSessionPoolType TUdpSessionPool;
+
+		typedef typename TWorkerTrait::TSessionPool<TTcp, Worker>::TSessionType TTcpSession;
+		typedef typename TWorkerTrait::TSessionPool<TUdp, Worker>::TSessionType TUdpSession;
+
+		template<typename TProtocol>
+		struct TSession
+		{
+			typedef typename TWorkerTrait::TSessionPool<TProtocol, Worker>::TSessionType TSessionType;
+		};
+
+		template<typename TProtocol>
+		struct TSessionPool
+		{
+			typedef typename TWorkerTrait::TSessionPool<TProtocol, Worker>::TSessionPoolType TSessionPoolType;
+		};
 
 		Worker(TOwner* core) :
 			WorkerBase(core)
@@ -62,12 +74,12 @@ namespace FeedTheDog
 		}
 		
 		template<typename TProtocol>
-		inline shared_ptr<typename CoreTrait::TSessionPool<TProtocol>::type::TSession> NewSession()
+		inline shared_ptr<typename TSession<TProtocol>::TSessionType> NewSession()
 		{
 			return GetSessionPool<TProtocol>()->NewSession();
 		}
 		template<typename TProtocol>
-		inline typename typename CoreTrait::TSessionPool<TProtocol>::type::TResolver& GetResolver()
+		inline typename TSessionPool<TProtocol>::TSessionPoolType::TResolver& GetResolver()
 		{
 			return GetSessionPool<TProtocol>()->GetResolver();
 		}
@@ -76,15 +88,15 @@ namespace FeedTheDog
 		unique_ptr<TUdpSessionPool> udpSessionPool;
 
 		template<typename TProtocol>
-		inline unique_ptr<typename CoreTrait::TSessionPool<TProtocol>::type>& GetSessionPool();
+		inline unique_ptr<typename TSessionPool<TProtocol>::TSessionPoolType>& GetSessionPool();
 
 		template<>
-		inline unique_ptr<typename CoreTrait::TSessionPool<TTcp>::type>& GetSessionPool<TTcp>()
+		inline unique_ptr<TTcpSessionPool>& GetSessionPool<TTcp>()
 		{
 			return tcpSessionPool;
 		}
 		template<>
-		inline unique_ptr<typename CoreTrait::TSessionPool<TUdp>::type>& GetSessionPool<TUdp>()
+		inline unique_ptr<TUdpSessionPool>& GetSessionPool<TUdp>()
 		{
 			return udpSessionPool;
 		}

@@ -219,7 +219,7 @@ namespace FeedTheDog
 
 	struct Async
 	{
-		template<typename ReadHandler>
+		template<typename ReadHandler,typename TTcpSession>
 		static void TcpReadMore(shared_ptr<TTcpSession>& session, BOOST_ASIO_MOVE_ARG(ReadHandler) handler, size_t alreadyTransferred = 0, size_t maxSize = 0)
 		{
 
@@ -347,11 +347,11 @@ namespace FeedTheDog
 		unsigned short port;
 	};
 
-	template<typename TProtocol>
+	template<typename TProtocol,typename TSession>
 	class DeadlineSession
 	{
 	public:
-		DeadlineSession(shared_ptr<typename SessionPoolTrait::TSession<TProtocol>::type>&& val) :
+		DeadlineSession(shared_ptr<TSession>&& val) :
 			timer(val->get_io_service()),
 			session(val)
 		{
@@ -370,7 +370,7 @@ namespace FeedTheDog
 		{
 			timer.cancel(ignore);
 		}
-		shared_ptr<typename SessionPoolTrait::TSession<TProtocol>::type>& GetSession()
+		shared_ptr<TSession>& GetSession()
 		{
 			return session;
 		}
@@ -379,16 +379,14 @@ namespace FeedTheDog
 			return timer;
 		}
 	private:
-		shared_ptr<typename SessionPoolTrait::TSession<TProtocol>::type> session;
+		shared_ptr<TSession> session;
 		_ASIO deadline_timer timer;
 	};
 
-	template<typename TService>
+	template<typename TSession>
 	class TcpForward :private _BOOST noncopyable
 	{
 	public:
-		typedef typename SessionPoolTrait::TSession<_ASIO ip::tcp>::type TSession;
-
 		TcpForward(shared_ptr<TSession>& read_, shared_ptr<TSession>& write_) :
 			readBuffer(_ASIO buffer(read->GetBuffer())),
 			read(read_),

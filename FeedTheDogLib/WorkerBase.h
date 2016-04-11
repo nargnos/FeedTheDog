@@ -1,6 +1,5 @@
 #pragma once
-#include "Config.h"
-#include "CoreTrait.h"
+
 namespace FeedTheDog
 {
 	

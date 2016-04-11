@@ -11,7 +11,7 @@ clock_t startNewSession;
 clock_t endNewSession;
 clock_t end;
 int count;
-void NewSessionTest(FeedTheDog::Core*core,Worker* worker)
+void NewSessionTest(FeedTheDog::Core*core, FeedTheDog::Core::TWorker* worker)
 {
 	count = 150000;
 	// 单纯测试创建析构session的速度，这里分配之后立马析构			

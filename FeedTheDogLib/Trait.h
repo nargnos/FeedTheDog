@@ -1,14 +1,16 @@
 #pragma once
 namespace FeedTheDog
 {
-	struct WorkerTrait;
-	struct WorkerTrait;
-	struct CoreTrait;
-	struct SessionPoolTrait;
-
-	class MemoryPool;
-	class Core;
-	template<typename TProtocol, typename www, typename Trait, typename XXX,typename LLL>
-	class SessionPool;
+	template<typename>
 	struct IService;
+	class Core;
+	template<typename>
+	class Worker;
+
+	template<typename, typename, typename, typename, typename>
+	class SessionPool;
+
+	template<typename, typename>
+	class Session;
+
 }  // namespace FeedTheDog

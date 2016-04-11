@@ -12,8 +12,8 @@ namespace FeedTheDog
 	{
 	public:
 		typedef typename Core TCore;
-		typedef typename CoreTrait::TWorker TWorker;
-		typedef typename CoreTrait::TService TService;
+		typedef typename CoreTrait::TCore<Core>::TWorkerType TWorker;
+		typedef typename CoreTrait::TCore<Core>::TService TService;
 		Core();
 		virtual ~Core();
 		
@@ -24,7 +24,7 @@ namespace FeedTheDog
 		void Stop();
 		int GetWorkerCount() const;
 		// 取空闲Worker
-		Worker* SelectIdleWorker();
+		TWorker* SelectIdleWorker();
 		shared_ptr<TraceSource<Config::TEnum>>& GetTrace();
 
 	private:
@@ -32,7 +32,7 @@ namespace FeedTheDog
 		// 当core没启动时用的
 		int tmpWorkerIndex;
 		Config config;
-		_STD vector<shared_ptr<Worker>> workers;
+		_STD vector<shared_ptr<TWorker>> workers;
 		// _BOOST mutex mutex;
 		concurrent_unordered_map<const char*, shared_ptr<TService>> services;
 		unsigned int threadCount;

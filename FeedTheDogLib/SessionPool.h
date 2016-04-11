@@ -1,18 +1,17 @@
 #pragma once
-#include "SessionPoolTrait.h"
 #include "Session.h"
 namespace FeedTheDog
 {
 	template<typename TProtocol,
 		typename TOwner,
-		typename Trait = SessionPoolTrait,
-		typename TMemoryPool = MemoryPoolStrategy,
-		typename TSessionStorage = SessionStorageStrategy>
+		typename Trait,
+		typename TMemoryPool,
+		typename TSessionStorage>
 	class SessionPool :
 		private _BOOST noncopyable
 	{
 	public:
-		typedef typename Trait::template TSession<TProtocol>::type TSession;
+		typedef typename Trait::template TSessionPool<TProtocol,TOwner, TMemoryPool, TSessionStorage>::TSessionType TSession;
 
 		typedef typename TMemoryPool::template MemoryPool<TSession> TMemoryPool;
 		typedef typename TMemoryPool::TPoolPtr TPoolPtr;

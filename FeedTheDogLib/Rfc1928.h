@@ -4,14 +4,7 @@
 namespace FeedTheDog
 {
 	// FIX: 协商部分需要限制读取最大长度，防止恶意请求
-	class Rfc1928;
-	struct Rfc1928Trait
-	{
-		typedef TcpForward<Rfc1928> TTcpForward;
-		typedef Async TUtil;
-		typedef EndPointParser TEndPointParser;
-		typedef DeadlineSession<_ASIO ip::tcp> TTcpDeadlineSession;
-	};
+
 	class Rfc1928 :
 		public ServiceBase
 	{
@@ -26,11 +19,12 @@ namespace FeedTheDog
 			ReservedBegin = 0x80,
 			ReservedEnd = 0xfe,
 		};
-		typedef Rfc1928Trait::TTcpForward TTcpForward;
+		typedef TcpForward<TTcpSession> TTcpForward;
+		typedef Async TUtil;
+		typedef EndPointParser TEndPointParser;
+		typedef DeadlineSession<_ASIO ip::tcp, TTcpSession> TTcpDeadlineSession;
+
 		friend TTcpForward;
-		typedef Rfc1928Trait::TUtil TUtil;
-		typedef Rfc1928Trait::TEndPointParser TEndPointParser;
-		typedef Rfc1928Trait::TTcpDeadlineSession TTcpDeadlineSession;
 
 
 		Rfc1928(int port, const char* name, int timeout = 3);
@@ -38,16 +32,16 @@ namespace FeedTheDog
 		virtual void AsyncStart() override;
 
 		virtual void Stop() override;
-		virtual bool Init(TCore *) override;
+		virtual bool Init(TServiceManager *) override;
 	private:
 		bool isStopped;
 		bool supportMethods[0xff];
-		TCore* core;
+		TServiceManager* core;
 		int port_;
 		_BOOST system::error_code ignore;
 		_BOOST posix_time::seconds timeoutSecond;
 		unique_ptr<_ASIO ip::tcp::acceptor> acceptor;
-		
+
 		bool __fastcall CheckVersionMessage(size_t, const VersionMessage *);
 		int __fastcall BuildCmdConnectReplyMessage(ServerReplieMessage *, shared_ptr<TTcpSession>&, const _BOOST system::error_code &);
 		unsigned char __fastcall ReplySelectedMethod(_ASIO ip::tcp::socket&, VersionMessage *, _BOOST system::error_code &);

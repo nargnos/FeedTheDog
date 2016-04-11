@@ -2,10 +2,6 @@
 #include "Trait.h"
 namespace FeedTheDog
 {
-	template<typename TProtocol, typename TSessionPool>
-	class Session;
-	class Worker;
-
 
 	struct MemoryPoolStrategy
 	{
@@ -58,26 +54,15 @@ namespace FeedTheDog
 	};
 	struct SessionPoolTrait
 	{
-		typedef _ASIO ip::tcp TTcp;
-		typedef _ASIO ip::udp TUdp;
-		//typedef Worker TWorker;
-		template<typename TProtocol>
-		struct TSession
+		template<typename TProtocol,
+			typename TOwner,
+			typename TMemoryPool,
+			typename TSessionStorage>
+		struct TSessionPool
 		{
-			typedef Session<TProtocol, SessionPool<TProtocol,Worker, SessionPoolTrait, MemoryPoolStrategy, SessionStorageStrategy>> type;
+			typedef SessionPool<TProtocol, TOwner, SessionPoolTrait, TMemoryPool, TSessionStorage> TSessionPoolType;
+			typedef Session<TProtocol, TSessionPoolType> TSessionType;
 		};
 
-		/*template<typename TProtocol>
-		struct TQueue
-		{
-			typedef _BOOST lockfree::queue<typename TSession<TProtocol>::type*> type;
-		};*/
-		typedef TSession<TTcp>::type TTcpSession;
-		typedef TSession<TUdp>::type TUdpSession;
-
-
 	};
-	typedef SessionPoolTrait::TTcpSession TTcpSession;
-	typedef SessionPoolTrait::TUdpSession TUdpSession;
-
 }  // namespace FeedTheDog
