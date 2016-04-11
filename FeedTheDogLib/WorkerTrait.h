@@ -3,11 +3,8 @@
 #include "SessionPoolTrait.h"
 namespace FeedTheDog
 {
-
 	struct WorkerTrait
 	{
-		//typedef IService TService;
-
 		typedef _ASIO ip::tcp TTcp;
 		typedef _ASIO ip::udp TUdp;
 

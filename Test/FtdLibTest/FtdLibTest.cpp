@@ -2,8 +2,7 @@
 //
 
 #include "stdafx.h"
-#include <Core.h>
-#include <worker.h>
+#include <ServiceManager.h>
 using namespace FeedTheDog;
 
 
@@ -11,7 +10,7 @@ clock_t startNewSession;
 clock_t endNewSession;
 clock_t end;
 int count;
-void NewSessionTest(FeedTheDog::Core*core, FeedTheDog::Core::TWorker* worker)
+void NewSessionTest(FeedTheDog::ServiceManager*core, FeedTheDog::ServiceManager::TWorker* worker)
 {
 	count = 150000;
 	// 单纯测试创建析构session的速度，这里分配之后立马析构			
@@ -41,7 +40,7 @@ void TestLog(_STD ostringstream& os,shared_ptr<Config::TTraceSource>& trace)
 }
 int main()
 {
-	FeedTheDog::Core core;
+	FeedTheDog::ServiceManager core;
 	auto worker = core.SelectIdleWorker();
 	worker->GetIoService().post(_BOOST bind(&NewSessionTest, &core, worker));
 	core.Start();

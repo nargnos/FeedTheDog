@@ -1,37 +1,32 @@
 #pragma once
-#include "WorkerTrait.h"
 #include "WorkerBase.h"
-#include "SessionPool.h"
 namespace FeedTheDog
 {
-	template<typename TOwner>
+	template<typename TOwner,
+		typename Trait>
 	class Worker :
-		public WorkerBase<Core>
+		public WorkerBase<TOwner>
 	{
 	public:
-		//typedef Worker TWorker;
-		typedef WorkerTrait TWorkerTrait;
-		//typedef typename TWorkerTrait::TService TService;
+		typedef typename Trait::TTcp TTcp;
+		typedef typename Trait::TUdp TUdp;
 
-		typedef typename TWorkerTrait::TTcp TTcp;
-		typedef typename TWorkerTrait::TUdp TUdp;
+		typedef typename Trait::template TSessionPool<TTcp, Worker>::TSessionPoolType TTcpSessionPool;
+		typedef typename Trait::template TSessionPool<TUdp, Worker>::TSessionPoolType TUdpSessionPool;
 
-		typedef typename TWorkerTrait::TSessionPool<TTcp, Worker>::TSessionPoolType TTcpSessionPool;
-		typedef typename TWorkerTrait::TSessionPool<TUdp, Worker>::TSessionPoolType TUdpSessionPool;
-
-		typedef typename TWorkerTrait::TSessionPool<TTcp, Worker>::TSessionType TTcpSession;
-		typedef typename TWorkerTrait::TSessionPool<TUdp, Worker>::TSessionType TUdpSession;
+		typedef typename Trait::template TSessionPool<TTcp, Worker>::TSessionType TTcpSession;
+		typedef typename Trait::template TSessionPool<TUdp, Worker>::TSessionType TUdpSession;
 
 		template<typename TProtocol>
 		struct TSession
 		{
-			typedef typename TWorkerTrait::TSessionPool<TProtocol, Worker>::TSessionType TSessionType;
+			typedef typename Trait::template TSessionPool<TProtocol, Worker>::TSessionType TSessionType;
 		};
 
 		template<typename TProtocol>
 		struct TSessionPool
 		{
-			typedef typename TWorkerTrait::TSessionPool<TProtocol, Worker>::TSessionPoolType TSessionPoolType;
+			typedef typename Trait::template TSessionPool<TProtocol, Worker>::TSessionPoolType TSessionPoolType;
 		};
 
 		Worker(TOwner* core) :

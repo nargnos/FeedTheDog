@@ -1,26 +1,22 @@
 #pragma once
-#include "IService.h"
-#include "Core.h"
-#include "Worker.h"
-#include "Session.h"
-#include "SessionPool.h"
+#include "ServiceManager.h"
 
 namespace FeedTheDog
 {
 	struct ServiceBase :
-		public IService<Core>
+		public IService<ServiceManager>
 	{
-		typedef typename Core::TWorker::TTcp TTcp;
-		typedef typename Core::TWorker::TUdp TUdp;
-		typedef typename Core::TWorker::TTcpSessionPool TTcpSessionPool;
-		typedef typename Core::TWorker::TTcpSession TTcpSession;
-		typedef typename Core::TWorker::TUdpSessionPool TUdpSessionPool;
-		typedef typename Core::TWorker::TUdpSession TUdpSession;
+		typedef typename ServiceManager::TWorker::TTcp TTcp;
+		typedef typename ServiceManager::TWorker::TUdp TUdp;
+		typedef typename ServiceManager::TWorker::TTcpSessionPool TTcpSessionPool;
+		typedef typename ServiceManager::TWorker::TTcpSession TTcpSession;
+		typedef typename ServiceManager::TWorker::TUdpSessionPool TUdpSessionPool;
+		typedef typename ServiceManager::TWorker::TUdpSession TUdpSession;
 
 		template<typename TProtocol>
 		struct TSession
 		{
-			typedef typename Core::TWorker::TSession<TProtocol>::TSessionType TSessionType;
+			typedef typename ServiceManager::TWorker::TSession<TProtocol>::TSessionType TSessionType;
 		};
 
 		ServiceBase(const char* name)

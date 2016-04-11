@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 
-#include <Core.h>
+#include <ServiceManager.h>
 #include <EchoService.h>
 #include <Rfc1928.h>
 #ifdef CRTDBG
@@ -37,7 +37,7 @@ int main()
 
 	using namespace FeedTheDog;
 
-	auto& core = make_shared<Core>();
+	auto& core = make_shared<ServiceManager>();
 	auto a = make_shared<EchoService>(9999, "Echo No 1");
 	core->AddService(a);
 	auto b = make_shared<EchoService>(7788, "Echo No 2");

@@ -3,8 +3,9 @@ namespace FeedTheDog
 {
 	template<typename>
 	struct IService;
-	class Core;
 	template<typename>
+	class Core;
+	template<typename, typename>
 	class Worker;
 
 	template<typename, typename, typename, typename, typename>

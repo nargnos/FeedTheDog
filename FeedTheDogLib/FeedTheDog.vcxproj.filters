@@ -2,9 +2,6 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
-    <ClCompile Include="Core.cpp">
-      <Filter>Service Manager</Filter>
-    </ClCompile>
     <ClCompile Include="Worker.cpp">
       <Filter>Worker</Filter>
     </ClCompile>
@@ -40,9 +37,6 @@
     </ClCompile>
     <ClCompile Include="TraceSource.cpp">
       <Filter>Trace</Filter>
-    </ClCompile>
-    <ClCompile Include="SessionBase.cpp">
-      <Filter>SessionPool</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -126,6 +120,9 @@
     </ClInclude>
     <ClInclude Include="SessionPool.h">
       <Filter>SessionPool</Filter>
+    </ClInclude>
+    <ClInclude Include="ServiceManager.h">
+      <Filter>Service Manager</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

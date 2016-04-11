@@ -184,6 +184,7 @@
     <ClInclude Include="ListenerBase.h" />
     <ClInclude Include="Rfc1928.h" />
     <ClInclude Include="Rfc1928Def.h" />
+    <ClInclude Include="ServiceManager.h" />
     <ClInclude Include="Session.h" />
     <ClInclude Include="SessionBase.h" />
     <ClInclude Include="SessionPool.h" />
@@ -204,13 +205,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Config.cpp" />
-    <ClCompile Include="Core.cpp" />
     <ClCompile Include="ConsoleListener.cpp" />
     <ClCompile Include="DebugListener.cpp" />
     <ClCompile Include="FileListener.cpp" />
     <ClCompile Include="ListenerBase.cpp" />
     <ClCompile Include="Rfc1928.cpp" />
-    <ClCompile Include="SessionBase.cpp" />
     <ClCompile Include="TraceDefine.cpp" />
     <ClCompile Include="TraceSource.cpp" />
     <ClCompile Include="TraceSourceBase.cpp" />
