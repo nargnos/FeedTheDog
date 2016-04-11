@@ -2,26 +2,71 @@
 #include "Trait.h"
 namespace FeedTheDog
 {
-	template<typename TProtocol>
+	template<typename TProtocol, typename TSessionPool>
 	class Session;
+	class Worker;
+
+
+	struct MemoryPoolStrategy
+	{
+		enum { PoolDefaultSize = 1024 };
+		template<typename TSession>
+		struct MemoryPool
+		{
+			typedef _BOOST lockfree::detail::freelist_stack<TSession> TPoolType;
+			typedef unique_ptr<TPoolType> TPoolPtr;
+			template<typename TOwner>
+			static TSession* Malloc(TPoolPtr& pool, TOwner* owner_, io_service* ios)
+			{
+				return pool->construct<true, false>(owner_, ios);
+			}
+			static void Free(TPoolPtr& pool, TSession* ptr)
+			{
+				pool->destruct<true>(ptr);
+			}
+			static TPoolPtr Create(_STD allocator<TSession>& alloc)
+			{
+				return make_unique<TPoolType>(alloc, PoolDefaultSize);
+			}
+		};
+
+	};
+
+	struct SessionStorageStrategy
+	{
+		template<typename TSession>
+		struct SessionStorage
+		{
+			typedef _STD list<TSession*> TStorageType;
+			typedef unique_ptr<TStorageType> TStoragePtr;
+			typedef typename TStorageType::value_type TStorageValue;
+			typedef typename TStorageType::iterator TStorageIterator;
+			static TStorageIterator Insert(TStoragePtr& storage, TSession* insert)
+			{
+				return storage->insert(storage->end(), insert);
+			}
+			static void Remove(TStoragePtr& storage, TStorageIterator& pos)
+			{
+				storage->erase(pos);
+			}
+			static TStoragePtr Create()
+			{
+				return make_unique<TStorageType>();
+			}
+		};
+
+	};
 	struct SessionPoolTrait
-	{		
+	{
 		typedef _ASIO ip::tcp TTcp;
-		typedef _ASIO ip::udp TUdp;		
-		typedef Worker TWorker;
+		typedef _ASIO ip::udp TUdp;
+		//typedef Worker TWorker;
 		template<typename TProtocol>
 		struct TSession
 		{
-			typedef Session<TProtocol> type;
+			typedef Session<TProtocol, SessionPool<TProtocol,Worker, SessionPoolTrait, MemoryPoolStrategy, SessionStorageStrategy>> type;
 		};
-		// FIX: 每个池初始的大小，这里可以改到配置文件里
-		enum { PoolDefaultSize = 1024 };
-		template<typename TProtocol>
-		struct TPool
-		{
-			
-			typedef _BOOST lockfree::detail::freelist_stack<typename TSession<TProtocol>::type> type;
-		};
+
 		/*template<typename TProtocol>
 		struct TQueue
 		{
@@ -29,13 +74,8 @@ namespace FeedTheDog
 		};*/
 		typedef TSession<TTcp>::type TTcpSession;
 		typedef TSession<TUdp>::type TUdpSession;
-		template<typename TProtocol>
-		struct TSessionStorage
-		{
-			typedef typename SessionPoolTrait::TSession<TProtocol>::type TValue;
-			typedef _STD list<TValue*> type;
-		};
-		
+
+
 	};
 	typedef SessionPoolTrait::TTcpSession TTcpSession;
 	typedef SessionPoolTrait::TUdpSession TUdpSession;

@@ -210,11 +210,11 @@
     <ClCompile Include="FileListener.cpp" />
     <ClCompile Include="ListenerBase.cpp" />
     <ClCompile Include="Rfc1928.cpp" />
+    <ClCompile Include="SessionBase.cpp" />
     <ClCompile Include="TraceDefine.cpp" />
     <ClCompile Include="TraceSource.cpp" />
     <ClCompile Include="TraceSourceBase.cpp" />
     <ClCompile Include="Worker.cpp" />
-    <ClCompile Include="SessionBase.cpp" />
     <ClCompile Include="EchoService.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

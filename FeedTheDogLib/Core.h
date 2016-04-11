@@ -3,7 +3,7 @@
 #include "Trait.h"
 #include "CoreTrait.h"
 #include "IService.h"
-
+#include "Worker.h"
 namespace FeedTheDog
 {
 	// Service Manager & ThreadPool
@@ -24,7 +24,7 @@ namespace FeedTheDog
 		void Stop();
 		int GetWorkerCount() const;
 		// 取空闲Worker
-		TWorker* SelectIdleWorker();
+		Worker* SelectIdleWorker();
 		shared_ptr<TraceSource<Config::TEnum>>& GetTrace();
 
 	private:
@@ -32,7 +32,7 @@ namespace FeedTheDog
 		// 当core没启动时用的
 		int tmpWorkerIndex;
 		Config config;
-		_STD vector<shared_ptr<TWorker>> workers;
+		_STD vector<shared_ptr<Worker>> workers;
 		// _BOOST mutex mutex;
 		concurrent_unordered_map<const char*, shared_ptr<TService>> services;
 		unsigned int threadCount;

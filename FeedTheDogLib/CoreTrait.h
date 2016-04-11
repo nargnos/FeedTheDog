@@ -2,6 +2,9 @@
 #include "Trait.h"
 namespace FeedTheDog
 {
+	class Worker;
+	struct MemoryPoolStrategy;
+	struct SessionStorageStrategy;
 	struct CoreTrait
 	{
 		typedef Core TCore;
@@ -10,7 +13,7 @@ namespace FeedTheDog
 		template<typename TProtocol>
 		struct TSessionPool
 		{
-			typedef SessionPool<TProtocol> type;
+			typedef SessionPool<TProtocol,Worker,SessionPoolTrait,MemoryPoolStrategy, SessionStorageStrategy> type;
 		};
 	};
 

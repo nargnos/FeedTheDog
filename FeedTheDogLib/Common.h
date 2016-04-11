@@ -48,3 +48,7 @@ using Concurrency::concurrent_unordered_multimap;
 
 #define _BOOST boost::
 #define _ASIO _BOOST asio::
+
+using _ASIO io_service;
+//using _ASIO ip::tcp;
+//using _ASIO ip::udp;

@@ -1,28 +1,34 @@
 #pragma once
-#include "Config.h"
-#include "CoreTrait.h"
 namespace FeedTheDog
 {
+	template<typename TSessionPool>
 	class SessionBase :
 		public _BOOST noncopyable
 	{
 	public:
-
-		typedef _STD array<unsigned char, Config::BufferSize> TBufferType;
+		static const unsigned int BufferSize = 1024 * 6;
+		typedef _STD array<unsigned char, BufferSize> TBufferType;
 		typedef SessionBase TSessionBase;
-		typedef typename CoreTrait::TCore TCore;
-		typedef typename CoreTrait::TWorker TWorker;
-		typedef TCore* TReturnCore;
-		SessionBase(TWorker* worker);
-		virtual ~SessionBase();
-		TBufferType& GetBuffer();
-		// È¡µÃCore
-		TReturnCore GetCore();
-		SessionBase::TWorker * SessionBase::GetWorker();
+	
+		SessionBase(TSessionPool* pool) :
+			sessionPool(pool)
+		{
+		}
+		virtual ~SessionBase()
+		{
+		}
+		TBufferType& GetBuffer()
+		{
+			return buffer;
+		}
+		
+		TSessionPool * SessionBase::GetSessionPool()
+		{
+			return sessionPool;
+		}
 	protected:
-		TWorker* worker_;
+		TSessionPool* sessionPool;
 		TBufferType buffer;
-		TReturnCore core;
 	};
 }  // namespace FeedTheDog
 

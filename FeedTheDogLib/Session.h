@@ -1,24 +1,22 @@
-#pragma once
+ï»¿#pragma once
 #include "SessionBase.h"
-#include "SessionPoolTrait.h"
 namespace FeedTheDog
 {
 
-	template<typename TProtocol>
+	template<typename TProtocol,typename TSessionPool>
 	class Session :
-		public _STD enable_shared_from_this<Session<TProtocol>>,
-		public SessionBase,
+		public _STD enable_shared_from_this<Session<TProtocol, TSessionPool>>,
+		public SessionBase<TSessionPool>,
 		public TProtocol::socket
 	{
 	public:
 		typedef TProtocol TProtocol;
-		typedef Session<TProtocol> TSession;
+		typedef Session<TProtocol, TSessionPool> TSession;
 		typedef typename TProtocol::socket TSocket;
-		typedef typename CoreTrait::TSessionPool<TProtocol>::type TSessionPool;
 		friend TSessionPool;
-		Session(TWorker* worker) :
-			TSocket(worker->GetIoService()),
-			TSessionBase(worker)
+		Session(TSessionPool* pool,io_service* ios) :
+			TSocket(*ios),
+			TSessionBase(pool)
 		{
 		}
 	
@@ -29,8 +27,7 @@ namespace FeedTheDog
 
 	protected:
 		
-		// µ±Ç°ÔÚmapÖÐµÄÎ»ÖÃ
-		typedef typename SessionPoolTrait::TSessionStorage<TProtocol>::type::iterator TStorageIterator;
+		typedef typename TSessionPool::TStorageIterator TStorageIterator;
 		TStorageIterator insertPosition;
 
 	};

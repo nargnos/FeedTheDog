@@ -38,7 +38,7 @@ namespace FeedTheDog
 	{
 		if (!error)
 		{
-			auto& trace = session->GetCore()->GetTrace();
+			auto& trace = core->GetTrace();
 			auto& endPoint = session->remote_endpoint();
 			_STD ostringstream str;
 			str << "Service " << name_ << ", New Connection: " << endPoint;

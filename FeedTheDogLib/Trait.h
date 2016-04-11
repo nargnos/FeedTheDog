@@ -8,8 +8,7 @@ namespace FeedTheDog
 
 	class MemoryPool;
 	class Core;
-	class Worker;
-	template<typename TProtocol>
+	template<typename TProtocol, typename www, typename Trait, typename XXX,typename LLL>
 	class SessionPool;
 	struct IService;
 }  // namespace FeedTheDog

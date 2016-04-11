@@ -11,9 +11,6 @@
     <ClCompile Include="EchoService.cpp">
       <Filter>Service</Filter>
     </ClCompile>
-    <ClCompile Include="SessionBase.cpp">
-      <Filter>SessionPool</Filter>
-    </ClCompile>
     <ClCompile Include="Config.cpp">
       <Filter>Config</Filter>
     </ClCompile>
@@ -43,6 +40,9 @@
     </ClCompile>
     <ClCompile Include="TraceSource.cpp">
       <Filter>Trace</Filter>
+    </ClCompile>
+    <ClCompile Include="SessionBase.cpp">
+      <Filter>SessionPool</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -80,9 +80,6 @@
       <Filter>SessionPool</Filter>
     </ClInclude>
     <ClInclude Include="Session.h">
-      <Filter>SessionPool</Filter>
-    </ClInclude>
-    <ClInclude Include="SessionPool.h">
       <Filter>SessionPool</Filter>
     </ClInclude>
     <ClInclude Include="Config.h">
@@ -126,6 +123,9 @@
     </ClInclude>
     <ClInclude Include="TraceSource.h">
       <Filter>Trace</Filter>
+    </ClInclude>
+    <ClInclude Include="SessionPool.h">
+      <Filter>SessionPool</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

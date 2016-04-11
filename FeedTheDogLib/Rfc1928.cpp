@@ -348,7 +348,7 @@ namespace FeedTheDog
 		case TEndPointParser::AtypIPv6:
 		{
 			// 必须创建跟session属于同一个ioservice的连接
-			auto& remote = session->GetWorker()->NewSession<_ASIO ip::tcp>();
+			auto& remote = session->GetSessionPool()->NewSession();
 
 
 			auto& remoteRef = *remote;
@@ -361,7 +361,7 @@ namespace FeedTheDog
 		case TEndPointParser::AtypDomainName:
 		{
 
-			session->GetWorker()->GetResolver<_ASIO ip::tcp>().async_resolve(parser->ParseDomain<_ASIO ip::tcp>(),
+			session->GetSessionPool()->GetResolver().async_resolve(parser->ParseDomain<_ASIO ip::tcp>(),
 				[this, ptr = _STD move(deadlineSession)](const _BOOST system::error_code & error, const _ASIO ip::tcp::resolver::iterator& endpoint_iterator) mutable {
 				HandleResolver(ptr, endpoint_iterator, error);
 			});
@@ -390,7 +390,7 @@ namespace FeedTheDog
 		}
 
 		auto& session = deadlineSession->GetSession();
-		auto& remote = session->GetWorker()->NewSession<_ASIO ip::tcp>();
+		auto& remote = session->GetSessionPool()->NewSession();
 
 
 		auto& remoteRef = *remote;

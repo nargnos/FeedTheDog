@@ -7,12 +7,13 @@
 #include "SessionPool.h"
 namespace FeedTheDog
 {
-
+	class Core;
+//	template<typename TOwner>
 	class Worker :
-		public WorkerBase
+		public WorkerBase<Core>
 	{
 	public:
-		typedef Worker TWorker;
+		//typedef Worker TWorker;
 		typedef typename WorkerTrait::TService TService;
 
 		typedef typename SessionPoolTrait::TTcp TTcp;
@@ -21,11 +22,11 @@ namespace FeedTheDog
 		typedef typename CoreTrait::TSessionPool<TTcp>::type TTcpSessionPool;
 		typedef typename CoreTrait::TSessionPool<TUdp>::type TUdpSessionPool;
 
-		Worker(TCore* core) :
+		Worker(TOwner* core) :
 			WorkerBase(core)
 		{
-			tcpSessionPool = make_unique<TTcpSessionPool>(core, this, ioService);
-			udpSessionPool = make_unique<TUdpSessionPool>(core, this, ioService);
+			tcpSessionPool = make_unique<TTcpSessionPool>(this, ioService);
+			udpSessionPool = make_unique<TUdpSessionPool>(this, ioService);
 		}
 		~Worker()
 		{
@@ -60,14 +61,13 @@ namespace FeedTheDog
 			return sum;
 		}
 		
-
 		template<typename TProtocol>
-		inline shared_ptr<typename SessionPool<TProtocol>::TSession> NewSession()
+		inline shared_ptr<typename CoreTrait::TSessionPool<TProtocol>::type::TSession> NewSession()
 		{
 			return GetSessionPool<TProtocol>()->NewSession();
 		}
 		template<typename TProtocol>
-		inline typename SessionPool<TProtocol>::TResolver& GetResolver()
+		inline typename typename CoreTrait::TSessionPool<TProtocol>::type::TResolver& GetResolver()
 		{
 			return GetSessionPool<TProtocol>()->GetResolver();
 		}
