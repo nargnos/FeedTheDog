@@ -180,17 +180,20 @@
     <ClInclude Include="FileListener.h" />
     <ClInclude Include="IEncryptor.h" />
     <ClInclude Include="IListener.h" />
-    <ClInclude Include="ISessionPool.h" />
+    <ClInclude Include="ITraceConfig.h" />
     <ClInclude Include="ListenerBase.h" />
+    <ClInclude Include="ListenerFactory.h" />
     <ClInclude Include="Rfc1928.h" />
     <ClInclude Include="Rfc1928Def.h" />
     <ClInclude Include="ServiceManager.h" />
     <ClInclude Include="Session.h" />
     <ClInclude Include="SessionBase.h" />
     <ClInclude Include="SessionPool.h" />
-    <ClInclude Include="TraceDefine.h" />
+    <ClInclude Include="TraceFormat.h" />
+    <ClInclude Include="TraceLevel.h" />
     <ClInclude Include="TraceSource.h" />
-    <ClInclude Include="TraceSourceBase.h" />
+    <ClInclude Include="TraceSourceImpl.h" />
+    <ClInclude Include="TraceTrait.h" />
     <ClInclude Include="Worker.h" />
     <ClInclude Include="IService.h" />
     <ClInclude Include="EchoService.h" />
@@ -209,11 +212,9 @@
     <ClCompile Include="DebugListener.cpp" />
     <ClCompile Include="FileListener.cpp" />
     <ClCompile Include="ListenerBase.cpp" />
+    <ClCompile Include="ListenerFactory.cpp" />
     <ClCompile Include="Rfc1928.cpp" />
-    <ClCompile Include="TraceDefine.cpp" />
-    <ClCompile Include="TraceSource.cpp" />
-    <ClCompile Include="TraceSourceBase.cpp" />
-    <ClCompile Include="Worker.cpp" />
+    <ClCompile Include="TraceLevel.cpp" />
     <ClCompile Include="EchoService.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -221,7 +222,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="WorkerBase.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\JsonCpp\JsonCpp.vcxproj">

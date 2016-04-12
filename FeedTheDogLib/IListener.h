@@ -1,12 +1,16 @@
 #pragma once
-#include "TraceDefine.h"
 namespace FeedTheDog
 {	
-	__interface IListener
+	template<typename TTraceLevel>
+	struct IListener
 	{
-		void WriteLine(const _STD string&, TraceLevel);
-		void Init(Json::Value& listenerConfig);
-		Json::Value & GetDefaultConfig();
+		typedef TTraceLevel TTraceLevel;
+		virtual void WriteLine(const _STD string&, TTraceLevel)=0;
+		static Json::Value GetDefaultConfig()
+		{
+			assert(false);
+			return Json::Value();
+		};
 	};
 }  // namespace FeedTheDog
 

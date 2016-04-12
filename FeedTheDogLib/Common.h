@@ -15,7 +15,8 @@
 #include <boost\lockfree\queue.hpp>
 #include <boost\lockfree\spsc_queue.hpp>
 #include <boost\lexical_cast.hpp>
-
+#include <boost\algorithm\string.hpp>
+#include <boost\pool\singleton_pool.hpp>
 #include <filesystem>
 #include <fstream>
 #include <vector>
@@ -40,7 +41,8 @@ using _STD make_shared;
 using _STD make_unique;
 using _STD dynamic_pointer_cast;
 using _STD static_pointer_cast;
-
+using _STD string;
+using _STD ostringstream;
 using Concurrency::concurrent_unordered_map;
 using Concurrency::concurrent_unordered_set;
 

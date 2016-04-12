@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "Config.h"
-
+#include "ListenerFactory.h"
 namespace FeedTheDog
 {
 	Config::Config()
@@ -8,61 +8,38 @@ namespace FeedTheDog
 		configPath = ".\\config.json";
 		maxThreadCount = _BOOST thread::hardware_concurrency() * 2;
 		Json::StreamWriterBuilder sb;
-		// 格式化配置信息
+		// 格式化配置信息,紧凑输出
 		// sb["indentation"] = "";
 		// sb["dropNullPlaceholders"] = true;
 
 		// 初始化对象
-		trace = make_shared<TraceSource<TEnum>>();
 		writer = shared_ptr<Json::StreamWriter>(sb.newStreamWriter());
-		// 设置对应事件
-		texts = make_shared<typename TraceSource<TEnum>::TMap>();		
-		typedef typename TraceSource<TEnum>::TMap::value_type TPair;
-		texts->insert(TPair(TEnum::Initialized, "Core Initialized"));
-		texts->insert(TPair(TEnum::NewCore, "New Core"));
-		texts->insert(TPair(TEnum::FreeCore, "Free Core"));
-		texts->insert(TPair(TEnum::NewWorker, "New Worker"));
-		texts->insert(TPair(TEnum::FreeWorker, "Free Worker"));
-		texts->insert(TPair(TEnum::NewSessionPool, "New SessionPool"));
-		texts->insert(TPair(TEnum::FreeSessionPool, "Free SessionPool"));
-		texts->insert(TPair(TEnum::NewSession, "New Session"));
-		texts->insert(TPair(TEnum::FreeSession, "Free Session"));
-		texts->insert(TPair(TEnum::AllocMemory, "Alloc Memory"));
-		texts->insert(TPair(TEnum::FreeMemory, "Free Memory"));
-		texts->insert(TPair(TEnum::CoreStart, "Core Start"));
-		texts->insert(TPair(TEnum::CoreStop, "=> Core Stop"));
-		texts->insert(TPair(TEnum::StartWorker, "Start Worker"));
-		texts->insert(TPair(TEnum::StopWorker, "Stop Worker"));
-		texts->insert(TPair(TEnum::CloseAllSocket, "Close All Socket"));
-		texts->insert(TPair(TEnum::MainEnd, "=> End Process"));
-		texts->insert(TPair(TEnum::Exit, "Exit"));
-		texts->insert(TPair(TEnum::AddService, "Add Service"));
-		texts->insert(TPair(TEnum::DeleteService, "Delete Service"));
 
+		_STD ifstream ifs(configPath);
+		if (ifs.is_open())
+		{
+
+			Json::Reader reader;
+			if (!reader.parse(ifs, root))
+			{
+				root.clear();
+			}
+
+			ifs.close();
+		}
+
+		isEmpty = root.empty();
+
+		// 读取跟踪开关
+		auto& openTraceNode = IsOpenTraceNode();
+		this->isOpenTrace = openTraceNode.asBool();
 	}
+
 	Config::~Config()
 	{
 		this->Save();
 	}
-	void Config::Load()
-	{
-		_STD ifstream ifs(configPath);
-		if (ifs.is_open())
-		{
-			
-			Json::Reader reader;
-			Json::Value config;
-			if (!reader.parse(ifs, config))
-			{
-				return;
-			}
-			root = config;
-			ifs.close();
-		}
-		// 无配置文件，使用默认设置
-		// 检查配置时，相应的字段为空的时候就表示需要使用默认设置，由各个类自己管理
-		trace->Init(texts, ConfigNode()["Trace"]);
-	}
+
 	void Config::Save()
 	{
 		_STD ofstream ofs(configPath);
@@ -78,35 +55,87 @@ namespace FeedTheDog
 	{
 		return maxThreadCount;
 	}
-	shared_ptr<TraceSource<Config::TEnum>>& Config::GetTrace()
-	{
-		return trace;
-	}
 	Json::Value & Config::ConfigNode()
 	{
-		return root["Config"];
+		auto& result = root["Config"];
+		if (!result.isObject())
+		{
+			result.clear();
+		}
+		return result;
+	}
+	Json::Value & Config::TraceNode()
+	{
+		auto& result = ConfigNode()["Trace"];
+		if (!result.isObject())
+		{
+			result.clear();
+		}
+		return result;
+	}
+	Json::Value & Config::IsOpenTraceNode()
+	{
+		auto& result = TraceNode()["IsOpenTrace"];
+		if (!result.isBool())
+		{
+			result.clear();
+			result = false;
+		}
+		return result;
 	}
 	Json::Value & Config::ThreadCountMember()
 	{
-		static bool isVerify = false;
 		auto& threadCount = ConfigNode()["ThreadCount"];
-		if (!isVerify)
+		if (threadCount.isInt())
 		{
-			if (threadCount.isInt())
-			{
-				auto count = threadCount.asInt();
-				if (count < 0 || count > maxThreadCount)
-				{
-					threadCount = 0;
-				}
-			}
-			else
+			auto count = threadCount.asInt();
+			if (count < 0 || count > maxThreadCount)
 			{
 				threadCount = 0;
 			}
-			isVerify = true;
 		}
+		else
+		{
+			threadCount.clear();
+			threadCount = 0;
+		}
+
+
 		return threadCount;
+	}
+	bool Config::IsOpenTrace() const
+	{
+		return isOpenTrace;
+	}
+	void SetTraceComment(Json::Value & commentNode)
+	{
+		auto place = Json::CommentPlacement::commentAfter;
+		// 添加配置注释
+		if (commentNode.hasComment(place))
+		{
+			return;
+		}
+		auto& regs = ListenerFactory::GetListenerRegister();
+		Json::Value commentJson;
+		for each (auto& var in regs)
+		{
+			commentJson[var.first] = var.second.second();
+		}
+		ostringstream comment;
+		comment << "/* " << _STD endl << commentJson.toStyledString() << " */" << _STD endl;
+
+		commentNode.setComment(comment.str(), place);
+	}
+	Config::TListenerVector Config::CreateListeners()
+	{
+		SetTraceComment(IsOpenTraceNode());
+		TListenerVector result;
+		if (isOpenTrace)
+		{
+			auto& node = TraceNode();
+			result.swap(ListenerFactory::CreateListeners(node, isEmpty));
+		}
+		return result;
 	}
 }  // namespace FeedTheDog
 

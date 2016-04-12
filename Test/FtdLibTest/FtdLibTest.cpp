@@ -23,21 +23,21 @@ void NewSessionTest(FeedTheDog::ServiceManager*core, FeedTheDog::ServiceManager:
 	endNewSession = clock();
 	core->Stop();
 }
-void TestLog(_STD ostringstream& os,shared_ptr<Config::TTraceSource>& trace)
-{
-	// 计算log时间
-	auto logTimes = 100000;
-	os << "Log速度" << _STD endl;
-	clock_t logStart = clock();
-	for (size_t i = 0; i < logTimes; i++)
-	{
-		trace->TracePoint("XXXXXXX");
-	}
-	clock_t logEnd = clock();
-	auto logTotal = logEnd - logStart;
-	os << "总" << logTotal << _STD endl;
-	os << "avg" << logTotal / (double)logTimes << _STD endl;
-}
+//void TestLog(_STD ostringstream& os,shared_ptr<Config::TTraceSource>& trace)
+//{
+//	// 计算log时间
+//	auto logTimes = 100000;
+//	os << "Log速度" << _STD endl;
+//	clock_t logStart = clock();
+//	for (size_t i = 0; i < logTimes; i++)
+//	{
+//	//	trace->TracePoint("XXXXXXX");
+//	}
+//	clock_t logEnd = clock();
+//	auto logTotal = logEnd - logStart;
+//	os << "总" << logTotal << _STD endl;
+//	os << "avg" << logTotal / (double)logTimes << _STD endl;
+//}
 int main()
 {
 	FeedTheDog::ServiceManager core;

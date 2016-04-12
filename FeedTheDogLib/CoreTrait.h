@@ -12,7 +12,7 @@ namespace FeedTheDog
 			typedef IService<TOwner> TService;
 		};
 		typedef Config TConfig;
-		typedef TraceSource<Config::TEnum> TTraceSource;
+		typedef TraceSource TTraceSource;
 	};
 
 }  // namespace FeedTheDog

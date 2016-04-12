@@ -15,12 +15,12 @@ namespace FeedTheDog
 			static int wid = 0;
 			id = wid++;
 			owner_ = owner;
-			//owner->GetTrace()->DebugPoint(LogMsg::NewWorker, true, id);
+			owner_->GetTrace()->DebugPoint("New Worker", true, id);
 		}
 
 		~WorkerBase()
 		{
-			//owner->GetTrace()->DebugPoint(LogMsg::FreeWorker, true, id);
+			owner_->GetTrace()->DebugPoint("Free Worker", true, id);
 		}
 		int GetID() const
 		{
@@ -36,7 +36,7 @@ namespace FeedTheDog
 			ioService.reset();
 			work = make_unique<_ASIO io_service::work>(ioService);
 			isRunning = true;
-			//owner->GetTrace()->DebugPoint(LogMsg::StartWorker, true, id);
+			owner_->GetTrace()->DebugPoint("Start Worker", true, id);
 			ioService.run();
 		}
 		// 只在程序结束使用
@@ -47,7 +47,7 @@ namespace FeedTheDog
 			work.reset();
 			//ioService.stop();
 
-		//	owner->GetTrace()->DebugPoint(LogMsg::StopWorker, true, id);
+			owner_->GetTrace()->DebugPoint("Stop Worker", true, id);
 		}
 		_ASIO io_service& GetIoService()
 		{

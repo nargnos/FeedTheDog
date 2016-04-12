@@ -1,27 +1,30 @@
 #pragma once
 #include "IListener.h"
+#include "TraceTrait.h"
+#include "TraceLevel.h"
 namespace FeedTheDog
 {
+	class ListenerFactory;
 	class ListenerBase :
-		public IListener
+		public TraceSourceTrait::TIListener,
+		public _BOOST noncopyable
 	{
 	public:
-		ListenerBase();
-		~ListenerBase();
-		virtual void WriteLine(const std::string &) = 0;
-		virtual void WriteLine(const std::string &, TraceLevel) override;
-		virtual void Init(Json::Value & listenerConfig) override;
-		virtual Json::Value & GetDefaultConfig() override;
+		typedef typename TraceSourceTrait::TTraceLevel TTraceLevel;
+		typedef typename TTraceLevel::Level TLevel;
+		friend ListenerFactory;
+		virtual ~ListenerBase();
+
+		virtual void WriteLine(const std::string &str, TLevel level) override;
+		static Json::Value GetDefaultConfig();
 
 	protected:
-		bool visibleLevel[(int)TraceLevel::_End];
-		_BOOST mutex mutex;
-		Json::Value traceLevelStrings;
-		Json::Value defaultConfig;
+		explicit ListenerBase(Json::Value& listenerConfig);
+		virtual void WriteLine(const std::string &) = 0;
 
-		Json::Value& TraceLevelNode(Json::Value& listenerNode);
-		bool CheckTraceLevelConfig(Json::Value& traceLevelNode);
-		
+		bool visibleLevel[(int)TLevel::_End];
+		_BOOST mutex mutex;
+		static Json::Value& TraceLevelNode(Json::Value& listenerNode);
 	};
 
 }  // namespace FeedTheDog

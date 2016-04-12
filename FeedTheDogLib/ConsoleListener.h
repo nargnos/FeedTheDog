@@ -6,10 +6,9 @@ namespace FeedTheDog
 		public ListenerBase
 	{
 	public:
-		ConsoleListener();
-		~ConsoleListener();
-
-		// Í¨¹ý ListenerBase ¼Ì³Ð
+		friend ListenerFactory;
+	protected:
+		ConsoleListener(Json::Value & listenerConfig);
 		virtual void WriteLine(const std::string &) override;
 	};
 

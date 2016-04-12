@@ -511,18 +511,12 @@ namespace FeedTheDog
 	{
 		core->GetTrace()->DebugPoint(__func__);
 
-		auto& clientForward = make_shared<TTcpForward>(client, remote);
-		auto& remoteForward = make_shared<TTcpForward>(remote, client);
-
-		auto& clientReadBuffer = clientForward->GetReadBuffer();
-		auto& remoteReadBuffer = remoteForward->GetReadBuffer();
-
-		client->async_read_some(clientReadBuffer,
-			[this, ptr = _STD move(clientForward)](const _BOOST system::error_code & error, size_t bytes_transferred) mutable {
+		client->async_read_some(_ASIO buffer(client->GetBuffer()),
+			[this, ptr = make_shared<TTcpForward>(client, remote)](const _BOOST system::error_code & error, size_t bytes_transferred) mutable {
 			ForwardRead(ptr, error, bytes_transferred);
 		});
-		remote->async_read_some(remoteReadBuffer,
-			[this, ptr = _STD move(remoteForward)](const _BOOST system::error_code & error, size_t bytes_transferred) mutable {
+		remote->async_read_some(_ASIO buffer(remote->GetBuffer()),
+			[this, ptr = make_shared<TTcpForward>(remote, client)](const _BOOST system::error_code & error, size_t bytes_transferred) mutable {
 			ForwardRead(ptr, error, bytes_transferred);
 		});
 	}
@@ -539,7 +533,11 @@ namespace FeedTheDog
 				{
 					writeSession->shutdown(_ASIO socket_base::shutdown_both, ignore);
 				}
-				writeSession->close(ignore);
+				else
+				{
+					writeSession->close(ignore);
+				}
+				//
 			}
 			return;
 		}
@@ -562,7 +560,11 @@ namespace FeedTheDog
 				{
 					readSession->shutdown(_ASIO socket_base::shutdown_both, ignore);
 				}
-				readSession->close(ignore);
+				else
+				{
+					readSession->close(ignore);
+				}
+				//
 			}
 			return;
 		}

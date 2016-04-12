@@ -48,16 +48,16 @@ int main()
 	core->AddService(d);
 	auto e = make_shared<Rfc1928>(9090, "rfc1928 server No 2");
 	core->AddService(e);
-#if 0
+#if 1
 	// 测试运行中途退出的情况
 	auto& io = core->SelectIdleWorker()->GetIoService();
 	_ASIO deadline_timer t(io);
-	t.expires_from_now(_BOOST posix_time::seconds(60*30));
-	t.async_wait(_BOOST bind(&Core::Stop, core));
+	t.expires_from_now(_BOOST posix_time::seconds(60*10));
+	t.async_wait(_BOOST bind(&ServiceManager::Stop, core));
 #endif // fi
 
 	core->Start();
-	core->GetTrace()->TracePoint(LogMsg::MainEnd, FeedTheDog::TraceLevel::Trace);
+	core->GetTrace()->TracePoint("Main End", FeedTheDog::TraceLevel::Level::Trace);
 
 	return 0;
 }

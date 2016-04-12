@@ -17,9 +17,8 @@ namespace FeedTheDog
 			isStop = true;
 			tmpWorkerIndex = -1;
 			config = make_unique<TConfig>();
-
-			config->Load();
-			GetTrace()->DebugPoint(LogMsg::NewCore);
+			trace = make_unique<TTraceSource>(*config);
+			GetTrace()->DebugPoint("New Core");
 			threadCount = config->GetThreadCount();
 			assert(threadCount > 0 && threadCount <= config->GetMaxThreadCount());
 
@@ -28,11 +27,11 @@ namespace FeedTheDog
 				workers.push_back(make_unique<TWorker>(this));
 			}
 			config->Save();
-			GetTrace()->DebugPoint(LogMsg::Initialized);
+			GetTrace()->DebugPoint("Initialized");
 		}
 		virtual ~Core()
 		{
-			GetTrace()->DebugPoint(LogMsg::FreeCore);
+			GetTrace()->DebugPoint("Free Core");
 			//Stop();
 		}
 		
@@ -56,7 +55,7 @@ namespace FeedTheDog
 				return false;
 			}
 			services.insert(_STD pair<const char*, shared_ptr<TService>>(svr->Name(), svr));
-			GetTrace()->DebugPoint(LogMsg::AddService, false, 0, svr->Name());
+			GetTrace()->DebugPoint("Add Service", false, 0, svr->Name());
 			svr->AsyncStart();
 			return true;
 		}
@@ -82,7 +81,7 @@ namespace FeedTheDog
 		//}
 		void Start()
 		{
-			GetTrace()->DebugPoint(LogMsg::CoreStart);
+			GetTrace()->DebugPoint("Core Start");
 			/*for each (auto& var in services)
 			{
 			var.second->AsyncStart();
@@ -115,7 +114,7 @@ namespace FeedTheDog
 			{
 				return;
 			}
-			GetTrace()->DebugPoint(LogMsg::CoreStop);
+			GetTrace()->DebugPoint("Core Stop");
 			isStop = true;
 			// 此处停止服务不会关掉会话
 			for each (auto& var in services)
@@ -163,9 +162,9 @@ namespace FeedTheDog
 			assert(result != NULL);
 			return result;
 		}
-		shared_ptr<TTraceSource>& GetTrace()
+		unique_ptr<TTraceSource>& GetTrace()
 		{
-			return config->GetTrace();
+			return trace;
 		}
 
 	private:
@@ -173,8 +172,8 @@ namespace FeedTheDog
 		// 当core没启动时用的
 		int tmpWorkerIndex;
 		unique_ptr<TConfig> config;
+		unique_ptr<TTraceSource> trace;
 		_STD vector<unique_ptr<TWorker>> workers;
-		// _BOOST mutex mutex;
 		concurrent_unordered_map<const char*, shared_ptr<TService>> services;
 		unsigned int threadCount;
 	};

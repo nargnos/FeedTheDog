@@ -2,14 +2,11 @@
 #include "DebugListener.h"
 namespace FeedTheDog
 {
-	DebugListener::DebugListener()
+	DebugListener::DebugListener(Json::Value & listenerConfig) :
+		ListenerBase(listenerConfig)
 	{
 	}
 
-
-	DebugListener::~DebugListener()
-	{
-	}
 	void DebugListener::WriteLine(const std::string & str)
 	{
 		OutputDebugStringA(str.c_str());

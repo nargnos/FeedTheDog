@@ -6,17 +6,15 @@ namespace FeedTheDog
 		public ListenerBase
 	{
 	public:
-		FileListener();
-		~FileListener();
-
-
-		// 通过 ListenerBase 继承
+		static Json::Value GetDefaultConfig();
+		virtual ~FileListener() override;
+		friend ListenerFactory;
+	protected:
 		virtual void WriteLine(const std::string &) override;
-		virtual void Init(Json::Value & listenerConfig) override;
-	private:
-		Json::Value& FileNameNode(Json::Value& listener);
-		bool isOpen;
-		shared_ptr<_STD ostream> ofs;
+		FileListener(Json::Value & listenerConfig);
+		static Json::Value& FileNameNode(Json::Value& listener);
+		static  Json::Value& FlushIntervalNode(Json::Value& listener);
+		unique_ptr<_STD ofstream> ofs;
 		// 刷新速度
 		int flushSpeed;
 		int count;

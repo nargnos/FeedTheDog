@@ -29,8 +29,8 @@ namespace FeedTheDog
 			typedef typename Trait::template TSessionPool<TProtocol, Worker>::TSessionPoolType TSessionPoolType;
 		};
 
-		Worker(TOwner* core) :
-			WorkerBase(core)
+		Worker(TOwner* owner) :
+			WorkerBase(owner)
 		{
 			tcpSessionPool = make_unique<TTcpSessionPool>(this, ioService);
 			udpSessionPool = make_unique<TUdpSessionPool>(this, ioService);

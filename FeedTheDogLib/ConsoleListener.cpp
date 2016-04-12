@@ -2,12 +2,8 @@
 #include "ConsoleListener.h"
 namespace FeedTheDog
 {
-	ConsoleListener::ConsoleListener()
-	{
-	}
-
-
-	ConsoleListener::~ConsoleListener()
+	ConsoleListener::ConsoleListener(Json::Value & listenerConfig):
+		ListenerBase(listenerConfig)
 	{
 	}
 
@@ -15,6 +11,7 @@ namespace FeedTheDog
 	{
 		_STD cout << str;
 	}
+
 
 
 }  // namespace FeedTheDog

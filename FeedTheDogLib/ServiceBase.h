@@ -12,6 +12,8 @@ namespace FeedTheDog
 		typedef typename ServiceManager::TWorker::TTcpSession TTcpSession;
 		typedef typename ServiceManager::TWorker::TUdpSessionPool TUdpSessionPool;
 		typedef typename ServiceManager::TWorker::TUdpSession TUdpSession;
+		typedef typename ServiceManager::TTraceSource::TLevel TLevel;
+
 
 		template<typename TProtocol>
 		struct TSession

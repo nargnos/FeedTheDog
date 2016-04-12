@@ -38,11 +38,11 @@ namespace FeedTheDog
 	{
 		if (!error)
 		{
-			auto& trace = core->GetTrace();
+			//auto& trace = core->GetTrace();
 			auto& endPoint = session->remote_endpoint();
-			_STD ostringstream str;
-			str << "Service " << name_ << ", New Connection: " << endPoint;
-			trace->TracePoint(str.str().c_str(), TraceLevel::Trace);
+		//	_STD ostringstream str;
+		//	str << "Service " << name_ << ", New Connection: " << endPoint;
+			//trace->TracePoint(str.str().c_str(), TraceLevel::Trace);
 			ReadSome(session);
 			AsyncStart();
 		}
@@ -75,12 +75,12 @@ namespace FeedTheDog
 			acceptor = make_unique<_ASIO ip::tcp::acceptor>(io, _ASIO ip::tcp::endpoint(_ASIO ip::tcp::v4(), port_));
 
 		}
-		core->GetTrace()->TracePoint("Service Initialized", false, 0, name_, TraceLevel::Info);
+		//core->GetTrace()->TracePoint("Service Initialized", false, 0, name_, TraceLevel::Info);
 		return true;
 	}
 	void EchoService::Stop()
 	{
-		core->GetTrace()->DebugPoint("stop echo");
+		//core->GetTrace()->DebugPoint("stop echo");
 		isStop = true;
 		acceptor->close();
 	}

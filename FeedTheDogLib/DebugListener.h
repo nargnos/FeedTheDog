@@ -6,11 +6,11 @@ namespace FeedTheDog
 		public ListenerBase
 	{
 	public:
-		DebugListener();
-		~DebugListener();
-
-		// Í¨¹ý ListenerBase ¼Ì³Ð
+		friend ListenerFactory;
+	protected:
+		DebugListener(Json::Value & listenerConfig);
 		virtual void WriteLine(const std::string &) override;
+
 	};
 
 }  // namespace FeedTheDog

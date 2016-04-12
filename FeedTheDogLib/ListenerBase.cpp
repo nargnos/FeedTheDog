@@ -1,27 +1,11 @@
 #include "stdafx.h"
 #include "ListenerBase.h"
-#include "TraceDefine.h"
 namespace FeedTheDog
 {
-	ListenerBase::ListenerBase()
-	{
-		auto& traceLevelNode = TraceLevelNode(defaultConfig);
-		for (auto i = (int)TraceLevel::_Begin; i < (int)TraceLevel::_End; i++)
-		{
-			// 设置过滤
-			visibleLevel[i] = false;
-			// 设置默认跟踪等级
-			traceLevelNode.append(TraceLevelString[i]);
-			// 设置转换表
-			traceLevelStrings[TraceLevelString[i]] = i;
-		}
-	}
-
-
 	ListenerBase::~ListenerBase()
 	{
 	}
-	void ListenerBase::WriteLine(const _STD string &str, TraceLevel level)
+	void ListenerBase::WriteLine(const std::string & str, TLevel level)
 	{
 		if (!visibleLevel[(int)level])
 		{
@@ -31,60 +15,62 @@ namespace FeedTheDog
 		WriteLine(str);
 		mutex.unlock();
 	}
-
-	void ListenerBase::Init(Json::Value & listenerConfig)
+	Json::Value ListenerBase::GetDefaultConfig()
 	{
+		Json::Value result;
+		auto& defaultTraceLevelNode = TraceLevelNode(result);
+		for (auto i = (int)TLevel::_Begin; i < (int)TLevel::_End; i++)
+		{
+			// 设置默认跟踪等级
+			defaultTraceLevelNode.append(TTraceLevel::Parse(static_cast<TLevel>(i)));
+		}
+
+
+		return result;
+	}
+	ListenerBase::ListenerBase(Json::Value & listenerConfig)
+	{
+		// 初始化默认设置
+
+		for (auto i = (int)TLevel::_Begin; i < (int)TLevel::_End; i++)
+		{
+			// 设置过滤
+			visibleLevel[i] = false;
+		}
+
+
 		assert(!listenerConfig.empty());
 		// 设置过滤
 		auto& traceLevelNode = TraceLevelNode(listenerConfig);
-		// 只要是错误设置都会恢复成默认值（包括大小写错误）
-		if(!CheckTraceLevelConfig(traceLevelNode))
+
+		if (!traceLevelNode.isArray() || traceLevelNode.empty())
 		{
-			traceLevelNode = TraceLevelNode(defaultConfig);
+			traceLevelNode.clear();
 		}
+
 		for each (auto& var in traceLevelNode)
 		{
-			assert(var.isString());
-
-			auto& tmpStr = var.asString();
-			auto& traceLevelStr = traceLevelStrings[tmpStr];
-			assert(!traceLevelStr.empty());
-			assert(traceLevelStr.isInt());
-			int index = traceLevelStr.asInt();
-			if (index < (int)TraceLevel::_End && index >= (int)TraceLevel::_Begin)
+			if (var.isString())
 			{
-				visibleLevel[index] = true;
+				string tmpStr = var.asString();
+				_BOOST algorithm::to_lower(tmpStr);
+				TLevel level;
+				if (TTraceLevel::TryParse(tmpStr, &level))
+				{
+					visibleLevel[static_cast<int>(level)] = true;
+				}
 			}
 		}
+
 	}
 	Json::Value & ListenerBase::TraceLevelNode(Json::Value & listenerNode)
 	{
-		return listenerNode["TraceLevel"];
-	}
-	bool ListenerBase::CheckTraceLevelConfig(Json::Value & traceLevelNode)
-	{
-		if (!traceLevelNode.isArray())
+		auto& result = listenerNode["TraceLevel"];
+		if (!result.isArray())
 		{
-			return false;
+			result.clear();
 		}
-		else
-		{
-			bool hasError = false;
-			for each (auto& var in traceLevelNode)
-			{
-				if (!var.isString() ||
-					traceLevelStrings[var.asString()].empty())
-				{
-					hasError = true;
-					break;
-				}
-			}
-			return !hasError;
-		}
-	}
-	Json::Value & ListenerBase::GetDefaultConfig()
-	{
-		return defaultConfig;		
+		return result;
 	}
 }  // namespace FeedTheDog
 
