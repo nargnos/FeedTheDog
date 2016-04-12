@@ -2,33 +2,23 @@
 
 namespace FeedTheDog
 {
-	
-	template<typename TOwner>
-	class WorkerBase :
+	class _WorkerBase :
 		private _BOOST noncopyable
 	{
 	public:
-		typedef TOwner TOwner;
-		WorkerBase(TOwner* owner)
+		_WorkerBase()
 		{
 			isRunning = false;
 			static int wid = 0;
 			id = wid++;
-			owner_ = owner;
-			owner_->GetTrace()->DebugPoint("New Worker", true, id);
 		}
 
-		~WorkerBase()
+		virtual ~_WorkerBase()
 		{
-			owner_->GetTrace()->DebugPoint("Free Worker", true, id);
 		}
 		int GetID() const
 		{
 			return id;
-		}
-		TOwner* GetOwner()
-		{
-			return owner_;
 		}
 		// 只在程序开始使用
 		void Start()
@@ -36,7 +26,6 @@ namespace FeedTheDog
 			ioService.reset();
 			work = make_unique<_ASIO io_service::work>(ioService);
 			isRunning = true;
-			owner_->GetTrace()->DebugPoint("Start Worker", true, id);
 			ioService.run();
 		}
 		// 只在程序结束使用
@@ -45,9 +34,6 @@ namespace FeedTheDog
 			isRunning = false;
 			CloseAllSessions();
 			work.reset();
-			//ioService.stop();
-
-			owner_->GetTrace()->DebugPoint("Stop Worker", true, id);
 		}
 		_ASIO io_service& GetIoService()
 		{
@@ -57,8 +43,25 @@ namespace FeedTheDog
 		_ASIO io_service ioService;
 		unique_ptr<_ASIO io_service::work> work;
 		int id;
-		TOwner* owner_;
+
 		bool isRunning;
 		virtual void CloseAllSessions() = 0;
+	};
+
+	template<typename TOwner>
+	class WorkerBase:public _WorkerBase
+	{
+	public:
+		typedef TOwner TOwner;
+		WorkerBase(TOwner* owner)
+		{
+			owner_ = owner;
+		}		
+		TOwner* GetOwner()
+		{
+			return owner_;
+		}	
+	protected:
+		TOwner* owner_;	
 	};
 }  // namespace FeedTheDog
