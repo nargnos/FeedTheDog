@@ -3,30 +3,30 @@
 namespace FeedTheDog
 {
 	template<typename TOwner,
-		typename Trait>
+		typename TWorkerPolicy>
 	class Worker :
 		public WorkerBase<TOwner>
 	{
 	public:
-		typedef typename Trait::TTcp TTcp;
-		typedef typename Trait::TUdp TUdp;
+		typedef typename TWorkerPolicy::TTcp TTcp;
+		typedef typename TWorkerPolicy::TUdp TUdp;
 
-		typedef typename Trait::template TSessionPool<TTcp, Worker>::TSessionPoolType TTcpSessionPool;
-		typedef typename Trait::template TSessionPool<TUdp, Worker>::TSessionPoolType TUdpSessionPool;
+		typedef typename TWorkerPolicy::template TSessionPool<TTcp, Worker>::TSessionPoolType TTcpSessionPool;
+		typedef typename TWorkerPolicy::template TSessionPool<TUdp, Worker>::TSessionPoolType TUdpSessionPool;
 
-		typedef typename Trait::template TSessionPool<TTcp, Worker>::TSessionType TTcpSession;
-		typedef typename Trait::template TSessionPool<TUdp, Worker>::TSessionType TUdpSession;
+		typedef typename TWorkerPolicy::template TSessionPool<TTcp, Worker>::TSessionType TTcpSession;
+		typedef typename TWorkerPolicy::template TSessionPool<TUdp, Worker>::TSessionType TUdpSession;
 
 		template<typename TProtocol>
 		struct TSession
 		{
-			typedef typename Trait::template TSessionPool<TProtocol, Worker>::TSessionType TSessionType;
+			typedef typename TWorkerPolicy::template TSessionPool<TProtocol, Worker>::TSessionType TSessionType;
 		};
 
 		template<typename TProtocol>
 		struct TSessionPool
 		{
-			typedef typename Trait::template TSessionPool<TProtocol, Worker>::TSessionPoolType TSessionPoolType;
+			typedef typename TWorkerPolicy::template TSessionPool<TProtocol, Worker>::TSessionPoolType TSessionPoolType;
 		};
 
 		Worker(TOwner* owner) :

@@ -1,16 +1,16 @@
 #pragma once
-#include "Trait.h"
-#include "SessionPoolTrait.h"
+#include "Define.h"
+#include "SessionPoolPolicy.h"
 namespace FeedTheDog
 {
-	struct WorkerTrait
+	struct WorkerPolicy
 	{
 		typedef _ASIO ip::tcp TTcp;
 		typedef _ASIO ip::udp TUdp;
 
 		template<typename TProtocol, typename TOwner>
 		struct TSessionPool :
-			public SessionPoolTrait::TSessionPool<TProtocol, TOwner, MemoryPoolStrategy, SessionStorageStrategy>
+			public SessionPoolPolicy::TSessionPool<TProtocol, TOwner, MemoryPoolPolicy, SessionStoragePolicy>
 		{
 		};
 	};

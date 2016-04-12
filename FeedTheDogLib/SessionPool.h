@@ -4,14 +4,14 @@ namespace FeedTheDog
 {
 	template<typename TProtocol,
 		typename TOwner,
-		typename Trait,
+		typename TSessionPoolPolicy,
 		typename TMemoryPool,
 		typename TSessionStorage>
 	class SessionPool :
 		private _BOOST noncopyable
 	{
 	public:
-		typedef typename Trait::template TSessionPool<TProtocol,TOwner, TMemoryPool, TSessionStorage>::TSessionType TSession;
+		typedef typename TSessionPoolPolicy::template TSessionPool<TProtocol,TOwner, TMemoryPool, TSessionStorage>::TSessionType TSession;
 
 		typedef typename TMemoryPool::template MemoryPool<TSession> TMemoryPool;
 		typedef typename TMemoryPool::TPoolPtr TPoolPtr;

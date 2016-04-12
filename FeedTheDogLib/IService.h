@@ -1,6 +1,6 @@
 #pragma once
-#include "Trait.h"
-#include "CoreTrait.h"
+#include "Define.h"
+#include "CorePolicy.h"
 
 namespace FeedTheDog
 {

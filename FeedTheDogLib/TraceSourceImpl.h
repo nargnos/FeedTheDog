@@ -5,17 +5,17 @@ namespace FeedTheDog
 #ifdef _DEBUG
 //#define OPEN_DEBUGPOINT
 #endif // _DEBUG
-	template<typename Trait>
+	template<typename TTracePolicy>
 	class TraceSourceImpl
 	{
 	public:
-		typedef typename Trait::TTraceLevel TTraceLevel;
+		typedef typename TTracePolicy::TTraceLevel TTraceLevel;
 		typedef typename TTraceLevel::Level TLevel;
-		typedef typename Trait::TIListener TIListener;
+		typedef typename TTracePolicy::TIListener TIListener;
 
-		typedef typename Trait::TTraceConfig TTraceConfig;
+		typedef typename TTracePolicy::TTraceConfig TTraceConfig;
 		typedef typename TTraceConfig::TListenerVector TListenerVector;
-		typedef typename Trait::TTraceFormat TTraceFormat;
+		typedef typename TTracePolicy::TTraceFormat TTraceFormat;
 
 		TraceSourceImpl(TTraceConfig& config):
 			openTrace(config.IsOpenTrace()),

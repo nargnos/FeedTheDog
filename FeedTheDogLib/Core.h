@@ -2,16 +2,16 @@
 namespace FeedTheDog
 {
 	// Service Manager & ThreadPool
-	template<typename Trait>
+	template<typename TCorePolicy>
 	class Core :
 		private _BOOST noncopyable
 	{
 	public:
 		typedef typename Core TCore;
-		typedef typename Trait::TConfig TConfig;
-		typedef typename Trait::TTraceSource TTraceSource;
-		typedef typename Trait::template TCore<Core>::TWorkerType TWorker;
-		typedef typename Trait::template TCore<Core>::TService TService;
+		typedef typename TCorePolicy::TConfig TConfig;
+		typedef typename TCorePolicy::TTraceSource TTraceSource;
+		typedef typename TCorePolicy::template TCore<Core>::TWorkerType TWorker;
+		typedef typename TCorePolicy::template TCore<Core>::TService TService;
 		Core()
 		{
 			isStop = true;

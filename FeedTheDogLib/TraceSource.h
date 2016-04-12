@@ -1,6 +1,6 @@
 #pragma once
 #include "TraceSourceImpl.h"
-#include "TraceTrait.h"
+#include "TracePolicy.h"
 #include "TraceLevel.h"
 #include "ITraceConfig.h"
 #include "IListener.h"
@@ -8,5 +8,5 @@
 
 namespace FeedTheDog
 {
-	typedef TraceSourceImpl<TraceSourceTrait> TraceSource;
+	typedef TraceSourceImpl<TraceSourcePolicy> TraceSource;
 }  // namespace FeedTheDog

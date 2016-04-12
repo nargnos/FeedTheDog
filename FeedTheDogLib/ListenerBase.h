@@ -1,16 +1,16 @@
 #pragma once
 #include "IListener.h"
-#include "TraceTrait.h"
+#include "TracePolicy.h"
 #include "TraceLevel.h"
 namespace FeedTheDog
 {
 	class ListenerFactory;
 	class ListenerBase :
-		public TraceSourceTrait::TIListener,
+		public TraceSourcePolicy::TIListener,
 		public _BOOST noncopyable
 	{
 	public:
-		typedef typename TraceSourceTrait::TTraceLevel TTraceLevel;
+		typedef typename TraceSourcePolicy::TTraceLevel TTraceLevel;
 		typedef typename TTraceLevel::Level TLevel;
 		friend ListenerFactory;
 		virtual ~ListenerBase();

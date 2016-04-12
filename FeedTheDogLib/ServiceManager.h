@@ -1,8 +1,8 @@
 #pragma once
 #include "stdafx.h"
 #include "Config.h"
-#include "Trait.h"
-#include "CoreTrait.h"
+#include "Define.h"
+#include "CorePolicy.h"
 #include "IService.h"
 #include "Worker.h"
 #include "SessionPool.h"
@@ -10,6 +10,6 @@
 
 namespace FeedTheDog
 {
-	typedef Core<CoreTrait> ServiceManager;
+	typedef Core<CorePolicy> ServiceManager;
 
 }  // namespace FeedTheDog

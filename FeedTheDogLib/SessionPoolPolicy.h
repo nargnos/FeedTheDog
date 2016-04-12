@@ -1,9 +1,9 @@
 #pragma once
-#include "Trait.h"
+#include "Define.h"
 namespace FeedTheDog
 {
 
-	struct MemoryPoolStrategy
+	struct MemoryPoolPolicy
 	{
 		enum { PoolDefaultSize = 1024 };
 		template<typename TSession>
@@ -28,7 +28,7 @@ namespace FeedTheDog
 
 	};
 
-	struct SessionStorageStrategy
+	struct SessionStoragePolicy
 	{
 		template<typename TSession>
 		struct SessionStorage
@@ -52,7 +52,7 @@ namespace FeedTheDog
 		};
 
 	};
-	struct SessionPoolTrait
+	struct SessionPoolPolicy
 	{
 		template<typename TProtocol,
 			typename TOwner,
@@ -60,7 +60,7 @@ namespace FeedTheDog
 			typename TSessionStorage>
 		struct TSessionPool
 		{
-			typedef SessionPool<TProtocol, TOwner, SessionPoolTrait, TMemoryPool, TSessionStorage> TSessionPoolType;
+			typedef SessionPool<TProtocol, TOwner, SessionPoolPolicy, TMemoryPool, TSessionStorage> TSessionPoolType;
 			typedef Session<TProtocol, TSessionPoolType> TSessionType;
 		};
 

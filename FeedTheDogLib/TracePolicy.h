@@ -9,7 +9,7 @@ namespace FeedTheDog
 	template<typename TTraceLevel>
 	class TraceFormat;
 
-	struct TraceSourceTrait
+	struct TraceSourcePolicy
 	{		
 		typedef TraceLevel TTraceLevel;
 		typedef IListener<typename TTraceLevel::Level> TIListener;

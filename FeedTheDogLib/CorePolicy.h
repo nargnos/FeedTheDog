@@ -1,14 +1,14 @@
 #pragma once
-#include "Trait.h"
-#include "WorkerTrait.h"
+#include "Define.h"
+#include "WorkerPolicy.h"
 namespace FeedTheDog
 {
-	struct CoreTrait
+	struct CorePolicy
 	{
 		template<typename TOwner>
 		struct TCore
 		{
-			typedef Worker<TOwner,WorkerTrait> TWorkerType;
+			typedef Worker<TOwner,WorkerPolicy> TWorkerType;
 			typedef IService<TOwner> TService;
 		};
 		typedef Config TConfig;

@@ -40,18 +40,6 @@
     <ClInclude Include="IService.h">
       <Filter>Interface</Filter>
     </ClInclude>
-    <ClInclude Include="Trait.h">
-      <Filter>Type</Filter>
-    </ClInclude>
-    <ClInclude Include="SessionPoolTrait.h">
-      <Filter>Type</Filter>
-    </ClInclude>
-    <ClInclude Include="WorkerTrait.h">
-      <Filter>Type</Filter>
-    </ClInclude>
-    <ClInclude Include="CoreTrait.h">
-      <Filter>Type</Filter>
-    </ClInclude>
     <ClInclude Include="Core.h">
       <Filter>Service Manager</Filter>
     </ClInclude>
@@ -115,14 +103,26 @@
     <ClInclude Include="TraceSourceImpl.h">
       <Filter>Trace</Filter>
     </ClInclude>
-    <ClInclude Include="TraceTrait.h">
-      <Filter>Type</Filter>
-    </ClInclude>
     <ClInclude Include="ITraceConfig.h">
       <Filter>Interface</Filter>
     </ClInclude>
     <ClInclude Include="ListenerFactory.h">
       <Filter>Trace\Listener</Filter>
+    </ClInclude>
+    <ClInclude Include="Define.h">
+      <Filter>Type</Filter>
+    </ClInclude>
+    <ClInclude Include="TracePolicy.h">
+      <Filter>Type</Filter>
+    </ClInclude>
+    <ClInclude Include="SessionPoolPolicy.h">
+      <Filter>Type</Filter>
+    </ClInclude>
+    <ClInclude Include="WorkerPolicy.h">
+      <Filter>Type</Filter>
+    </ClInclude>
+    <ClInclude Include="CorePolicy.h">
+      <Filter>Type</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
