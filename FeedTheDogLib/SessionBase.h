@@ -1,16 +1,16 @@
 #pragma once
 namespace FeedTheDog
 {
-	class _SessionBase :
+	class SessionBase :
 		public _BOOST noncopyable
 	{
 	public:
 		static const unsigned int BufferSize = 1024 * 6;
 		typedef _STD array<unsigned char, BufferSize> TBufferType;
-		_SessionBase()
+		SessionBase()
 		{
 		}
-		virtual ~_SessionBase()
+		virtual ~SessionBase()
 		{
 		}
 		TBufferType& GetBuffer()
@@ -21,23 +21,5 @@ namespace FeedTheDog
 		TBufferType buffer;
 	};
 
-	template<typename TSessionPool>
-	class SessionBase :
-		public _SessionBase
-	{
-	public:
-		typedef SessionBase TSessionBase;
-	
-		SessionBase(TSessionPool* pool) :
-			sessionPool(pool)
-		{
-		}
-		TSessionPool * SessionBase::GetSessionPool()
-		{
-			return sessionPool;
-		}
-	protected:
-		TSessionPool* sessionPool;
-	};
 }  // namespace FeedTheDog
 

@@ -178,6 +178,7 @@
     <ClInclude Include="ConsoleListener.h" />
     <ClInclude Include="DebugListener.h" />
     <ClInclude Include="FileListener.h" />
+    <ClInclude Include="Owner.h" />
     <ClInclude Include="IEncryptor.h" />
     <ClInclude Include="IListener.h" />
     <ClInclude Include="ITraceConfig.h" />

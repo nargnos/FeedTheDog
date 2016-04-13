@@ -2,18 +2,18 @@
 
 namespace FeedTheDog
 {
-	class _WorkerBase :
+	class WorkerBase :
 		private _BOOST noncopyable
 	{
 	public:
-		_WorkerBase()
+		WorkerBase()
 		{
 			isRunning = false;
 			static int wid = 0;
 			id = wid++;
 		}
 
-		virtual ~_WorkerBase()
+		virtual ~WorkerBase()
 		{
 		}
 		int GetID() const
@@ -48,20 +48,4 @@ namespace FeedTheDog
 		virtual void CloseAllSessions() = 0;
 	};
 
-	template<typename TOwner>
-	class WorkerBase:public _WorkerBase
-	{
-	public:
-		typedef TOwner TOwner;
-		WorkerBase(TOwner* owner)
-		{
-			owner_ = owner;
-		}		
-		TOwner* GetOwner()
-		{
-			return owner_;
-		}	
-	protected:
-		TOwner* owner_;	
-	};
 }  // namespace FeedTheDog

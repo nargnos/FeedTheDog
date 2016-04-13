@@ -14,7 +14,7 @@ namespace FeedTheDog
 	private:
 		int port_;
 		bool isStop;
-		TServiceManager* core;
+		TServiceManager* manager;
 		void ReadSome(shared_ptr<TTcpSession>&);
 		void HandleAccept(shared_ptr<TTcpSession>&,const _BOOST system::error_code& error);
 		void HandleRead(shared_ptr<TTcpSession>&, const _BOOST system::error_code& error, size_t bytes_transferred);

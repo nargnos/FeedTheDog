@@ -31,7 +31,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Common.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="IEncryptor.h">
@@ -110,19 +109,25 @@
       <Filter>Trace\Listener</Filter>
     </ClInclude>
     <ClInclude Include="Define.h">
-      <Filter>Type</Filter>
+      <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="TracePolicy.h">
-      <Filter>Type</Filter>
+    <ClInclude Include="Common.h">
+      <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="SessionPoolPolicy.h">
-      <Filter>Type</Filter>
+    <ClInclude Include="Owner.h">
+      <Filter>Common</Filter>
     </ClInclude>
     <ClInclude Include="WorkerPolicy.h">
-      <Filter>Type</Filter>
+      <Filter>Worker</Filter>
+    </ClInclude>
+    <ClInclude Include="TracePolicy.h">
+      <Filter>Trace</Filter>
+    </ClInclude>
+    <ClInclude Include="SessionPoolPolicy.h">
+      <Filter>SessionPool</Filter>
     </ClInclude>
     <ClInclude Include="CorePolicy.h">
-      <Filter>Type</Filter>
+      <Filter>Service Manager</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -147,9 +152,6 @@
     <Filter Include="Config">
       <UniqueIdentifier>{9c10a1a2-7680-4894-934e-6e8abce4f3ac}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Type">
-      <UniqueIdentifier>{04ab5aa8-270a-47d7-a955-2cae8e638617}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Service Manager">
       <UniqueIdentifier>{9ddb68ea-5ad6-4213-b9d0-e7d7f9510ce1}</UniqueIdentifier>
     </Filter>
@@ -158,6 +160,9 @@
     </Filter>
     <Filter Include="Trace\Listener">
       <UniqueIdentifier>{52b7ee6e-ecf0-4496-b413-88f5d6c944e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common">
+      <UniqueIdentifier>{04ab5aa8-270a-47d7-a955-2cae8e638617}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

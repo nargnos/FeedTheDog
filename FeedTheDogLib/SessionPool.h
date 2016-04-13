@@ -1,22 +1,24 @@
 #pragma once
 #include "Session.h"
+#include "Owner.h"
 namespace FeedTheDog
 {
 	template<typename TProtocol,
 		typename TOwner,
 		typename TSessionPoolPolicy,
-		typename TMemoryPool,
-		typename TSessionStorage>
+		typename TMemoryPoolPolicy,
+		typename TSessionStoragePolicy>
 	class SessionPool :
-		private _BOOST noncopyable
+		public _BOOST noncopyable,
+		public Owner<TOwner>
 	{
 	public:
-		typedef typename TSessionPoolPolicy::template TSessionPool<TProtocol,TOwner, TMemoryPool, TSessionStorage>::TSessionType TSession;
+		typedef typename TSessionPoolPolicy::template TSession<TProtocol, SessionPool>::TSessionType TSession;
 
-		typedef typename TMemoryPool::template MemoryPool<TSession> TMemoryPool;
-		typedef typename TMemoryPool::TPoolPtr TPoolPtr;
+		typedef typename TMemoryPoolPolicy::template MemoryPool<TSession> TMemoryPoolPolicy;
+		typedef typename TMemoryPoolPolicy::TPoolPtr TPoolPtr;
 
-		typedef typename TSessionStorage::template SessionStorage<TSession> TStorage;
+		typedef typename TSessionStoragePolicy::template SessionStorage<TSession> TStorage;
 		typedef typename TStorage::TStoragePtr TStoragePtr;
 
 		typedef typename TStorage::TStorageIterator TStorageIterator;
@@ -28,10 +30,10 @@ namespace FeedTheDog
 		SessionPool(TOwner* owner, _ASIO io_service& io) :
 			ios(io),
 			count(0),
-			sessionPool(_STD move(TMemoryPool::Create(alloc))),
-			owner_(owner),
+			sessionPool(_STD move(TMemoryPoolPolicy::Create(alloc))),
 			resolver(io),
-			sessionStorage(TStorage::Create())
+			sessionStorage(TStorage::Create()),
+			Owner(owner)
 		{
 			//corePtr->GetTrace()->DebugPoint(LogMsg::NewSessionPool);
 			isDestruct = false;
@@ -54,7 +56,7 @@ namespace FeedTheDog
 			++count;
 			// FIX: 看有什么更快的方案可以换
 			// 构建session
-			auto result = TMemoryPool::Malloc(sessionPool, this, &ios);
+			auto result = TMemoryPoolPolicy::Malloc(sessionPool, this, &ios);
 
 			// 加快返回速度，析构的erase执行时间绝对会在insert执行之后			
 			ios.post([&, result]() {result->insertPosition = TStorage::Insert(sessionStorage, result); });
@@ -77,10 +79,7 @@ namespace FeedTheDog
 			}
 			ios.post(_BOOST bind(&SessionPool::AsyncCloseAll, this));
 		}
-		TOwner* GetOwner()
-		{
-			return owner_;
-		}
+		
 		TResolver& GetResolver()
 		{
 			return resolver;
@@ -90,7 +89,7 @@ namespace FeedTheDog
 			isDestruct = true;
 		}
 	private:
-		TOwner* owner_;
+		
 		//_ASIO strand strand;
 		// 表示是否处于析构状态
 		bool isDestruct;
@@ -129,7 +128,7 @@ namespace FeedTheDog
 
 			// FIX: cpu
 			// 在这种情况下使用lockfree可能会拖慢速度
-			TMemoryPool::Free(sessionPool, ptr);
+			TMemoryPoolPolicy::Free(sessionPool, ptr);
 			--count;
 		}
 

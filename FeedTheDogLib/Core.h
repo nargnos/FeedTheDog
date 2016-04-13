@@ -7,11 +7,11 @@ namespace FeedTheDog
 		private _BOOST noncopyable
 	{
 	public:
-		typedef typename Core TCore;
 		typedef typename TCorePolicy::TConfig TConfig;
 		typedef typename TCorePolicy::TTraceSource TTraceSource;
 		typedef typename TCorePolicy::template TCore<Core>::TWorkerType TWorker;
 		typedef typename TCorePolicy::template TCore<Core>::TService TService;
+		typedef typename TCorePolicy::template TCore<Core>::TWorkerVectorType TWorkerVectorType;
 		Core()
 		{
 			isStop = true;
@@ -22,10 +22,9 @@ namespace FeedTheDog
 			threadCount = config->GetThreadCount();
 			assert(threadCount > 0 && threadCount <= config->GetMaxThreadCount());
 
-			for (size_t i = 0; i < threadCount; i++)
-			{
-				workers.push_back(make_unique<TWorker>(this));
-			}
+			workers= TCorePolicy::template TCore<Core>::CreateWorkerVector(this, threadCount);
+
+
 			config->Save();
 			GetTrace()->DebugPoint("Initialized");
 		}
@@ -59,53 +58,11 @@ namespace FeedTheDog
 			svr->AsyncStart();
 			return true;
 		}
-		//void DeleteService(const shared_ptr<TService>&);
-		//void Core::DeleteService(const shared_ptr<TService>& svr)
-		//{
-		//	auto find = GetService(svr->Name());
-		//	if (find == NULL)
-		//	{
-		//		return;
-		//	}
-		//	// 由服务控制是否接受新连接
-		//	find->Stop();
-		//	GetTrace()->DebugPoint(LogMsg::AddService, false, 0, svr->Name());
-		//	// 把对应服务的所有session关掉
-		//	for each (auto& var in workers)
-		//	{
-		//		//var->RemoveAllServiceSession(svr->Name());
-		//	}
-		//	mutex.lock();
-		//	services.unsafe_erase(svr->Name());
-		//	mutex.unlock();
-		//}
 		void Start()
 		{
 			GetTrace()->DebugPoint("Core Start");
-			/*for each (auto& var in services)
-			{
-			var.second->AsyncStart();
-			}*/
 			isStop = false;
-			_STD vector<shared_ptr<_BOOST thread>> threads;
-			assert(threadCount == workers.size());
-			if (threadCount > 1)
-			{
-				for (size_t i = 1; i < threadCount; i++)
-				{
-					auto tmpThread = make_shared<_BOOST thread>(_BOOST bind(&TWorker::Start, workers[i].get()));
-
-					threads.push_back(tmpThread);
-				}
-			}
-
-			// 自身线程也算在内
-			workers[0]->Start();
-			// join等待所有线程结束
-			for each (auto& var in threads)
-			{
-				var->join();
-			}
+			TCorePolicy::template TCore<Core>::StartWorkers(workers);
 		}
 		void Stop()
 		{
@@ -122,10 +79,7 @@ namespace FeedTheDog
 				var.second->Stop();
 			}
 			// 此处会关并删掉会话
-			for (size_t i = 0; i < threadCount; i++)
-			{
-				workers[i]->Stop();
-			}
+			TCorePolicy::template TCore<Core>::StopWorkers(workers);
 		}
 		int GetWorkerCount() const
 		{
@@ -144,20 +98,7 @@ namespace FeedTheDog
 			}
 			else
 			{
-				auto i = workers.begin();
-				result = i->get();
-				unsigned int sessionCount = result->GetSessionCount();
-				++i;
-				auto& end = workers.end();
-				for (; i < end; ++i)
-				{
-					auto tmpSessionCount = (*i)->GetSessionCount();
-					if (tmpSessionCount < sessionCount)
-					{
-						result = i->get();
-						sessionCount = tmpSessionCount;
-					}
-				}
+				result = TCorePolicy::template TCore<Core>::SelectIdleWorker(workers);
 			}
 			assert(result != NULL);
 			return result;
@@ -173,7 +114,7 @@ namespace FeedTheDog
 		int tmpWorkerIndex;
 		unique_ptr<TConfig> config;
 		unique_ptr<TTraceSource> trace;
-		_STD vector<unique_ptr<TWorker>> workers;
+		TWorkerVectorType workers;
 		concurrent_unordered_map<const char*, shared_ptr<TService>> services;
 		unsigned int threadCount;
 	};

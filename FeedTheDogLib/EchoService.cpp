@@ -22,7 +22,7 @@ namespace FeedTheDog
 			return;
 		}
 		
-		auto& session = core->SelectIdleWorker()->NewSession<_ASIO ip::tcp>();
+		auto& session = manager->SelectIdleWorker()->NewSession<_ASIO ip::tcp>();
 		acceptor->async_accept(*session, _BOOST bind(&EchoService::HandleAccept, this, session, _ASIO placeholders::error));
 
 	}
@@ -38,7 +38,7 @@ namespace FeedTheDog
 	{
 		if (!error)
 		{
-			//auto& trace = core->GetTrace();
+			//auto& trace = manager->GetTrace();
 			auto& endPoint = session->remote_endpoint();
 		//	_STD ostringstream str;
 		//	str << "Service " << name_ << ", New Connection: " << endPoint;
@@ -67,7 +67,7 @@ namespace FeedTheDog
 	bool EchoService::Init(TServiceManager* corePtr)
 	{
 		isStop = false;
-		core = corePtr;
+		manager = corePtr;
 
 		if (!acceptor)
 		{
@@ -75,12 +75,12 @@ namespace FeedTheDog
 			acceptor = make_unique<_ASIO ip::tcp::acceptor>(io, _ASIO ip::tcp::endpoint(_ASIO ip::tcp::v4(), port_));
 
 		}
-		//core->GetTrace()->TracePoint("Service Initialized", false, 0, name_, TraceLevel::Info);
+		//manager->GetTrace()->TracePoint("Service Initialized", false, 0, name_, TraceLevel::Info);
 		return true;
 	}
 	void EchoService::Stop()
 	{
-		//core->GetTrace()->DebugPoint("stop echo");
+		//manager->GetTrace()->DebugPoint("stop echo");
 		isStop = true;
 		acceptor->close();
 	}

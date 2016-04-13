@@ -9,9 +9,10 @@ namespace FeedTheDog
 		typedef _ASIO ip::udp TUdp;
 
 		template<typename TProtocol, typename TOwner>
-		struct TSessionPool :
-			public SessionPoolPolicy::TSessionPool<TProtocol, TOwner, MemoryPoolPolicy, SessionStoragePolicy>
+		struct TSessionPool
 		{
+			typedef SessionPool<TProtocol, TOwner, SessionPoolPolicy, MemoryPoolPolicy, SessionStoragePolicy> TSessionPoolType;
+			typedef Session<TProtocol, TSessionPoolType> TSessionType;
 		};
 	};
 }  // namespace FeedTheDog

@@ -55,12 +55,9 @@ namespace FeedTheDog
 	struct SessionPoolPolicy
 	{
 		template<typename TProtocol,
-			typename TOwner,
-			typename TMemoryPool,
-			typename TSessionStorage>
-		struct TSessionPool
+			typename TSessionPoolType>
+		struct TSession
 		{
-			typedef SessionPool<TProtocol, TOwner, SessionPoolPolicy, TMemoryPool, TSessionStorage> TSessionPoolType;
 			typedef Session<TProtocol, TSessionPoolType> TSessionType;
 		};
 

@@ -347,7 +347,7 @@ namespace FeedTheDog
 		unsigned short port;
 	};
 
-	template<typename TProtocol,typename TSession>
+	template<typename TSession>
 	class DeadlineSession
 	{
 	public:

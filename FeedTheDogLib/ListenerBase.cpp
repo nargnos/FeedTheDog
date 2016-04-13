@@ -7,7 +7,7 @@ namespace FeedTheDog
 	}
 	void ListenerBase::WriteLine(const std::string & str, TLevel level)
 	{
-		if (!visibleLevel[(int)level])
+		if (!CheckLevel(level))
 		{
 			return;
 		}
@@ -22,7 +22,7 @@ namespace FeedTheDog
 		for (auto i = (int)TLevel::_Begin; i < (int)TLevel::_End; i++)
 		{
 			// 设置默认跟踪等级
-			defaultTraceLevelNode.append(TTraceLevel::Parse(static_cast<TLevel>(i)));
+			defaultTraceLevelNode.append(TTraceLevel::ConvertToStr(i));
 		}
 
 
@@ -71,6 +71,10 @@ namespace FeedTheDog
 			result.clear();
 		}
 		return result;
+	}
+	bool ListenerBase::CheckLevel(ListenerBase::TLevel level) const
+	{
+		return visibleLevel[(int)level];
 	}
 }  // namespace FeedTheDog
 

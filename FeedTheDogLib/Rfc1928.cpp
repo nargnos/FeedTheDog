@@ -17,7 +17,7 @@ namespace FeedTheDog
 	bool Rfc1928::Init(TServiceManager * corePtr)
 	{
 		isStopped = false;
-		core = corePtr;
+		manager = corePtr;
 		if (!acceptor)
 		{
 			auto& io = corePtr->SelectIdleWorker()->GetIoService();
@@ -42,8 +42,8 @@ namespace FeedTheDog
 		{
 			return;
 		}
-		core->GetTrace()->DebugPoint(__func__);
-		auto& session = core->SelectIdleWorker()->NewSession<_ASIO ip::tcp>();
+		manager->GetTrace()->DebugPoint(__func__);
+		auto& session = manager->SelectIdleWorker()->NewSession<_ASIO ip::tcp>();
 		// buffer建议大于1k
 		assert(session->GetBuffer().max_size() > 1024);
 		auto& deadlineSession = make_shared<TTcpDeadlineSession>(_STD move(session));
@@ -52,7 +52,6 @@ namespace FeedTheDog
 			[this, deadlineSession](const _BOOST system::error_code& error) mutable {
 			CheckDeadline(deadlineSession, error);
 		});
-
 		auto& tmpSession = *deadlineSession->GetSession();
 		acceptor->async_accept(tmpSession,
 			[this, ptr = _STD move(deadlineSession)](const _BOOST system::error_code & error) mutable {
@@ -63,7 +62,7 @@ namespace FeedTheDog
 	void Rfc1928::CheckDeadline(shared_ptr<TTcpDeadlineSession>& deadlineSession,
 		const _BOOST system::error_code& error)
 	{
-		core->GetTrace()->DebugPoint(__func__);
+		manager->GetTrace()->DebugPoint(__func__);
 		if (error || isStopped)
 		{
 			return;
@@ -82,7 +81,7 @@ namespace FeedTheDog
 
 	void Rfc1928::Stop()
 	{
-		core->GetTrace()->DebugPoint("stop", false, 0, name_);
+		manager->GetTrace()->DebugPoint("stop", false, 0, name_);
 		isStopped = true;
 		acceptor->close();
 	}
@@ -90,7 +89,7 @@ namespace FeedTheDog
 	void Rfc1928::HandleAccept(shared_ptr<TTcpDeadlineSession>& deadlineSession,
 		const _BOOST system::error_code & error)
 	{
-		core->GetTrace()->DebugPoint(__func__);
+		manager->GetTrace()->DebugPoint(__func__);
 		if (error || isStopped)
 		{
 			deadlineSession->Close(ignore);
@@ -109,7 +108,7 @@ namespace FeedTheDog
 	void Rfc1928::HandleReadVersionMessage(shared_ptr<TTcpDeadlineSession>& deadlineSession,
 		size_t alreadyTransferred, size_t bytes_transferred, const _BOOST system::error_code & error)
 	{
-		core->GetTrace()->DebugPoint(__func__);
+		manager->GetTrace()->DebugPoint(__func__);
 		if (error || isStopped)
 		{
 			deadlineSession->Close(ignore);
@@ -158,7 +157,7 @@ namespace FeedTheDog
 	unsigned char Rfc1928::ReplySelectedMethod(_ASIO ip::tcp::socket& sessionSocket, VersionMessage* vmHeader,
 		_BOOST system::error_code & error)
 	{
-		core->GetTrace()->DebugPoint(__func__);
+		manager->GetTrace()->DebugPoint(__func__);
 		unsigned char nmethods = vmHeader->NMethods;
 		// 使用原本的buffer存储返回信息
 		auto replyBuffer = reinterpret_cast<MethodSelectionMessage*>(vmHeader);
@@ -181,7 +180,7 @@ namespace FeedTheDog
 
 	void Rfc1928::RunMethod(shared_ptr<TTcpDeadlineSession>& deadlineSession, unsigned char selectedMethod)
 	{
-		core->GetTrace()->DebugPoint(__func__);
+		manager->GetTrace()->DebugPoint(__func__);
 		auto& timer = deadlineSession->GetTimer();
 		auto& session = deadlineSession->GetSession();
 		switch (selectedMethod)
@@ -225,7 +224,7 @@ namespace FeedTheDog
 	void Rfc1928::HandleNoAuthenticationRequired(shared_ptr<TTcpDeadlineSession>& deadlineSession,
 		size_t alreadyTransferred, size_t bytes_transferred, const _BOOST system::error_code & error)
 	{
-		core->GetTrace()->DebugPoint(__func__);
+		manager->GetTrace()->DebugPoint(__func__);
 		if (isStopped || error)
 		{
 			deadlineSession->Close(ignore);
@@ -319,7 +318,7 @@ namespace FeedTheDog
 	void Rfc1928::DoCmd(shared_ptr<TTcpDeadlineSession>& deadlineSession, unique_ptr<TEndPointParser>& parser,
 		unsigned char cmd)
 	{
-		core->GetTrace()->DebugPoint(__func__);
+		manager->GetTrace()->DebugPoint(__func__);
 		switch (cmd)
 		{
 		case ClientRequestDetailMessage::CmdConnect:
@@ -340,7 +339,7 @@ namespace FeedTheDog
 
 	void Rfc1928::DoCmdConnect(shared_ptr<TTcpDeadlineSession>& deadlineSession, unique_ptr<TEndPointParser>& parser)
 	{
-		core->GetTrace()->DebugPoint(__func__);
+		manager->GetTrace()->DebugPoint(__func__);
 		auto& session = deadlineSession->GetSession();
 		switch (parser->GetAtyp())
 		{
@@ -376,7 +375,7 @@ namespace FeedTheDog
 	void Rfc1928::HandleResolver(shared_ptr<TTcpDeadlineSession>& deadlineSession,
 		const _ASIO ip::tcp::resolver::iterator& endpoint_iterator, const _BOOST system::error_code & error)
 	{
-		core->GetTrace()->DebugPoint(__func__);
+		manager->GetTrace()->DebugPoint(__func__);
 		if (isStopped)
 		{
 			deadlineSession->Close(ignore);
@@ -404,7 +403,7 @@ namespace FeedTheDog
 	int Rfc1928::BuildCmdConnectReplyMessage(ServerReplieMessage* reply, shared_ptr<TTcpSession>& remote,
 		const _BOOST system::error_code & error)
 	{
-		core->GetTrace()->DebugPoint(__func__);
+		manager->GetTrace()->DebugPoint(__func__);
 		assert(reply->Ver == ServerReplieMessage::VerValue);
 		assert(reply->Rsv == ServerReplieMessage::RsvValue);
 
@@ -475,7 +474,7 @@ namespace FeedTheDog
 	void Rfc1928::HandleCmdConnectReply(shared_ptr<TTcpDeadlineSession>& deadlineSession,
 		shared_ptr<TTcpSession>& remote, const _BOOST system::error_code & error)
 	{
-		core->GetTrace()->DebugPoint(__func__);
+		manager->GetTrace()->DebugPoint(__func__);
 		if (isStopped)
 		{
 			deadlineSession->Close(ignore);
@@ -509,7 +508,7 @@ namespace FeedTheDog
 
 	void Rfc1928::CreateForward(shared_ptr<TTcpSession>& client, shared_ptr<TTcpSession>& remote)
 	{
-		core->GetTrace()->DebugPoint(__func__);
+		manager->GetTrace()->DebugPoint(__func__);
 
 		client->async_read_some(_ASIO buffer(client->GetBuffer()),
 			[this, ptr = make_shared<TTcpForward>(client, remote)](const _BOOST system::error_code & error, size_t bytes_transferred) mutable {

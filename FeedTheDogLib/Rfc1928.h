@@ -22,7 +22,7 @@ namespace FeedTheDog
 		typedef TcpForward<TTcpSession> TTcpForward;
 		typedef Async TUtil;
 		typedef EndPointParser TEndPointParser;
-		typedef DeadlineSession<_ASIO ip::tcp, TTcpSession> TTcpDeadlineSession;
+		typedef DeadlineSession<TTcpSession> TTcpDeadlineSession;
 
 		friend TTcpForward;
 
@@ -36,7 +36,7 @@ namespace FeedTheDog
 	private:
 		bool isStopped;
 		bool supportMethods[0xff];
-		TServiceManager* core;
+		TServiceManager* manager;
 		int port_;
 		_BOOST system::error_code ignore;
 		_BOOST posix_time::seconds timeoutSecond;

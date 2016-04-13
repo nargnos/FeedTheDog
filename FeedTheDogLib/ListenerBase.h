@@ -18,6 +18,7 @@ namespace FeedTheDog
 		virtual void WriteLine(const std::string &str, TLevel level) override;
 		static Json::Value GetDefaultConfig();
 
+		virtual bool CheckLevel(TLevel level) const override;
 	protected:
 		explicit ListenerBase(Json::Value& listenerConfig);
 		virtual void WriteLine(const std::string &) = 0;
@@ -25,6 +26,7 @@ namespace FeedTheDog
 		bool visibleLevel[(int)TLevel::_End];
 		_BOOST mutex mutex;
 		static Json::Value& TraceLevelNode(Json::Value& listenerNode);
+
 	};
 
 }  // namespace FeedTheDog
