@@ -65,6 +65,17 @@ int main()
 
 	os << "½áÊø" << _STD endl;
 	
+	_ASIO io_service io;
+	_ASIO ip::tcp::acceptor k(io);
+	_ASIO ip::udp::socket l(io);
+	//_ASIO as
+	//k.async_read_some(buffer&, handler&&)
+	//k.async_write_some(buffer&,handler&&)
+	//l.async_receive_from(buffer&,endpoint&,handler&&)
+	//l.async_send_to(buffer&,endpoint&,handler&&)
+	//l.async_connect()
+
+
 	//TestLog(os, core.GetTrace());
 	//Logger::WriteMessage(os.str().c_str());
 	_STD cout << os.str();

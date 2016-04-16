@@ -41,27 +41,7 @@ namespace FeedTheDog
 		~Worker()
 		{
 		}
-
-		//void RemoveAllServiceSession(const char* serviceName)
-		//{
-		//	if (!isRunning)
-		//	{
-		//		// worker停止，由其它函数移除session
-		//		return;
-		//	}
-		//	tcpSessionPool->RemoveServiceSession(serviceName);
-		//	udpSessionPool->RemoveServiceSession(serviceName);
-
-		//}
-		virtual void CloseAllSessions() override
-		{
-			tcpSessionPool->__PreDestruct();
-			tcpSessionPool->CloseAll();
-
-			udpSessionPool->__PreDestruct();
-			udpSessionPool->CloseAll();
-
-		}
+	
 
 		unsigned int GetSessionCount()
 		{
@@ -97,6 +77,14 @@ namespace FeedTheDog
 		unique_ptr<TTcpSessionPool> tcpSessionPool;
 		unique_ptr<TUdpSessionPool> udpSessionPool;
 
-		
+		virtual void CloseAllSessions() override
+		{
+			tcpSessionPool->__PreDestruct();
+			tcpSessionPool->CloseAll();
+
+			udpSessionPool->__PreDestruct();
+			udpSessionPool->CloseAll();
+
+		}
 	};
 }  // namespace FeedTheDog

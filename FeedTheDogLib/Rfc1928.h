@@ -20,11 +20,8 @@ namespace FeedTheDog
 			ReservedEnd = 0xfe,
 		};
 		typedef TcpForward<TTcpSession> TTcpForward;
-		typedef Async TUtil;
 		typedef EndPointParser TEndPointParser;
 		typedef DeadlineSession<TTcpSession> TTcpDeadlineSession;
-
-		friend TTcpForward;
 
 
 		Rfc1928(int port, const char* name, int timeout = 3);
@@ -32,19 +29,31 @@ namespace FeedTheDog
 		virtual void AsyncStart() override;
 
 		virtual void Stop() override;
-		virtual bool Init(TServiceManager *) override;
+
 	private:
-		bool isStopped;
 		bool supportMethods[0xff];
-		TServiceManager* manager;
 		int port_;
 		_BOOST system::error_code ignore;
 		_BOOST posix_time::seconds timeoutSecond;
 		unique_ptr<_ASIO ip::tcp::acceptor> acceptor;
 
+		template<typename ReadHandler, typename TTcpSession>
+		void TcpReadMore(shared_ptr<TTcpSession>& session, ReadHandler&& handler, size_t alreadyTransferred = 0, size_t maxSize = 0)
+		{
+
+			auto& buffer = session->GetBuffer();
+			assert(maxSize <= buffer.max_size());
+			auto bufferData = buffer.data();
+
+			auto leftSize = (maxSize == 0 ? buffer.max_size() : maxSize) - alreadyTransferred;
+			assert(leftSize > 0);
+			AsyncReadSome(*session,_ASIO buffer(bufferData + alreadyTransferred, leftSize), _STD forward<ReadHandler>(handler));
+		}
+
+		virtual bool InitService() override;
 		bool __fastcall CheckVersionMessage(size_t, const VersionMessage *);
 		int __fastcall BuildCmdConnectReplyMessage(ServerReplieMessage *, shared_ptr<TTcpSession>&, const _BOOST system::error_code &);
-		unsigned char __fastcall ReplySelectedMethod(_ASIO ip::tcp::socket&, VersionMessage *, _BOOST system::error_code &);
+		unsigned char __fastcall ReplySelectedMethod(shared_ptr<TTcpSession>&, VersionMessage *, _BOOST system::error_code &);
 		void __fastcall CheckDeadline(shared_ptr<TTcpDeadlineSession>&, const _BOOST system::error_code&);
 		void __fastcall ForwardRead(shared_ptr<TTcpForward>& forward, const _BOOST system::error_code & error, size_t bytes_transferred);
 		void __fastcall ForwardWrite(shared_ptr<TTcpForward>& forward, const _BOOST system::error_code & error, size_t bytes_transferred);

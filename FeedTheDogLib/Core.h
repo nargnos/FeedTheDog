@@ -22,8 +22,7 @@ namespace FeedTheDog
 			threadCount = config->GetThreadCount();
 			assert(threadCount > 0 && threadCount <= config->GetMaxThreadCount());
 
-			workers= TCorePolicy::template TCore<Core>::CreateWorkerVector(this, threadCount);
-
+			workers=TCorePolicy::template TCore<Core>::CreateWorkerVector(this, threadCount);
 
 			config->Save();
 			GetTrace()->DebugPoint("Initialized");
@@ -53,7 +52,7 @@ namespace FeedTheDog
 			{
 				return false;
 			}
-			services.insert(_STD pair<const char*, shared_ptr<TService>>(svr->Name(), svr));
+			services.insert({ svr->Name(), svr });
 			GetTrace()->DebugPoint("Add Service", false, 0, svr->Name());
 			svr->AsyncStart();
 			return true;
@@ -83,17 +82,17 @@ namespace FeedTheDog
 		}
 		int GetWorkerCount() const
 		{
-			return workers.size();
+			return threadCount;
 		}
 		// 取空闲Worker
 		TWorker* SelectIdleWorker()
 		{
-			assert(workers.size() > 0);
+			assert(threadCount > 0);
 			TWorker* result = NULL;
 			if (isStop)
 			{
 				// 当core未开时用于分散此时添加的服务
-				tmpWorkerIndex = (tmpWorkerIndex + 1) % workers.size();
+				tmpWorkerIndex = (tmpWorkerIndex + 1) % threadCount;
 				result = workers[tmpWorkerIndex].get();
 			}
 			else

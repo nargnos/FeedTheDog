@@ -112,7 +112,7 @@ namespace FeedTheDog
 		{
 			for each (auto& var in *sessionStorage)
 			{
-				var->close(ignore);
+				var->GetSocket().close(ignore);
 			}
 		}
 

@@ -8,7 +8,7 @@ namespace FeedTheDog
 		typedef TOwner TOwner;
 		Owner(TOwner* owner)
 		{
-			static_assert(_STD is_class<TOwner>::value,"Owner");
+			static_assert(_STD is_class<TOwner>::value,"Owner != Class");
 			owner_ = owner;
 		}
 		TOwner* GetOwner()

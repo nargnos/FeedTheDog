@@ -11,9 +11,8 @@ namespace FeedTheDog
 		{
 			return;
 		}
-		mutex.lock();
+		_BOOST unique_lock<_BOOST mutex> lock(mutex);
 		WriteLine(str);
-		mutex.unlock();
 	}
 	Json::Value ListenerBase::GetDefaultConfig()
 	{

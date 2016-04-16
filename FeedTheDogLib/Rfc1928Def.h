@@ -217,22 +217,7 @@ namespace FeedTheDog
 	};
 #pragma pack(pop)
 
-	struct Async
-	{
-		template<typename ReadHandler,typename TTcpSession>
-		static void TcpReadMore(shared_ptr<TTcpSession>& session, BOOST_ASIO_MOVE_ARG(ReadHandler) handler, size_t alreadyTransferred = 0, size_t maxSize = 0)
-		{
 
-			auto& buffer = session->GetBuffer();
-			assert(maxSize <= buffer.max_size());
-			auto bufferData = buffer.data();
-
-			auto leftSize = (maxSize == 0 ? buffer.max_size() : maxSize) - alreadyTransferred;
-			assert(leftSize > 0);
-			session->async_read_some(_ASIO buffer(bufferData + alreadyTransferred, leftSize), handler);
-		}
-
-	};
 	// 除了domain字符串，其传入结构都是网络序
 	class EndPointParser
 	{
@@ -352,7 +337,7 @@ namespace FeedTheDog
 	{
 	public:
 		DeadlineSession(shared_ptr<TSession>&& val) :
-			timer(val->get_io_service()),
+			timer(val->GetIoService()),
 			session(val)
 		{
 		}
@@ -364,7 +349,7 @@ namespace FeedTheDog
 		void Close(_BOOST system::error_code& ignore)
 		{
 			CancelTimer(ignore);
-			session->close(ignore);
+			session->Close(ignore);
 		}
 		void CancelTimer(_BOOST system::error_code& ignore)
 		{

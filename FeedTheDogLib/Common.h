@@ -16,7 +16,6 @@
 #include <boost\lockfree\spsc_queue.hpp>
 #include <boost\lexical_cast.hpp>
 #include <boost\algorithm\string.hpp>
-#include <boost\pool\singleton_pool.hpp>
 #include <filesystem>
 #include <fstream>
 #include <vector>

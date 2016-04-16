@@ -31,7 +31,7 @@ namespace FeedTheDog
 		isEmpty = root.empty();
 
 		// ¶ÁÈ¡¸ú×Ù¿ª¹Ø
-		auto& openTraceNode = IsOpenTraceNode();
+		auto& openTraceNode = OpenTraceNode();
 		this->isOpenTrace = openTraceNode.asBool();
 	}
 
@@ -73,7 +73,7 @@ namespace FeedTheDog
 		}
 		return result;
 	}
-	Json::Value & Config::IsOpenTraceNode()
+	Json::Value & Config::OpenTraceNode()
 	{
 		auto& result = TraceNode()["IsOpenTrace"];
 		if (!result.isBool())
@@ -128,7 +128,7 @@ namespace FeedTheDog
 	}
 	Config::TListenerVector Config::CreateListeners()
 	{
-		SetTraceComment(IsOpenTraceNode());
+		SetTraceComment(OpenTraceNode());
 		TListenerVector result;
 		if (isOpenTrace)
 		{

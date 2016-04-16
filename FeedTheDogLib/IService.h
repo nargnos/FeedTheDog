@@ -12,5 +12,6 @@ namespace FeedTheDog
 		virtual void AsyncStart() = 0;
 		virtual void Stop() = 0;
 		virtual bool Init(TServiceManager*) = 0;
+		virtual ~IService() = default;
 	};
 }  // namespace FeedTheDog

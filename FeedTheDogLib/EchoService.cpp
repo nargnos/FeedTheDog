@@ -8,7 +8,6 @@ namespace FeedTheDog
 		ServiceBase(name),
 		port_(port)
 	{
-		isStop = false;
 	}
 
 
@@ -17,19 +16,18 @@ namespace FeedTheDog
 	}
 	void EchoService::AsyncStart()
 	{
-		if (isStop)
+		if (isStopped)
 		{
 			return;
 		}
-		
-		auto& session = manager->SelectIdleWorker()->NewSession<_ASIO ip::tcp>();
-		acceptor->async_accept(*session, _BOOST bind(&EchoService::HandleAccept, this, session, _ASIO placeholders::error));
+		auto& session = SelectIdleWorker()->NewSession<_ASIO ip::tcp>();
+		AsyncAccept(*acceptor, *session, _BOOST bind(&EchoService::HandleAccept, this, session, _ASIO placeholders::error));
 
 	}
 	void EchoService::ReadSome(shared_ptr<TTcpSession>& session)
 	{
 
-		session->async_read_some(
+		AsyncReadSome(*session,
 			_ASIO buffer(session->GetBuffer()),
 			_BOOST bind(&EchoService::HandleRead, this, session, _ASIO placeholders::error, _ASIO placeholders::bytes_transferred)
 			);
@@ -39,10 +37,10 @@ namespace FeedTheDog
 		if (!error)
 		{
 			//auto& trace = manager->GetTrace();
-			auto& endPoint = session->remote_endpoint();
-		//	_STD ostringstream str;
-		//	str << "Service " << name_ << ", New Connection: " << endPoint;
-			//trace->TracePoint(str.str().c_str(), TraceLevel::Trace);
+			auto& endPoint = session->GetSocket().remote_endpoint();
+			//	_STD ostringstream str;
+			//	str << "Service " << name_ << ", New Connection: " << endPoint;
+				//trace->TracePoint(str.str().c_str(), TraceLevel::Trace);
 			ReadSome(session);
 			AsyncStart();
 		}
@@ -51,7 +49,7 @@ namespace FeedTheDog
 	{
 		if (!error)
 		{
-			session->async_write_some(_ASIO buffer(session->GetBuffer(), bytes_transferred),
+			AsyncWriteSome(*session, _ASIO buffer(session->GetBuffer(), bytes_transferred),
 				_BOOST bind(&EchoService::HandleWrite, this, session, _ASIO placeholders::error)
 				);
 		}
@@ -64,14 +62,11 @@ namespace FeedTheDog
 			ReadSome(session);
 		}
 	}
-	bool EchoService::Init(TServiceManager* corePtr)
+	bool EchoService::InitService()
 	{
-		isStop = false;
-		manager = corePtr;
-
 		if (!acceptor)
 		{
-			auto& io = corePtr->SelectIdleWorker()->GetIoService();
+			auto& io = SelectIdleWorker()->GetIoService();
 			acceptor = make_unique<_ASIO ip::tcp::acceptor>(io, _ASIO ip::tcp::endpoint(_ASIO ip::tcp::v4(), port_));
 
 		}
@@ -81,7 +76,7 @@ namespace FeedTheDog
 	void EchoService::Stop()
 	{
 		//manager->GetTrace()->DebugPoint("stop echo");
-		isStop = true;
+		isStopped = true;
 		acceptor->close();
 	}
 }  // namespace FeedTheDog
