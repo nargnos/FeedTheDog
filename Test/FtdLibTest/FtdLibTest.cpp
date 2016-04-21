@@ -10,14 +10,14 @@ clock_t startNewSession;
 clock_t endNewSession;
 clock_t end;
 int count;
-void NewSessionTest(FeedTheDog::ServiceManager*core, FeedTheDog::ServiceManager::TWorker* worker)
+void NewSessionTest(FeedTheDog::ServiceManager*core)
 {
-	count = 150000;
-	// 单纯测试创建析构session的速度，这里分配之后立马析构			
+	count = 2000000;
+	// 测试创建析构session的速度，这里分配之后立马析构			
 	startNewSession = clock();
 	for (size_t i = 0; i < count; i++)
 	{
-		auto& tmpSession = worker->NewSession<_ASIO ip::tcp>();
+		auto tmpSession = core->GetWorkerPool().SelectWorker()->GetSessionPool<_ASIO ip::tcp>()->NewSession();
 	}
 	// 不是new结束时间，newsession把最耗时的部分post进队列了
 	endNewSession = clock();
@@ -40,10 +40,12 @@ void NewSessionTest(FeedTheDog::ServiceManager*core, FeedTheDog::ServiceManager:
 //}
 int main()
 {
-	FeedTheDog::ServiceManager core;
-	auto worker = core.SelectIdleWorker();
-	worker->GetIoService().post(_BOOST bind(&NewSessionTest, &core, worker));
-	core.Start();
+	{
+		FeedTheDog::ServiceManager core;
+
+		core.GetWorkerPool().SelectIdleWorker()->GetIoService().post(_BOOST bind(&NewSessionTest, &core));
+		core.Start();
+	}
 	end = clock();
 	// 并不能得出正确结果，只作为参考
 	// 时间中少了分配内存的部分，测得的结果是new的速度与delete的速度等同时的结果
@@ -54,31 +56,25 @@ int main()
 	os << "执行完new操作的时间 " << plus << _STD endl;
 	auto avgNew = plus / (double)count;
 	os << "平均new时间 " << avgNew << _STD endl;
-	os << "每秒可new " << 1 / avgNew << _STD endl;
+	
 	os << "善后时间 " << end - endNewSession << _STD endl;
 
 	// 善后和析构部分从开头记起，加上单独的new部分得到较正确的总时间
 	auto avgTime = (total + plus) / (double)count;
 
 	os << "new/delete时间 " << avgTime << _STD endl;
+	os << "每秒可new " << 1 / avgNew << _STD endl;
 	os << "每秒可处理new/delete次数 " << 1 / avgTime << _STD endl;
 
 	os << "结束" << _STD endl;
-	
-	_ASIO io_service io;
-	_ASIO ip::tcp::acceptor k(io);
-	_ASIO ip::udp::socket l(io);
-	//_ASIO as
-	//k.async_read_some(buffer&, handler&&)
-	//k.async_write_some(buffer&,handler&&)
-	//l.async_receive_from(buffer&,endpoint&,handler&&)
-	//l.async_send_to(buffer&,endpoint&,handler&&)
-	//l.async_connect()
 
 
 	//TestLog(os, core.GetTrace());
 	//Logger::WriteMessage(os.str().c_str());
+	
+
 	_STD cout << os.str();
+	//system("pause");
 	return 0;
 }
 

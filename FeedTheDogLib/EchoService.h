@@ -8,7 +8,7 @@ namespace FeedTheDog
 	public:
 		EchoService(int port, const char* name);
 		~EchoService();
-		virtual void AsyncStart() override;
+		virtual void Start() override;
 		virtual void Stop() override;
 		
 	private:

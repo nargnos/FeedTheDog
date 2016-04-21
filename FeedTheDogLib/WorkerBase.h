@@ -34,6 +34,7 @@ namespace FeedTheDog
 			isRunning = false;
 			CloseAllSessions();
 			work.reset();
+			ioService.stop();
 		}
 		_ASIO io_service& GetIoService()
 		{

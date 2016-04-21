@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include <Core.h>
 #include <worker.h>
-
+#include <WorkerPool.h>
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace ServerTest
@@ -25,8 +25,11 @@ namespace ServerTest
 			_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
 		}
+
 		TEST_METHOD(CoreTest)
 		{
+			//_ASIO ip::tcp::socket l;
+			//_BOOST lockfree::
 		}
 
 

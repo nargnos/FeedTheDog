@@ -1,7 +1,8 @@
 #pragma once
+#include "WorkerPool.h"
 namespace FeedTheDog
 {
-	// Service Manager & ThreadPool
+	// Service Manager
 	template<typename TCorePolicy>
 	class Core :
 		private _BOOST noncopyable
@@ -9,20 +10,16 @@ namespace FeedTheDog
 	public:
 		typedef typename TCorePolicy::TConfig TConfig;
 		typedef typename TCorePolicy::TTraceSource TTraceSource;
-		typedef typename TCorePolicy::template TCore<Core>::TWorkerType TWorker;
-		typedef typename TCorePolicy::template TCore<Core>::TService TService;
-		typedef typename TCorePolicy::template TCore<Core>::TWorkerVectorType TWorkerVectorType;
-		Core()
+		typedef typename TCorePolicy::TWorker TWorker;
+		typedef typename TCorePolicy::TWorkerPool TWorkerPool;
+		typedef typename TCorePolicy::template TService<Core>::TServiceType TService;
+
+		Core() :
+			isStopped(true),
+			config(make_unique<TConfig>())
 		{
-			isStop = true;
-			tmpWorkerIndex = -1;
-			config = make_unique<TConfig>();
 			trace = make_unique<TTraceSource>(*config);
 			GetTrace()->DebugPoint("New Core");
-			threadCount = config->GetThreadCount();
-			assert(threadCount > 0 && threadCount <= config->GetMaxThreadCount());
-
-			workers=TCorePolicy::template TCore<Core>::CreateWorkerVector(this, threadCount);
 
 			config->Save();
 			GetTrace()->DebugPoint("Initialized");
@@ -30,9 +27,8 @@ namespace FeedTheDog
 		virtual ~Core()
 		{
 			GetTrace()->DebugPoint("Free Core");
-			//Stop();
 		}
-		
+
 		TService* GetService(const char* name)
 		{
 			if (services.count(name) > 0)
@@ -54,68 +50,49 @@ namespace FeedTheDog
 			}
 			services.insert({ svr->Name(), svr });
 			GetTrace()->DebugPoint("Add Service", false, 0, svr->Name());
-			svr->AsyncStart();
+			svr->Start();
 			return true;
 		}
+		// TODO: 运行时卸载服务
 		void Start()
 		{
 			GetTrace()->DebugPoint("Core Start");
-			isStop = false;
-			TCorePolicy::template TCore<Core>::StartWorkers(workers);
+			isStopped = false;
+			workerPool.Start();
 		}
 		void Stop()
 		{
 			// 整个程序结束需要执行的东西，不管结束后再start的情况了，如果需要就重新new
-			if (isStop)
+			if (isStopped)
 			{
 				return;
 			}
 			GetTrace()->DebugPoint("Core Stop");
-			isStop = true;
+			isStopped = true;
 			// 此处停止服务不会关掉会话
 			for each (auto& var in services)
 			{
 				var.second->Stop();
 			}
 			// 此处会关并删掉会话
-			TCorePolicy::template TCore<Core>::StopWorkers(workers);
+			workerPool.Stop();
 		}
-		int GetWorkerCount() const
-		{
-			return threadCount;
-		}
-		// 取空闲Worker
-		TWorker* SelectIdleWorker()
-		{
-			assert(threadCount > 0);
-			TWorker* result = NULL;
-			if (isStop)
-			{
-				// 当core未开时用于分散此时添加的服务
-				tmpWorkerIndex = (tmpWorkerIndex + 1) % threadCount;
-				result = workers[tmpWorkerIndex].get();
-			}
-			else
-			{
-				result = TCorePolicy::template TCore<Core>::SelectIdleWorker(workers);
-			}
-			assert(result != NULL);
-			return result;
-		}
-		unique_ptr<TTraceSource>& GetTrace()
+		inline const unique_ptr<TTraceSource>& GetTrace() const
 		{
 			return trace;
 		}
-
+		inline const TWorkerPool& GetWorkerPool() const
+		{
+			return workerPool;
+		}
 	private:
-		bool isStop;
-		// 当core没启动时用的
-		int tmpWorkerIndex;
+		TWorkerPool workerPool; // workerPool持有ioservice，必须比service后析构，此声明位置不可调整
+		concurrent_unordered_map<string, shared_ptr<TService>> services;
+
 		unique_ptr<TConfig> config;
 		unique_ptr<TTraceSource> trace;
-		TWorkerVectorType workers;
-		concurrent_unordered_map<const char*, shared_ptr<TService>> services;
-		unsigned int threadCount;
+		bool isStopped;
+
 	};
 
 }  // namespace FeedTheDog

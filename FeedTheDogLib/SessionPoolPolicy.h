@@ -5,7 +5,7 @@ namespace FeedTheDog
 
 	struct MemoryPoolPolicy
 	{
-		enum { PoolDefaultSize = 1024 };
+		enum { PoolDefaultSize = 2048 };
 		template<typename TSession>
 		struct MemoryPool
 		{
@@ -25,7 +25,6 @@ namespace FeedTheDog
 				return make_unique<TPoolType>(alloc, PoolDefaultSize);
 			}
 		};
-
 	};
 
 	struct SessionStoragePolicy
@@ -33,7 +32,7 @@ namespace FeedTheDog
 		template<typename TSession>
 		struct SessionStorage
 		{
-			typedef _STD list<TSession*> TStorageType;
+			typedef _STD list<TSession*,_BOOST fast_pool_allocator<TSession*>> TStorageType;
 			typedef unique_ptr<TStorageType> TStoragePtr;
 			typedef typename TStorageType::value_type TStorageValue;
 			typedef typename TStorageType::iterator TStorageIterator;

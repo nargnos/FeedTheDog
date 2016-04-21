@@ -26,16 +26,16 @@ namespace FeedTheDog
 
 		Rfc1928(int port, const char* name, int timeout = 3);
 		~Rfc1928();
-		virtual void AsyncStart() override;
+		virtual void Start() override;
 
 		virtual void Stop() override;
 
 	private:
 		bool supportMethods[0xff];
-		int port_;
 		_BOOST system::error_code ignore;
 		_BOOST posix_time::seconds timeoutSecond;
 		unique_ptr<_ASIO ip::tcp::acceptor> acceptor;
+		int port_;
 
 		template<typename ReadHandler, typename TTcpSession>
 		void TcpReadMore(shared_ptr<TTcpSession>& session, ReadHandler&& handler, size_t alreadyTransferred = 0, size_t maxSize = 0)
@@ -47,13 +47,13 @@ namespace FeedTheDog
 
 			auto leftSize = (maxSize == 0 ? buffer.max_size() : maxSize) - alreadyTransferred;
 			assert(leftSize > 0);
-			AsyncReadSome(*session,_ASIO buffer(bufferData + alreadyTransferred, leftSize), _STD forward<ReadHandler>(handler));
+			session->AsyncReadSome(_ASIO buffer(bufferData + alreadyTransferred, leftSize), _STD forward<ReadHandler>(handler));
 		}
 
 		virtual bool InitService() override;
 		bool __fastcall CheckVersionMessage(size_t, const VersionMessage *);
 		int __fastcall BuildCmdConnectReplyMessage(ServerReplieMessage *, shared_ptr<TTcpSession>&, const _BOOST system::error_code &);
-		unsigned char __fastcall ReplySelectedMethod(shared_ptr<TTcpSession>&, VersionMessage *, _BOOST system::error_code &);
+		void __fastcall ReplySelectedMethod(shared_ptr<TTcpDeadlineSession>&, VersionMessage *);
 		void __fastcall CheckDeadline(shared_ptr<TTcpDeadlineSession>&, const _BOOST system::error_code&);
 		void __fastcall ForwardRead(shared_ptr<TTcpForward>& forward, const _BOOST system::error_code & error, size_t bytes_transferred);
 		void __fastcall ForwardWrite(shared_ptr<TTcpForward>& forward, const _BOOST system::error_code & error, size_t bytes_transferred);

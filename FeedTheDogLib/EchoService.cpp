@@ -14,44 +14,56 @@ namespace FeedTheDog
 	EchoService::~EchoService()
 	{
 	}
-	void EchoService::AsyncStart()
+	void EchoService::Start()
 	{
 		if (isStopped)
 		{
 			return;
 		}
-		auto& session = SelectIdleWorker()->NewSession<_ASIO ip::tcp>();
-		AsyncAccept(*acceptor, *session, _BOOST bind(&EchoService::HandleAccept, this, session, _ASIO placeholders::error));
+		auto& session = NewSession<_ASIO ip::tcp>();
+		auto& socketRef = session->GetSocket();
+		acceptor->async_accept(socketRef,
+			[this, session_ = _STD move(session)](const _BOOST system::error_code & error) mutable
+		{
+			HandleAccept(session_, error);
+		});
 
 	}
 	void EchoService::ReadSome(shared_ptr<TTcpSession>& session)
 	{
-
-		AsyncReadSome(*session,
-			_ASIO buffer(session->GetBuffer()),
-			_BOOST bind(&EchoService::HandleRead, this, session, _ASIO placeholders::error, _ASIO placeholders::bytes_transferred)
-			);
+		auto& buffer = session->GetBuffer();
+		auto& sessionRef = *session;
+		sessionRef.AsyncReadSome(
+			_ASIO buffer(buffer),
+			[this, session_ = _STD move(session)](const _BOOST system::error_code & error, size_t bytes_transferred) mutable
+		{
+			HandleRead(session_, error, bytes_transferred);
+		});
 	}
 	void EchoService::HandleAccept(shared_ptr<TTcpSession>& session, const _BOOST system::error_code & error)
 	{
 		if (!error)
 		{
 			//auto& trace = manager->GetTrace();
-			auto& endPoint = session->GetSocket().remote_endpoint();
+			//auto& endPoint = session->GetSocket().remote_endpoint();
 			//	_STD ostringstream str;
 			//	str << "Service " << name_ << ", New Connection: " << endPoint;
 				//trace->TracePoint(str.str().c_str(), TraceLevel::Trace);
 			ReadSome(session);
-			AsyncStart();
+			Start();
 		}
 	}
 	void EchoService::HandleRead(shared_ptr<TTcpSession>& session, const _BOOST system::error_code & error, size_t bytes_transferred)
 	{
 		if (!error)
 		{
-			AsyncWriteSome(*session, _ASIO buffer(session->GetBuffer(), bytes_transferred),
-				_BOOST bind(&EchoService::HandleWrite, this, session, _ASIO placeholders::error)
-				);
+			auto& buffer = session->GetBuffer();
+			auto& sessionRef = *session;
+			sessionRef.AsyncWrite(_ASIO buffer(buffer, bytes_transferred),
+				[this, session_ = _STD move(session)](const _BOOST system::error_code & error, size_t bytes_transferred) mutable
+			{
+				HandleWrite(session_, error);
+			});
 		}
 	}
 

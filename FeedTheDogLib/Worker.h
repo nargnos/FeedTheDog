@@ -1,12 +1,9 @@
 #pragma once
 #include "WorkerBase.h"
-#include "Owner.h"
 namespace FeedTheDog
 {
-	template<typename TOwner,
-		typename TWorkerPolicy>
+	template<typename TWorkerPolicy>
 	class Worker :
-		public Owner<TOwner>,
 		public WorkerBase
 	{
 	public:
@@ -31,8 +28,7 @@ namespace FeedTheDog
 			typedef typename TWorkerPolicy::template TSessionPool<TProtocol, Worker>::TSessionPoolType TSessionPoolType;
 		};
 
-		Worker(TOwner* owner) :
-			Owner(owner)
+		Worker()
 		{
 			
 			tcpSessionPool = make_unique<TTcpSessionPool>(this, ioService);
@@ -42,36 +38,23 @@ namespace FeedTheDog
 		{
 		}
 	
-
-		unsigned int GetSessionCount()
+		unsigned int GetSessionCount() const
 		{
-			unsigned int sum = 0;
-			sum += tcpSessionPool->GetSessionCount();
-			sum += udpSessionPool->GetSessionCount();
-			return sum;
+			return tcpSessionPool->GetSessionCount() +
+				udpSessionPool->GetSessionCount();
 		}
 		template<typename TProtocol>
-		inline unique_ptr<typename TSessionPool<TProtocol>::TSessionPoolType>& GetSessionPool();
+		inline const unique_ptr<typename TSessionPool<TProtocol>::TSessionPoolType>& GetSessionPool() const;
 
 		template<>
-		inline unique_ptr<TTcpSessionPool>& GetSessionPool<TTcp>()
+		inline const unique_ptr<TTcpSessionPool>& GetSessionPool<TTcp>() const
 		{
 			return tcpSessionPool;
 		}
 		template<>
-		inline unique_ptr<TUdpSessionPool>& GetSessionPool<TUdp>()
+		inline const unique_ptr<TUdpSessionPool>& GetSessionPool<TUdp>() const
 		{
 			return udpSessionPool;
-		}
-		template<typename TProtocol>
-		inline shared_ptr<typename TSession<TProtocol>::TSessionType> NewSession()
-		{
-			return GetSessionPool<TProtocol>()->NewSession();
-		}
-		template<typename TProtocol>
-		inline typename TSessionPool<TProtocol>::TSessionPoolType::TResolver& GetResolver()
-		{
-			return GetSessionPool<TProtocol>()->GetResolver();
 		}
 	private:
 		unique_ptr<TTcpSessionPool> tcpSessionPool;

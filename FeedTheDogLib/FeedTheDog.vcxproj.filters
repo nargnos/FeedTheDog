@@ -33,9 +33,6 @@
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="IEncryptor.h">
-      <Filter>Interface</Filter>
-    </ClInclude>
     <ClInclude Include="IService.h">
       <Filter>Interface</Filter>
     </ClInclude>
@@ -129,14 +126,18 @@
     <ClInclude Include="CorePolicy.h">
       <Filter>Service Manager</Filter>
     </ClInclude>
-    <ClInclude Include="IThreadCount.h">
-      <Filter>Interface</Filter>
-    </ClInclude>
     <ClInclude Include="ServicePolicy.h">
       <Filter>Service\ServiceBase</Filter>
     </ClInclude>
     <ClInclude Include="SessionManager.h">
       <Filter>Service\ServiceBase</Filter>
+    </ClInclude>
+    <ClInclude Include="WorkerPool.h">
+      <Filter>Worker</Filter>
+    </ClInclude>
+    <ClInclude Include="x.h" />
+    <ClInclude Include="IAddon.h">
+      <Filter>Interface</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

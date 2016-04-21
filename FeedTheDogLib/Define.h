@@ -5,7 +5,7 @@ namespace FeedTheDog
 	struct IService;
 	template<typename>
 	class Core;
-	template<typename, typename>
+	template<typename>
 	class Worker;
 
 	template<typename, typename, typename, typename, typename>
@@ -13,5 +13,6 @@ namespace FeedTheDog
 
 	template<typename, typename>
 	class Session;
-
+	template<typename>
+	class WorkerPool;
 }  // namespace FeedTheDog

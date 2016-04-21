@@ -5,7 +5,10 @@ namespace FeedTheDog
 		public _BOOST noncopyable
 	{
 	public:
-		static const unsigned int BufferSize = 1024 * 6;
+		enum
+		{
+			BufferSize = 1024 * 8
+		};
 		typedef _STD array<unsigned char, BufferSize> TBufferType;
 		SessionBase()
 		{

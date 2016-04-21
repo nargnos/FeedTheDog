@@ -232,31 +232,31 @@ namespace FeedTheDog
 			aytp(AtypIPv4),
 			port(_ASIO detail::socket_ops::network_to_host_short(val->Port))
 		{
-			new (buffer) _ASIO ip::address_v4(_ASIO detail::socket_ops::network_to_host_long(val->Ipv4));
+			new (buffer.data()) _ASIO ip::address_v4(_ASIO detail::socket_ops::network_to_host_long(val->Ipv4));
 		}
 		// FIX: ipv6字节序
 		EndPointParser(const IPv6* val) :
 			aytp(AtypIPv6),
 			port(_ASIO detail::socket_ops::network_to_host_short(val->Port))
 		{
-			new (buffer) _ASIO ip::address_v6(val->Ipv6);
+			new (buffer.data()) _ASIO ip::address_v6(val->Ipv6);
 		}
 		// domainPtr字符串（无NULL结尾）后必须跟2位端口号
 		EndPointParser(const char* domainPtr, size_t domainLen) :
 			aytp(AtypDomainName),
 			port(_ASIO detail::socket_ops::network_to_host_short(*reinterpret_cast<const unsigned short*>(domainPtr + domainLen)))
 		{
-			new (buffer) _STD string(domainPtr, domainLen);
+			new (buffer.data()) _STD string(domainPtr, domainLen);
 		}
 		EndPointParser(const EndPointParser& val)
 		{
-			if (this==&val)
+			if (this == &val)
 			{
 				return;
 			}
 			this->aytp = val.aytp;
 			this->port = val.port;
-			memcpy_s(buffer, UnionTypeSize, val.buffer, val.UnionTypeSize);
+			memcpy_s(buffer.data(), UnionTypeSize, val.buffer.data(), val.UnionTypeSize);
 
 		}
 		~EndPointParser()
@@ -290,9 +290,10 @@ namespace FeedTheDog
 				return typename TProtocol::endpoint(*GetV6Addr(), port);
 			}
 			default:
-				__assume(false);
+				assert(false);
 				break;
 			}
+			__assume(false);
 		}
 		template<typename TProtocol>
 		typename TProtocol::resolver::query ParseDomain()
@@ -304,8 +305,7 @@ namespace FeedTheDog
 		{
 			return aytp;
 		}
-	private:
-		Atyp aytp;
+	private:	
 		typedef union
 		{
 			_ASIO ip::address_v4 ipv4;
@@ -316,24 +316,27 @@ namespace FeedTheDog
 		{
 			UnionTypeSize = sizeof(UnionType)
 		};
+		_STD array<unsigned char, UnionTypeSize> buffer;
+		unsigned short port;
+		Atyp aytp;
+
 		_ASIO ip::address_v4* GetV4Addr()
 		{
-			return reinterpret_cast<_ASIO ip::address_v4*>(buffer);
+			return reinterpret_cast<_ASIO ip::address_v4*>(buffer.data());
 		}
 		_ASIO ip::address_v6* GetV6Addr()
 		{
-			return reinterpret_cast<_ASIO ip::address_v6*>(buffer);
+			return reinterpret_cast<_ASIO ip::address_v6*>(buffer.data());
 		}
 		_STD string* GetDomain()
 		{
-			return reinterpret_cast<_STD string*>(buffer);
+			return reinterpret_cast<_STD string*>(buffer.data());
 		}
-		unsigned char buffer[UnionTypeSize];
-		unsigned short port;
+		
 	};
 
 	template<typename TSession>
-	class DeadlineSession
+	class DeadlineSession :public _BOOST noncopyable
 	{
 	public:
 		DeadlineSession(shared_ptr<TSession>&& val) :
@@ -369,7 +372,7 @@ namespace FeedTheDog
 	};
 
 	template<typename TSession>
-	class TcpForward :private _BOOST noncopyable
+	class TcpForward :public _BOOST noncopyable
 	{
 	public:
 		TcpForward(shared_ptr<TSession>& read_, shared_ptr<TSession>& write_) :

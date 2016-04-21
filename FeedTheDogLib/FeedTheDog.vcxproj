@@ -86,6 +86,7 @@
       <CallingConvention>Cdecl</CallingConvention>
       <DisableSpecificWarnings>
       </DisableSpecificWarnings>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -106,6 +107,7 @@
       <CallingConvention>Cdecl</CallingConvention>
       <DisableSpecificWarnings>
       </DisableSpecificWarnings>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -118,8 +120,8 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <Optimization>MaxSpeed</Optimization>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
@@ -132,6 +134,7 @@
       <CallingConvention>Cdecl</CallingConvention>
       <DisableSpecificWarnings>
       </DisableSpecificWarnings>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -146,8 +149,8 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <Optimization>MaxSpeed</Optimization>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
@@ -158,6 +161,9 @@
       <CallingConvention>Cdecl</CallingConvention>
       <DisableSpecificWarnings>
       </DisableSpecificWarnings>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -178,9 +184,8 @@
     <ClInclude Include="ConsoleListener.h" />
     <ClInclude Include="DebugListener.h" />
     <ClInclude Include="FileListener.h" />
-    <ClInclude Include="IThreadCount.h" />
     <ClInclude Include="Owner.h" />
-    <ClInclude Include="IEncryptor.h" />
+    <ClInclude Include="IAddon.h" />
     <ClInclude Include="IListener.h" />
     <ClInclude Include="ITraceConfig.h" />
     <ClInclude Include="ListenerBase.h" />
@@ -209,6 +214,8 @@
     <ClInclude Include="Define.h" />
     <ClInclude Include="WorkerBase.h" />
     <ClInclude Include="WorkerPolicy.h" />
+    <ClInclude Include="WorkerPool.h" />
+    <ClInclude Include="x.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Config.cpp" />

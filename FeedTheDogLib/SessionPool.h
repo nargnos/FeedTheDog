@@ -3,6 +3,67 @@
 #include "Owner.h"
 namespace FeedTheDog
 {
+	class SpinLock :
+		_BOOST noncopyable
+	{
+	public:
+		SpinLock()
+		{
+		}
+		inline bool TryLock()
+		{
+			return !lock.test_and_set(_STD memory_order_acquire);
+		}
+		inline void Lock()
+		{
+			unsigned int i = 0;
+			while (!TryLock())
+			{
+				ThreadYield(++i);
+			}
+		}
+		inline void Unlock()
+		{
+			lock.clear(_STD memory_order_release);
+		}
+	private:
+		inline void ThreadYield(unsigned int k)
+		{
+			if (k < 4)
+			{
+			}
+#if defined( BOOST_SMT_PAUSE )
+			else if (k < 16)
+			{
+				BOOST_SMT_PAUSE
+			}
+#endif
+			else
+			{
+				_STD this_thread::yield();
+			}
+		}
+		_STD atomic_flag lock = ATOMIC_VAR_INIT(false);
+	};
+	class SpinLockGuard :
+		public _BOOST noncopyable
+	{
+	public:
+		SpinLockGuard(SpinLock& lock) :
+			lock_(lock)
+		{
+			lock_.Lock();
+		}
+
+		~SpinLockGuard()
+		{
+			lock_.Unlock();
+		}
+
+	private:
+		SpinLock& lock_;
+	};
+
 	template<typename TProtocol,
 		typename TOwner,
 		typename TSessionPoolPolicy,
@@ -35,13 +96,11 @@ namespace FeedTheDog
 			sessionStorage(TStorage::Create()),
 			Owner(owner)
 		{
-			//corePtr->GetTrace()->DebugPoint(LogMsg::NewSessionPool);
 			isDestruct = false;
 		}
 
 		~SessionPool()
 		{
-			//corePtr->GetTrace()->DebugPoint(LogMsg::FreeSessionPool);
 			isDestruct = true;
 			if (count > 0)
 			{
@@ -52,26 +111,27 @@ namespace FeedTheDog
 		// 多线程同时new多次有一定概率出现线程争用
 		shared_ptr<TSession> __fastcall NewSession()
 		{
-			//corePtr->GetTrace()->DebugPoint(LogMsg::NewSession);
-			++count;
+			count.fetch_add(1, _BOOST memory_order_relaxed);
 			// FIX: 看有什么更快的方案可以换
 			// 构建session
 			auto result = TMemoryPoolPolicy::Malloc(sessionPool, this, &ios);
 
-			// 加快返回速度，析构的erase执行时间绝对会在insert执行之后			
-			ios.post([&, result]() {result->insertPosition = TStorage::Insert(sessionStorage, result); });
-			return shared_ptr<TSession>(result, [this](TSession* ptr) {Free(ptr); });
+			{
+				SpinLockGuard guard(lock);
+				result->insertPosition = TStorage::Insert(sessionStorage, result);
+			}
+			return shared_ptr<TSession>(result, [this](TSession* ptr) {FreeSession(ptr); });
 		}
 
-		unsigned int GetSessionCount() const
+		inline unsigned int GetSessionCount() const
 		{
-			return count;
+			// count的设置及其结果使用都是无所谓执行顺序的
+			return count.load(_BOOST memory_order_relaxed);
 		}
 		// 可在运行时和停止前调用
 		void CloseAll()
 		{
-			// 只关掉连接，删除对象由智能指针处理			
-			//corePtr->GetTrace()->DebugPoint(LogMsg::CloseAllSocket);
+			// 只关掉连接，删除对象由智能指针处理
 			if (isDestruct)
 			{
 				AsyncCloseAll();
@@ -79,7 +139,7 @@ namespace FeedTheDog
 			}
 			ios.post(_BOOST bind(&SessionPool::AsyncCloseAll, this));
 		}
-		
+
 		TResolver& GetResolver()
 		{
 			return resolver;
@@ -89,60 +149,39 @@ namespace FeedTheDog
 			isDestruct = true;
 		}
 	private:
-		
-		//_ASIO strand strand;
-		// 表示是否处于析构状态
-		bool isDestruct;
-
-		//TCore* corePtr;
-		_ASIO io_service& ios;
-		_BOOST atomic<unsigned int> count;
-
 		TResolver resolver;
-		_BOOST system::error_code ignore;
-
 		_STD allocator<TSession> alloc;
 		// FIX:池(在freelock里找到的，是否好用待测试)
 		TPoolPtr sessionPool;
 		// 用作分配对象的指针存储
-
 		TStoragePtr sessionStorage;
+		_BOOST atomic<unsigned int> count;
+		_ASIO io_service& ios;
 
+		SpinLock lock;
+		// 表示是否处于析构状态
+		bool isDestruct;
 		void AsyncCloseAll()
 		{
+			_BOOST system::error_code ignore;
 			for each (auto& var in *sessionStorage)
 			{
 				var->GetSocket().close(ignore);
 			}
-		}
 
+		}
 		void FreeSession(TSession* ptr)
 		{
-			//corePtr->GetTrace()->DebugPoint(LogMsg::FreeSession);
-
-			// 析构时不erase减少析构时间
+			auto& pos = ptr->insertPosition;
 			if (!isDestruct)
 			{
-				TStorage::Remove(sessionStorage, ptr->insertPosition);
+				SpinLockGuard guard(lock);
+				TStorage::Remove(sessionStorage, pos);
 			}
-
-			// FIX: cpu
-			// 在这种情况下使用lockfree可能会拖慢速度
+			count.fetch_sub(1, _BOOST memory_order_relaxed);
 			TMemoryPoolPolicy::Free(sessionPool, ptr);
-			--count;
 		}
 
-		void Free(TSession* ptr)
-		{
-			if (isDestruct)
-			{
-				// ioservice会在free之前停止，所以不能post
-				FreeSession(ptr);
-				return;
-			}
-			// 不能dispatch，此时插入位置不一定已经设置
-			ios.post([this, ptr]() {FreeSession(ptr); });
-		}
 	};
 
 }  // namespace FeedTheDog

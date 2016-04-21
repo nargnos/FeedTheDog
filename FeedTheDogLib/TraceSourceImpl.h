@@ -62,10 +62,10 @@ namespace FeedTheDog
 			return openTrace;
 		}
 
-	private:
-		bool openTrace;
-		bool visibleLevel[(int)TLevel::_End];
+	private:		
 		TListenerVector listeners;
+		bool visibleLevel[(int)TLevel::_End];
+		bool openTrace;
 	};
 
 }  // namespace FeedTheDog
