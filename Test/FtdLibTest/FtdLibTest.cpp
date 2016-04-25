@@ -17,7 +17,7 @@ void NewSessionTest(FeedTheDog::ServiceManager*core)
 	startNewSession = clock();
 	for (size_t i = 0; i < count; i++)
 	{
-		auto tmpSession = core->GetWorkerPool().SelectWorker()->GetSessionPool<_ASIO ip::tcp>()->NewSession();
+		auto tmpSession = core->GetWorkerPool().SelectWorker()->GetSessionPool<_ASIO ip::tcp>()->NewSession<false>();		
 	}
 	// 不是new结束时间，newsession把最耗时的部分post进队列了
 	endNewSession = clock();

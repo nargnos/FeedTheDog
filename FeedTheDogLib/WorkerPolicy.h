@@ -12,7 +12,6 @@ namespace FeedTheDog
 		struct TSessionPool
 		{
 			typedef SessionPool<TProtocol, TOwner, SessionPoolPolicy, MemoryPoolPolicy, SessionStoragePolicy> TSessionPoolType;
-			typedef Session<TProtocol, TSessionPoolType> TSessionType;
 		};
 	};
 }  // namespace FeedTheDog

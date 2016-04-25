@@ -16,15 +16,23 @@ namespace FeedTheDog
 		typedef typename TWorker::TTcp TTcp;
 		typedef typename TWorker::TUdp TUdp;
 		typedef typename TWorker::TTcpSessionPool TTcpSessionPool;
-		typedef typename TWorker::TTcpSession TTcpSession;
+		typedef typename TTcpSessionPool::TSession TTcpSession;
+		typedef typename TTcpSessionPool::TSession_NoBuffer TTcpSession_NoBuffer;
 		typedef typename TWorker::TUdpSessionPool TUdpSessionPool;
-		typedef typename TWorker::TUdpSession TUdpSession;
+		typedef typename TUdpSessionPool::TSession TUdpSession;
+		typedef typename TUdpSessionPool::TSession_NoBuffer TUdpSession_NoBuffer;
 
 		template<typename TProtocol>
+		struct TSessionPool
+		{
+			typedef typename TWorker::template TSessionPool<TProtocol>::TSessionPoolType TSessionPoolType;
+		};
+		template<typename TProtocol, bool hasBuffer>
 		struct TSession
 		{
-			typedef typename TWorker::template TSession<TProtocol>::TSessionType TSessionType;
+			typedef typename TSessionPool<TProtocol>::TSessionPoolType::template THasBuffer<hasBuffer>::TSessionType TSessionType;
 		};
+
 
 		ServiceBaseImpl(const char* name)
 		{
@@ -43,31 +51,6 @@ namespace FeedTheDog
 			isStopped = false;
 			isInitialized = true;
 			return InitService();
-		}
-		inline TWorker* SelectIdleWorker()
-		{
-			assert(isInitialized);
-			return manager->GetWorkerPool().SelectIdleWorker();
-		}
-		inline const unique_ptr<TTraceSource>& GetTrace() const
-		{
-			return manager->GetTrace();
-		}
-		inline TWorker* SelectWorker()
-		{
-			assert(isInitialized);
-			return manager->GetWorkerPool().SelectWorker();
-		}
-
-		template<typename TProtocol>
-		inline shared_ptr<typename TSession<TProtocol>::TSessionType> NewSession()
-		{
-			return SelectIdleWorker()->GetSessionPool<TProtocol>()->NewSession();
-		}
-		template<typename TProtocol>
-		inline typename TWorker::template TSessionPool<TProtocol>::TSessionPoolType::TResolver& GetResolver()
-		{
-			return SelectIdleWorker()->GetSessionPool<TProtocol>()->GetResolver();
 		}
 
 		// TODO: 如何使用插件
@@ -91,6 +74,32 @@ namespace FeedTheDog
 		{
 		}
 	protected:
+		inline TWorker* SelectIdleWorker()
+		{
+			assert(isInitialized);
+			return manager->GetWorkerPool().SelectIdleWorker();
+		}
+		inline const unique_ptr<TTraceSource>& GetTrace() const
+		{
+			return manager->GetTrace();
+		}
+		inline TWorker* SelectWorker()
+		{
+			assert(isInitialized);
+			return manager->GetWorkerPool().SelectWorker();
+		}
+
+		template<typename TProtocol, bool hasBuffer = true>
+		inline shared_ptr<typename TSession<TProtocol, hasBuffer>::TSessionType> NewSession()
+		{
+			return SelectIdleWorker()->GetSessionPool<TProtocol>()->NewSession<hasBuffer>();
+		}
+
+		template<typename TProtocol>
+		inline typename TWorker::template TSessionPool<TProtocol>::TSessionPoolType::TResolver& GetResolver()
+		{
+			return SelectIdleWorker()->GetSessionPool<TProtocol>()->GetResolver();
+		}
 		virtual bool InitService() = 0;
 		concurrent_unordered_map<string, shared_ptr<IAddon>> addons;
 		TSessionManager sessionManager;
@@ -100,4 +109,9 @@ namespace FeedTheDog
 		bool isInitialized;
 	};
 	typedef ServiceBaseImpl<ServicePolicy> ServiceBase;
+	typedef ServiceBase::TTcpSession TcpSession;
+	typedef ServiceBase::TUdpSession UdpSession;
+	typedef ServiceBase::TTcpSession_NoBuffer TcpSessionNoBuffer;
+	typedef ServiceBase::TUdpSession_NoBuffer UdpSessionNoBuffer;
+
 }  // namespace FeedTheDog

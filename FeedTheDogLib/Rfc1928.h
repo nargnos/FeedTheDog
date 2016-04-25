@@ -51,7 +51,7 @@ namespace FeedTheDog
 		}
 
 		virtual bool InitService() override;
-		bool __fastcall CheckVersionMessage(size_t, const VersionMessage *);
+		static bool __fastcall CheckVersionMessage(size_t, const VersionMessage *);
 		int __fastcall BuildCmdConnectReplyMessage(ServerReplieMessage *, shared_ptr<TTcpSession>&, const _BOOST system::error_code &);
 		void __fastcall ReplySelectedMethod(shared_ptr<TTcpDeadlineSession>&, VersionMessage *);
 		void __fastcall CheckDeadline(shared_ptr<TTcpDeadlineSession>&, const _BOOST system::error_code&);

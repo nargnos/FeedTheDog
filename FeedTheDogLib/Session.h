@@ -1,78 +1,18 @@
 ﻿#pragma once
 #include "SessionBase.h"
-#include "Owner.h"
 namespace FeedTheDog
 {
 
-	// FIX: 这样设计加密模块没办法添加,
-	// 需要在send前经过加密函数,函数导出的话要写太多了
 	template<typename TProtocol, typename TSessionPool>
-	class SessionImpl :
-		public SessionBase,
-		protected Owner<TSessionPool>
-	{
-	public:
-		typedef TProtocol TProtocol;
-		typedef SessionImpl TSession;
-		typedef typename TProtocol::socket TSocket;
-
-		SessionImpl(TSessionPool* pool, io_service* ios) :
-			socket_(*ios),
-			Owner(pool)
-		{
-		}
-
-		~SessionImpl()
-		{
-		}
-
-		inline _ASIO io_service& GetIoService()
-		{
-			return socket_.get_io_service();
-		}
-		inline typename TProtocol::socket& GetSocket()
-		{
-			return socket_;
-		}
-		inline const typename TProtocol::socket& GetSocket() const
-		{
-			return socket_;
-		}
-		inline void Close(_BOOST system::error_code& ec)
-		{
-			socket_.close(ec);
-		}
-		inline void ShutDown(_ASIO socket_base::shutdown_type what, _BOOST system::error_code& ec)
-		{
-			socket_.shutdown(what, ec);
-		}
-		inline bool IsOpen() const
-		{
-			return socket_.is_open();
-		}
-
-		inline TSessionPool* GetSessionPool()
-		{
-			return owner_;
-		}
-
-	protected:
-		TSocket socket_;
-		typedef typename TSessionPool::TStorageIterator TStorageIterator;
-		TStorageIterator insertPosition;
-
-	};
-	template<typename TProtocol, typename TSessionPool>
-	class Session;
+	class SessionImpl;
 
 	template<typename TSessionPool>
-	class Session<_ASIO ip::tcp, TSessionPool> :
-		public SessionImpl<_ASIO ip::tcp, TSessionPool>
+	class SessionImpl<_ASIO ip::tcp, TSessionPool> :
+		public SessionBase<_ASIO ip::tcp, TSessionPool>
 	{
 	public:
-		friend TSessionPool;
-		Session(TSessionPool* pool, io_service* ios) :
-			SessionImpl(pool, ios)
+		SessionImpl(TSessionPool* pool, io_service* ios) :
+			SessionBase(pool, ios)
 		{
 
 		}
@@ -134,13 +74,13 @@ namespace FeedTheDog
 	private:
 	};
 	template<typename TSessionPool>
-	class Session<_ASIO ip::udp, TSessionPool> :
-		public SessionImpl<_ASIO ip::udp, TSessionPool>
+	class SessionImpl<_ASIO ip::udp, TSessionPool> :
+		public SessionBase<_ASIO ip::udp, TSessionPool>
 	{
 	public:
-		friend TSessionPool;
-		Session(TSessionPool* pool, io_service* ios) :
-			SessionImpl(pool, ios)
+		
+		SessionImpl(TSessionPool* pool, io_service* ios) :
+			SessionBase(pool, ios)
 		{
 
 		}
@@ -165,6 +105,50 @@ namespace FeedTheDog
 		}
 		// TODO: 用到再加
 	private:
+	};
+
+	template<typename TProtocol, typename TSessionPool>
+	class SessionNoBuffer:
+		public SessionImpl<TProtocol, TSessionPool>
+	{
+	public:
+		friend TSessionPool;
+		SessionNoBuffer(TSessionPool* pool, io_service* ios) :
+			SessionImpl(pool, ios)
+		{
+
+		}
+	protected:
+		typedef typename TSessionPool::template THasBuffer<false>::TStorageIterator TStorageIterator;
+		TStorageIterator insertPosition;
+	};
+
+	template<typename TProtocol, typename TSessionPool>
+	class Session:
+		public SessionImpl<TProtocol, TSessionPool>
+	{
+	public:
+		friend TSessionPool;
+		enum
+		{
+			BufferSize = 1024 * 8
+		};
+		typedef _STD array<unsigned char, BufferSize> TBufferType;
+		Session(TSessionPool* pool, io_service* ios) :
+			SessionImpl(pool, ios)
+		{
+		}
+		virtual ~Session()
+		{
+		}
+		TBufferType& GetBuffer()
+		{
+			return buffer;
+		}
+	protected:
+		TBufferType buffer;
+		typedef typename TSessionPool::template THasBuffer<true>::TStorageIterator TStorageIterator;
+		TStorageIterator insertPosition;
 	};
 }  // namespace FeedTheDog
 

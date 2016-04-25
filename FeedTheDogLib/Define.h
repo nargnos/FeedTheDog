@@ -13,6 +13,9 @@ namespace FeedTheDog
 
 	template<typename, typename>
 	class Session;
+	template<typename, typename>
+	class SessionNoBuffer;
+
 	template<typename>
 	class WorkerPool;
 }  // namespace FeedTheDog

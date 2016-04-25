@@ -135,6 +135,7 @@
       <DisableSpecificWarnings>
       </DisableSpecificWarnings>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <BrowseInformation>true</BrowseInformation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -144,6 +145,9 @@
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)\..\Boost\Lib;</AdditionalLibraryDirectories>
     </Lib>
+    <Bscmake>
+      <PreserveSbr>true</PreserveSbr>
+    </Bscmake>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -175,6 +179,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <Text Include="!这部分应该分出去.txt" />
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
@@ -215,7 +220,6 @@
     <ClInclude Include="WorkerBase.h" />
     <ClInclude Include="WorkerPolicy.h" />
     <ClInclude Include="WorkerPool.h" />
-    <ClInclude Include="x.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Config.cpp" />

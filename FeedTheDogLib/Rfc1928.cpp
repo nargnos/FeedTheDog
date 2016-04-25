@@ -131,7 +131,8 @@ namespace FeedTheDog
 
 			TcpReadMore(session,
 				[this, ptr = _STD move(deadlineSession), alreadyTransferred]
-			(const _BOOST system::error_code & error, size_t bytes_transferred) mutable {
+			(const _BOOST system::error_code & error, size_t bytes_transferred) mutable
+			{
 				HandleReadVersionMessage(ptr, alreadyTransferred, bytes_transferred, error);
 			}, alreadyTransferred, (size_t)vmHeader->NMethods + VersionMessage::FirstTwoBytes);
 			return;

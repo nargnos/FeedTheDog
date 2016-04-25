@@ -34,6 +34,8 @@
 #include <cassert>
 #include <type_traits>
 #include <mutex>
+#include <filesystem>
+
 using _STD shared_ptr;
 using _STD unique_ptr;
 using _STD weak_ptr;

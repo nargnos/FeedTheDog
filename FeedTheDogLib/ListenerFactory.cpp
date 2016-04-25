@@ -31,6 +31,7 @@ namespace FeedTheDog
 	ListenerFactory::~ListenerFactory()
 	{
 	}
+	// TODO: 这里可以改成用载入dll的方式建立表
 	ListenerFactory::TRegsterType ListenerFactory::listenerRegister
 	{
 		{ "Console", {ListenerFactory::Create<ConsoleListener>,ConsoleListener::GetDefaultConfig} },

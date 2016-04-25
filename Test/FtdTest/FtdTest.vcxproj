@@ -122,6 +122,7 @@
       <MinimalRebuild>true</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <BrowseInformation>true</BrowseInformation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -131,6 +132,9 @@
       <AdditionalLibraryDirectories>$(SolutionDir)\..\Boost\Lib;</AdditionalLibraryDirectories>
       <Profile>true</Profile>
     </Link>
+    <Bscmake>
+      <PreserveSbr>true</PreserveSbr>
+    </Bscmake>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>

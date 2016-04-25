@@ -10,34 +10,25 @@ namespace FeedTheDog
 		typedef typename TWorkerPolicy::TTcp TTcp;
 		typedef typename TWorkerPolicy::TUdp TUdp;
 
-		typedef typename TWorkerPolicy::template TSessionPool<TTcp, Worker>::TSessionPoolType TTcpSessionPool;
-		typedef typename TWorkerPolicy::template TSessionPool<TUdp, Worker>::TSessionPoolType TUdpSessionPool;
-
-		typedef typename TWorkerPolicy::template TSessionPool<TTcp, Worker>::TSessionType TTcpSession;
-		typedef typename TWorkerPolicy::template TSessionPool<TUdp, Worker>::TSessionType TUdpSession;
-
-		template<typename TProtocol>
-		struct TSession
-		{
-			typedef typename TWorkerPolicy::template TSessionPool<TProtocol, Worker>::TSessionType TSessionType;
-		};
-
 		template<typename TProtocol>
 		struct TSessionPool
 		{
 			typedef typename TWorkerPolicy::template TSessionPool<TProtocol, Worker>::TSessionPoolType TSessionPoolType;
 		};
 
+		typedef typename TSessionPool<TTcp>::TSessionPoolType TTcpSessionPool;
+		typedef typename TSessionPool<TUdp>::TSessionPoolType TUdpSessionPool;
+
 		Worker()
 		{
-			
+
 			tcpSessionPool = make_unique<TTcpSessionPool>(this, ioService);
 			udpSessionPool = make_unique<TUdpSessionPool>(this, ioService);
 		}
 		~Worker()
 		{
 		}
-	
+
 		unsigned int GetSessionCount() const
 		{
 			return tcpSessionPool->GetSessionCount() +

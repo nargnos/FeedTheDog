@@ -5,7 +5,7 @@ namespace FeedTheDog
 
 	struct MemoryPoolPolicy
 	{
-		enum { PoolDefaultSize = 2048 };
+		enum { PoolDefaultSize = 512 };
 		template<typename TSession>
 		struct MemoryPool
 		{
@@ -59,6 +59,11 @@ namespace FeedTheDog
 		{
 			typedef Session<TProtocol, TSessionPoolType> TSessionType;
 		};
-
+		template<typename TProtocol,
+			typename TSessionPoolType>
+		struct TSessionNoBuffer
+		{
+			typedef SessionNoBuffer<TProtocol, TSessionPoolType> TSessionType;
+		};
 	};
 }  // namespace FeedTheDog
