@@ -1,19 +1,16 @@
 #pragma once
-#include "Owner.h"
 namespace FeedTheDog
 {
-	template<typename TProtocol, typename TSessionPool>
+	template<typename TProtocol>
 	class SessionBase :
-		public _BOOST noncopyable,
-		protected Owner<TSessionPool>
+		public _BOOST noncopyable
 	{
 	public:
 		typedef TProtocol TProtocol;
 		typedef typename TProtocol::socket TSocket;
 
-		SessionBase(TSessionPool* pool, io_service* ios) :
-			socket_(*ios),
-			Owner(pool)
+		SessionBase(io_service& ios) :
+			socket_(ios)
 		{
 		}
 
@@ -44,11 +41,6 @@ namespace FeedTheDog
 		inline bool IsOpen() const
 		{
 			return socket_.is_open();
-		}
-
-		inline TSessionPool* GetSessionPool()
-		{
-			return owner_;
 		}
 
 	protected:

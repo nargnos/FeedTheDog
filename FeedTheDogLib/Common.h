@@ -7,13 +7,10 @@
 #include <boost\bind.hpp>
 #include <boost\bind\protect.hpp>
 #include <boost\atomic.hpp>
-#include <boost\pool\object_pool.hpp>
 #include <boost\pool\pool.hpp>
-
 #include <boost\utility.hpp>
 #include <boost\pool\pool_alloc.hpp>
 #include <boost\lockfree\queue.hpp>
-#include <boost\lockfree\spsc_queue.hpp>
 #include <boost\lexical_cast.hpp>
 #include <boost\algorithm\string.hpp>
 #include <filesystem>

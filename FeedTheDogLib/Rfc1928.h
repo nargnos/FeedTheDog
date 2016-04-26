@@ -37,6 +37,7 @@ namespace FeedTheDog
 		unique_ptr<_ASIO ip::tcp::acceptor> acceptor;
 		int port_;
 
+		bool isStopped;
 		template<typename ReadHandler, typename TTcpSession>
 		void TcpReadMore(shared_ptr<TTcpSession>& session, ReadHandler&& handler, size_t alreadyTransferred = 0, size_t maxSize = 0)
 		{

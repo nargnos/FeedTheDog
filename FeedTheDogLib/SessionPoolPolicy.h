@@ -1,5 +1,6 @@
 #pragma once
 #include "Define.h"
+#include "Session.h"
 namespace FeedTheDog
 {
 
@@ -12,9 +13,9 @@ namespace FeedTheDog
 			typedef _BOOST lockfree::detail::freelist_stack<TSession> TPoolType;
 			typedef unique_ptr<TPoolType> TPoolPtr;
 			template<typename TOwner>
-			inline static TSession* Malloc(TPoolPtr& pool, TOwner* owner_, io_service* ios)
+			inline static TSession* Malloc(TPoolPtr& pool, TOwner* owner_, io_service& ios)
 			{
-				return pool->construct<true, false>(owner_, ios);
+				return pool->construct<true, false>(_STD ref(ios));
 			}
 			inline static void Free(TPoolPtr& pool, TSession* ptr)
 			{
@@ -54,16 +55,12 @@ namespace FeedTheDog
 	struct SessionPoolPolicy
 	{
 		template<typename TProtocol,
-			typename TSessionPoolType>
+			typename TSessionPoolType,
+			bool hasBuffer>
 		struct TSession
 		{
-			typedef Session<TProtocol, TSessionPoolType> TSessionType;
+			typedef Session<TProtocol, TSessionPoolType, hasBuffer> TSessionType;
 		};
-		template<typename TProtocol,
-			typename TSessionPoolType>
-		struct TSessionNoBuffer
-		{
-			typedef SessionNoBuffer<TProtocol, TSessionPoolType> TSessionType;
-		};
+		
 	};
 }  // namespace FeedTheDog

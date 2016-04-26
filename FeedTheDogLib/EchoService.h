@@ -12,6 +12,7 @@ namespace FeedTheDog
 		virtual void Stop() override;
 		
 	private:
+		bool isStopped;
 		int port_;
 		virtual bool InitService() override;
 		void ReadSome(shared_ptr<TTcpSession>&);

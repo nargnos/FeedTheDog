@@ -5,6 +5,7 @@
 #include "CorePolicy.h"
 #include "IService.h"
 #include "Worker.h"
+#include "WorkerPool.h"
 #include "SessionPool.h"
 #include "Core.h"
 

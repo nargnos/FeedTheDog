@@ -5,7 +5,8 @@ namespace ServerTest
 {
 
 
-	using namespace FeedTheDog;
+
+//	using namespace FeedTheDog;
 	TEST_CLASS(OtherTest)
 	{
 	public:

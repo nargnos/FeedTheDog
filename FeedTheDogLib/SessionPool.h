@@ -1,77 +1,14 @@
 #pragma once
-#include "Session.h"
-#include "Owner.h"
+#include "SpinLock.h"
 namespace FeedTheDog
 {
-	class SpinLock :
-		_BOOST noncopyable
-	{
-	public:
-		SpinLock()
-		{
-		}
-		inline bool TryLock()
-		{
-			return !lock.test_and_set(_STD memory_order_acquire);
-		}
-		inline void Lock()
-		{
-			unsigned int i = 0;
-			while (!TryLock())
-			{
-				ThreadYield(++i);
-			}
-		}
-		inline void Unlock()
-		{
-			lock.clear(_STD memory_order_release);
-		}
-	private:
-		inline void ThreadYield(unsigned int k)
-		{
-			if (k < 4)
-			{
-			}
-#if defined( BOOST_SMT_PAUSE )
-			else if (k < 16)
-			{
-				BOOST_SMT_PAUSE
-			}
-#endif
-			else
-			{
-				_STD this_thread::yield();
-			}
-		}
-		_STD atomic_flag lock = ATOMIC_VAR_INIT(false);
-	};
-	class SpinLockGuard :
-		public _BOOST noncopyable
-	{
-	public:
-		SpinLockGuard(SpinLock& lock) :
-			lock_(lock)
-		{
-			lock_.Lock();
-		}
-
-		~SpinLockGuard()
-		{
-			lock_.Unlock();
-		}
-
-	private:
-		SpinLock& lock_;
-	};
 
 	template<typename TProtocol,
-		typename TOwner,
 		typename TSessionPoolPolicy,
 		typename TMemoryPoolPolicy,
 		typename TSessionStoragePolicy>
 	class SessionPool :
-		public _BOOST noncopyable,
-		public Owner<TOwner>
+		public _BOOST noncopyable
 	{
 	public:
 		typedef typename TProtocol::socket TSocket;
@@ -88,31 +25,21 @@ typedef typename TSessionStoragePolicy::template SessionStorage<TSessionType> TS
 
 
 		template<bool hasBuffer>
-		struct THasBuffer;
-
-		template<>
-		struct THasBuffer<true>
+		struct THasBuffer
 		{
-			typedef typename TSessionPoolPolicy::template TSession<TProtocol, SessionPool>::TSessionType TSessionType;
+			typedef typename TSessionPoolPolicy::template TSession<TProtocol, SessionPool, hasBuffer >::TSessionType TSessionType;
 			TDEFINES;
 		};
 
-		template<>
-		struct THasBuffer<false>
-		{
-			typedef typename TSessionPoolPolicy::template TSessionNoBuffer<TProtocol, SessionPool>::TSessionType TSessionType;
-			TDEFINES;
-		};
-
-		SessionPool(TOwner* owner, _ASIO io_service& io) :
+	
+		SessionPool(_ASIO io_service& io) :
 			ios(io),
 			count(0),
 			resolver(io),
 			sessionPool(_STD move(TMemoryPool::Create(alloc))),
 			sessionPoolNoBuffer(_STD move(TMemoryPool_NoBuffer::Create(allocNoBuffer))),
 			sessionStorage(TStorage::Create()),
-			sessionStorageNoBuffer(TStorage_NoBuffer::Create()),
-			Owner(owner)
+			sessionStorageNoBuffer(TStorage_NoBuffer::Create())
 		{
 			isDestruct = false;
 		}
@@ -135,7 +62,7 @@ typedef typename TSessionStoragePolicy::template SessionStorage<TSessionType> TS
 		shared_ptr<typename THasBuffer<true>::TSessionType> __fastcall NewSession<true>()
 		{
 			count.fetch_add(1, _BOOST memory_order_relaxed);
-			auto result = TMemoryPool::Malloc(sessionPool, this, &ios);;
+			auto result = TMemoryPool::Malloc(sessionPool, this, ios);;
 			{
 				SpinLockGuard guard(lock);
 				result->insertPosition = TStorage::Insert(sessionStorage, result);
@@ -149,7 +76,7 @@ typedef typename TSessionStoragePolicy::template SessionStorage<TSessionType> TS
 		shared_ptr<typename THasBuffer<false>::TSessionType> __fastcall NewSession<false>()
 		{
 			count.fetch_add(1, _BOOST memory_order_relaxed);
-			auto result = TMemoryPool_NoBuffer::Malloc(sessionPoolNoBuffer, this, &ios);;
+			auto result = TMemoryPool_NoBuffer::Malloc(sessionPoolNoBuffer, this, ios);;
 			{
 				SpinLockGuard guard(lockNoBuffer);
 				result->insertPosition = TStorage_NoBuffer::Insert(sessionStorageNoBuffer, result);

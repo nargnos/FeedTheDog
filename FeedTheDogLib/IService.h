@@ -1,6 +1,5 @@
 #pragma once
 #include "Define.h"
-#include "CorePolicy.h"
 #include "IAddon.h"
 namespace FeedTheDog
 {

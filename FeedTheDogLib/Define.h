@@ -5,17 +5,13 @@ namespace FeedTheDog
 	struct IService;
 	template<typename>
 	class Core;
-	template<typename>
 	class Worker;
 
-	template<typename, typename, typename, typename, typename>
+	template< typename, typename, typename, typename>
 	class SessionPool;
 
-	template<typename, typename>
+	template<typename, typename,bool>
 	class Session;
-	template<typename, typename>
-	class SessionNoBuffer;
-
-	template<typename>
+	class Config;
 	class WorkerPool;
 }  // namespace FeedTheDog

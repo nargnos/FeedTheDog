@@ -10,6 +10,26 @@ clock_t startNewSession;
 clock_t endNewSession;
 clock_t end;
 int count;
+namespace FeedTheDog
+{
+	class WorkerFriendProxy
+	{
+	public:
+		template<typename TProtocol, typename TWorker>
+		static const unique_ptr<typename TWorker::template TSessionPool<TProtocol>::TSessionPoolType>&
+			GetSessionPool(TWorker* worker)
+		{
+			return worker->GetSessionPool<TProtocol>();
+		}
+	private:
+		WorkerFriendProxy() = delete;
+
+		~WorkerFriendProxy() = delete;
+
+	};
+}  // namespace FeedTheDog
+
+
 void NewSessionTest(FeedTheDog::ServiceManager*core)
 {
 	count = 2000000;
@@ -17,12 +37,13 @@ void NewSessionTest(FeedTheDog::ServiceManager*core)
 	startNewSession = clock();
 	for (size_t i = 0; i < count; i++)
 	{
-		auto tmpSession = core->GetWorkerPool().SelectWorker()->GetSessionPool<_ASIO ip::tcp>()->NewSession<false>();		
+		auto tmpSession = FeedTheDog::WorkerFriendProxy::GetSessionPool<_ASIO ip::tcp>(core->GetWorkerPool()->SelectWorker())->NewSession<false>();
 	}
 	// 不是new结束时间，newsession把最耗时的部分post进队列了
 	endNewSession = clock();
 	core->Stop();
 }
+
 //void TestLog(_STD ostringstream& os,shared_ptr<Config::TTraceSource>& trace)
 //{
 //	// 计算log时间
@@ -43,7 +64,7 @@ int main()
 	{
 		FeedTheDog::ServiceManager core;
 
-		core.GetWorkerPool().SelectIdleWorker()->GetIoService().post(_BOOST bind(&NewSessionTest, &core));
+		core.GetWorkerPool()->SelectIdleWorker()->GetIoService().post(_BOOST bind(&NewSessionTest, &core));
 		core.Start();
 	}
 	end = clock();
@@ -56,7 +77,7 @@ int main()
 	os << "执行完new操作的时间 " << plus << _STD endl;
 	auto avgNew = plus / (double)count;
 	os << "平均new时间 " << avgNew << _STD endl;
-	
+
 	os << "善后时间 " << end - endNewSession << _STD endl;
 
 	// 善后和析构部分从开头记起，加上单独的new部分得到较正确的总时间
@@ -71,7 +92,7 @@ int main()
 
 	//TestLog(os, core.GetTrace());
 	//Logger::WriteMessage(os.str().c_str());
-	
+
 
 	_STD cout << os.str();
 	//system("pause");

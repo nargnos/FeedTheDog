@@ -78,7 +78,7 @@ namespace FeedTheDog
 
 	void Rfc1928::Stop()
 	{
-		GetTrace()->DebugPoint("stop", false, 0, name_);
+		GetTrace()->DebugPoint("stop", false, 0, Name());
 		isStopped = true;
 		acceptor->close();
 	}
@@ -363,7 +363,7 @@ namespace FeedTheDog
 		case TEndPointParser::AtypDomainName:
 		{
 
-			session->GetSessionPool()->GetResolver().async_resolve(parser->ParseDomain<_ASIO ip::tcp>(),
+			GetResolver<_ASIO ip::tcp>().async_resolve(parser->ParseDomain<_ASIO ip::tcp>(),
 				[this, ptr = _STD move(deadlineSession)]
 			(const _BOOST system::error_code & error, const _ASIO ip::tcp::resolver::iterator& endpoint_iterator) mutable {
 				HandleResolver(ptr, endpoint_iterator, error);
@@ -393,7 +393,7 @@ namespace FeedTheDog
 		}
 
 		auto& session = deadlineSession->GetSession();
-		auto& remote = session->GetSessionPool()->NewSession();
+		auto& remote = NewSession<_ASIO ip::tcp>();
 
 
 		auto& remoteRef = *remote;

@@ -1,14 +1,12 @@
 #pragma once
-
-#include "ServicePolicy.h"
+#include "ServiceBaseImpl.h"
 namespace FeedTheDog
 {
-	template<typename TServicePolicy>
-	class ServiceBaseImpl :
-		public IService<typename TServicePolicy::TServiceManager>
+	class ServiceBase :
+		public IService<typename ServiceBaseImpl::TServiceManager>
 	{
 	public:
-		typedef typename TServicePolicy::TSessionManager TSessionManager;
+		// 这些类型可以替换成Wapper
 		typedef typename TServiceManager::TWorker TWorker;
 		typedef typename TServiceManager::TTraceSource TTraceSource;
 		typedef typename TServiceManager::TWorkerPool TWorkerPool;
@@ -32,86 +30,63 @@ namespace FeedTheDog
 		{
 			typedef typename TSessionPool<TProtocol>::TSessionPoolType::template THasBuffer<hasBuffer>::TSessionType TSessionType;
 		};
-
-
-		ServiceBaseImpl(const char* name)
+		ServiceBase(const char* name):
+			impl_(make_unique<ServiceBaseImpl>(name))
 		{
-			isInitialized = false;
-			name_ = name;
-			isStopped = false;
 		}
-		virtual const char* Name() const override
+
+		~ServiceBase()
 		{
-			return name_;
 		}
-		virtual bool Init(TServiceManager* managerPtr) override
+
+		virtual const char * Name() const override
 		{
-			assert(!isInitialized);
-			manager = managerPtr;
-			isStopped = false;
-			isInitialized = true;
+			return impl_->Name();
+		}
+		virtual bool Init(TServiceManager * managerPtr) override
+		{
+			impl_->Init(managerPtr);
 			return InitService();
 		}
-
-		// TODO: 如何使用插件
-		virtual bool AddAddon(shared_ptr<IAddon>& addon)
+		virtual bool AddAddon(shared_ptr<IAddon>& addon) override
 		{
-			if (addons.count(addon->Name()) > 0)
-			{
-				return false;
-			}
-			addons.insert({ addon->Name(), addon });
-			return true;
+			return impl_ ->AddAddon(addon);
 		}
-		// TODO: 运行时删除需要多做一些处理
-		virtual void RemoveAddon(const char* name)
+		virtual void RemoveAddon(const char * ptr) override
 		{
-			addons.unsafe_erase(name);
-		}
-
-
-		virtual ~ServiceBaseImpl()
-		{
+			return impl_->RemoveAddon(ptr);
 		}
 	protected:
+		virtual bool InitService() = 0;
 		inline TWorker* SelectIdleWorker()
 		{
-			assert(isInitialized);
-			return manager->GetWorkerPool().SelectIdleWorker();
+			return impl_->SelectIdleWorker();
 		}
 		inline const unique_ptr<TTraceSource>& GetTrace() const
 		{
-			return manager->GetTrace();
+			return impl_->GetTrace();
 		}
 		inline TWorker* SelectWorker()
 		{
-			assert(isInitialized);
-			return manager->GetWorkerPool().SelectWorker();
+			return impl_->SelectWorker();
 		}
 
 		template<typename TProtocol, bool hasBuffer = true>
 		inline shared_ptr<typename TSession<TProtocol, hasBuffer>::TSessionType> NewSession()
 		{
-			return SelectIdleWorker()->GetSessionPool<TProtocol>()->NewSession<hasBuffer>();
+			return impl_->NewSession<TProtocol,hasBuffer>();
 		}
 
 		template<typename TProtocol>
-		inline typename TWorker::template TSessionPool<TProtocol>::TSessionPoolType::TResolver& GetResolver()
+		inline typename TSessionPool<TProtocol>::TSessionPoolType::TResolver& GetResolver()
 		{
-			return SelectIdleWorker()->GetSessionPool<TProtocol>()->GetResolver();
+			return impl_->GetResolver<TProtocol>();
 		}
-		virtual bool InitService() = 0;
-		concurrent_unordered_map<string, shared_ptr<IAddon>> addons;
-		TSessionManager sessionManager;
-		TServiceManager* manager;
-		const char* name_;
-		bool isStopped;
-		bool isInitialized;
+
+	private:
+		unique_ptr<ServiceBaseImpl> impl_;
+
 	};
-	typedef ServiceBaseImpl<ServicePolicy> ServiceBase;
-	typedef ServiceBase::TTcpSession TcpSession;
-	typedef ServiceBase::TUdpSession UdpSession;
-	typedef ServiceBase::TTcpSession_NoBuffer TcpSessionNoBuffer;
-	typedef ServiceBase::TUdpSession_NoBuffer UdpSessionNoBuffer;
+
 
 }  // namespace FeedTheDog

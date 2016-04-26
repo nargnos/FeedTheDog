@@ -50,7 +50,7 @@ int main()
 	core->AddService(e);
 #if 0
 	// 测试运行中途退出的情况
-	auto& io = core->GetWorkerPool().SelectIdleWorker()->GetIoService();
+	auto& io = core->GetWorkerPool()->SelectIdleWorker()->GetIoService();
 	_ASIO deadline_timer t(io);
 	t.expires_from_now(_BOOST posix_time::seconds(60*30));
 	t.async_wait(_BOOST bind(&ServiceManager::Stop, core));

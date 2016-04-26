@@ -29,6 +29,18 @@
     <ClCompile Include="EchoService.cpp">
       <Filter>Service\Echo</Filter>
     </ClCompile>
+    <ClCompile Include="Worker.cpp">
+      <Filter>Service Manager\Worker</Filter>
+    </ClCompile>
+    <ClCompile Include="WorkerBase.cpp">
+      <Filter>Service Manager\Worker</Filter>
+    </ClCompile>
+    <ClCompile Include="ServiceBase.cpp">
+      <Filter>Service\ServiceBase</Filter>
+    </ClCompile>
+    <ClCompile Include="WorkerPool.cpp">
+      <Filter>Service Manager\Worker</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -93,23 +105,11 @@
     <ClInclude Include="Common.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="Owner.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="WorkerPolicy.h">
-      <Filter>Service Manager\Worker</Filter>
-    </ClInclude>
     <ClInclude Include="TracePolicy.h">
       <Filter>Trace</Filter>
     </ClInclude>
     <ClInclude Include="SessionPoolPolicy.h">
       <Filter>Service Manager\Worker\SessionPool</Filter>
-    </ClInclude>
-    <ClInclude Include="CorePolicy.h">
-      <Filter>Service Manager</Filter>
-    </ClInclude>
-    <ClInclude Include="ServicePolicy.h">
-      <Filter>Service\ServiceBase</Filter>
     </ClInclude>
     <ClInclude Include="SessionManager.h">
       <Filter>Service\ServiceBase</Filter>
@@ -137,6 +137,18 @@
     </ClInclude>
     <ClInclude Include="ITraceConfig.h">
       <Filter>Trace</Filter>
+    </ClInclude>
+    <ClInclude Include="SessionImpl.h">
+      <Filter>Service Manager\Worker\SessionPool</Filter>
+    </ClInclude>
+    <ClInclude Include="SpinLock.h">
+      <Filter>Service Manager\Worker\SessionPool</Filter>
+    </ClInclude>
+    <ClInclude Include="ServiceBaseImpl.h">
+      <Filter>Service\ServiceBase</Filter>
+    </ClInclude>
+    <ClInclude Include="CorePolicy.h">
+      <Filter>Service Manager</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

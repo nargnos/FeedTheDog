@@ -1,11 +1,10 @@
 #pragma once
 #include "Define.h"
-#include "WorkerPolicy.h"
 namespace FeedTheDog
 {
 	struct CorePolicy
 	{
-		typedef Worker<WorkerPolicy> TWorker;
+		typedef Worker TWorker;
 		template<typename TManager>
 		struct TService
 		{			
@@ -13,7 +12,7 @@ namespace FeedTheDog
 		};
 		typedef Config TConfig;
 		typedef TraceSource TTraceSource;
-		typedef WorkerPool<TWorker> TWorkerPool;
+		typedef WorkerPool TWorkerPool;
 	};
 
 }  // namespace FeedTheDog

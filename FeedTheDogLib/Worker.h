@@ -1,39 +1,37 @@
 #pragma once
+#include "Define.h"
 #include "WorkerBase.h"
+#include "SessionPoolPolicy.h"
 namespace FeedTheDog
 {
-	template<typename TWorkerPolicy>
 	class Worker :
 		public WorkerBase
 	{
 	public:
-		typedef typename TWorkerPolicy::TTcp TTcp;
-		typedef typename TWorkerPolicy::TUdp TUdp;
-
+		typedef _ASIO ip::tcp TTcp;
+		typedef _ASIO ip::udp TUdp;
+		
 		template<typename TProtocol>
 		struct TSessionPool
 		{
-			typedef typename TWorkerPolicy::template TSessionPool<TProtocol, Worker>::TSessionPoolType TSessionPoolType;
+			// 修改SessionPool类型在此处
+			typedef SessionPool<TProtocol, SessionPoolPolicy, MemoryPoolPolicy, SessionStoragePolicy> TSessionPoolType;
 		};
 
 		typedef typename TSessionPool<TTcp>::TSessionPoolType TTcpSessionPool;
 		typedef typename TSessionPool<TUdp>::TSessionPoolType TUdpSessionPool;
 
-		Worker()
-		{
+		Worker();
+		~Worker();
 
-			tcpSessionPool = make_unique<TTcpSessionPool>(this, ioService);
-			udpSessionPool = make_unique<TUdpSessionPool>(this, ioService);
-		}
-		~Worker()
-		{
-		}
+		unsigned int GetSessionCount() const;
 
-		unsigned int GetSessionCount() const
-		{
-			return tcpSessionPool->GetSessionCount() +
-				udpSessionPool->GetSessionCount();
-		}
+		friend class WorkerFriendProxy;
+	private:
+		unique_ptr<TTcpSessionPool> tcpSessionPool;
+		unique_ptr<TUdpSessionPool> udpSessionPool;
+
+		virtual void CloseAllSessions() override;
 		template<typename TProtocol>
 		inline const unique_ptr<typename TSessionPool<TProtocol>::TSessionPoolType>& GetSessionPool() const;
 
@@ -47,18 +45,7 @@ namespace FeedTheDog
 		{
 			return udpSessionPool;
 		}
-	private:
-		unique_ptr<TTcpSessionPool> tcpSessionPool;
-		unique_ptr<TUdpSessionPool> udpSessionPool;
-
-		virtual void CloseAllSessions() override
-		{
-			tcpSessionPool->__PreDestruct();
-			tcpSessionPool->CloseAll();
-
-			udpSessionPool->__PreDestruct();
-			udpSessionPool->CloseAll();
-
-		}
 	};
+
+
 }  // namespace FeedTheDog

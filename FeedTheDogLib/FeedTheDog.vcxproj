@@ -187,9 +187,9 @@
     <ClInclude Include="Config.h" />
     <ClInclude Include="Core.h" />
     <ClInclude Include="ConsoleListener.h" />
+    <ClInclude Include="CorePolicy.h" />
     <ClInclude Include="DebugListener.h" />
     <ClInclude Include="FileListener.h" />
-    <ClInclude Include="Owner.h" />
     <ClInclude Include="IAddon.h" />
     <ClInclude Include="IListener.h" />
     <ClInclude Include="ITraceConfig.h" />
@@ -197,12 +197,14 @@
     <ClInclude Include="ListenerFactory.h" />
     <ClInclude Include="Rfc1928.h" />
     <ClInclude Include="Rfc1928Def.h" />
+    <ClInclude Include="ServiceBaseImpl.h" />
     <ClInclude Include="ServiceManager.h" />
-    <ClInclude Include="ServicePolicy.h" />
     <ClInclude Include="Session.h" />
     <ClInclude Include="SessionBase.h" />
+    <ClInclude Include="SessionImpl.h" />
     <ClInclude Include="SessionManager.h" />
     <ClInclude Include="SessionPool.h" />
+    <ClInclude Include="SpinLock.h" />
     <ClInclude Include="TraceFormat.h" />
     <ClInclude Include="TraceLevel.h" />
     <ClInclude Include="TraceSource.h" />
@@ -214,11 +216,9 @@
     <ClInclude Include="ServiceBase.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="CorePolicy.h" />
     <ClInclude Include="SessionPoolPolicy.h" />
     <ClInclude Include="Define.h" />
     <ClInclude Include="WorkerBase.h" />
-    <ClInclude Include="WorkerPolicy.h" />
     <ClInclude Include="WorkerPool.h" />
   </ItemGroup>
   <ItemGroup>
@@ -229,6 +229,7 @@
     <ClCompile Include="ListenerBase.cpp" />
     <ClCompile Include="ListenerFactory.cpp" />
     <ClCompile Include="Rfc1928.cpp" />
+    <ClCompile Include="ServiceBase.cpp" />
     <ClCompile Include="TraceLevel.cpp" />
     <ClCompile Include="EchoService.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -237,6 +238,9 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Worker.cpp" />
+    <ClCompile Include="WorkerBase.cpp" />
+    <ClCompile Include="WorkerPool.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\JsonCpp\JsonCpp.vcxproj">

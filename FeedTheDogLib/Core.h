@@ -1,5 +1,4 @@
 #pragma once
-#include "WorkerPool.h"
 namespace FeedTheDog
 {
 	// Service Manager
@@ -16,6 +15,7 @@ namespace FeedTheDog
 
 		Core() :
 			isStopped(true),
+			workerPool(make_unique<TWorkerPool>()),
 			config(make_unique<TConfig>())
 		{
 			trace = make_unique<TTraceSource>(*config);
@@ -58,7 +58,7 @@ namespace FeedTheDog
 		{
 			GetTrace()->DebugPoint("Core Start");
 			isStopped = false;
-			workerPool.Start();
+			workerPool->Start();
 		}
 		void Stop()
 		{
@@ -75,18 +75,18 @@ namespace FeedTheDog
 				var.second->Stop();
 			}
 			// 此处会关并删掉会话
-			workerPool.Stop();
+			workerPool->Stop();
 		}
 		inline const unique_ptr<TTraceSource>& GetTrace() const
 		{
 			return trace;
 		}
-		inline const TWorkerPool& GetWorkerPool() const
+		inline const unique_ptr<TWorkerPool>& GetWorkerPool() const
 		{
 			return workerPool;
 		}
 	private:
-		TWorkerPool workerPool; // workerPool持有ioservice，必须比service后析构，此声明位置不可调整
+		unique_ptr<TWorkerPool> workerPool; // workerPool持有ioservice，必须比service后析构，此声明位置不可调整
 		concurrent_unordered_map<string, shared_ptr<TService>> services;
 
 		unique_ptr<TConfig> config;
