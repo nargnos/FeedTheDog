@@ -105,7 +105,6 @@ namespace FeedTheDog
 		TServiceManager* manager;
 		const char* name_;
 		bool isInitialized;
-		int h;
 	private:
 		template<typename TProtocol>
 		const unique_ptr<typename TSessionPool<TProtocol>::TSessionPoolType>& GetSessionPool()

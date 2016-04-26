@@ -35,7 +35,11 @@ namespace FeedTheDog
 		_STD vector<shared_ptr<thread>> threads;
 		for (size_t i = 1; i < threadCount; i++)
 		{
-			threads.push_back(make_shared<thread>(_BOOST bind(&TWorker::Start, workers[i].get())));
+			threads.push_back(make_shared<thread>(
+				[worker = workers[i].get()]()
+			{
+				worker->Start();
+			}));
 		}
 		workers[0]->Start();
 		// join等待所有线程结束

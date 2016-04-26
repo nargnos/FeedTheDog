@@ -2,6 +2,8 @@
 #include "ServiceBaseImpl.h"
 namespace FeedTheDog
 {
+
+	// TODO: session连接需要加密或者代理等扩展，要么做到addon里，要么做成新service，post到新的处理
 	class ServiceBase :
 		public IService<typename ServiceBaseImpl::TServiceManager>
 	{

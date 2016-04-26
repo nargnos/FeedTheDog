@@ -219,7 +219,8 @@ namespace FeedTheDog
 
 
 	// 除了domain字符串，其传入结构都是网络序
-	class EndPointParser
+	class EndPointParser :
+		public _BOOST noncopyable
 	{
 	public:
 		enum Atyp :unsigned char
@@ -232,21 +233,21 @@ namespace FeedTheDog
 			aytp(AtypIPv4),
 			port(_ASIO detail::socket_ops::network_to_host_short(val->Port))
 		{
-			new (buffer.data()) _ASIO ip::address_v4(_ASIO detail::socket_ops::network_to_host_long(val->Ipv4));
+			new (GetBufferPtr()) _ASIO ip::address_v4(_ASIO detail::socket_ops::network_to_host_long(val->Ipv4));
 		}
 		// FIX: ipv6字节序
 		EndPointParser(const IPv6* val) :
 			aytp(AtypIPv6),
 			port(_ASIO detail::socket_ops::network_to_host_short(val->Port))
 		{
-			new (buffer.data()) _ASIO ip::address_v6(val->Ipv6);
+			new (GetBufferPtr()) _ASIO ip::address_v6(val->Ipv6);
 		}
 		// domainPtr字符串（无NULL结尾）后必须跟2位端口号
 		EndPointParser(const char* domainPtr, size_t domainLen) :
 			aytp(AtypDomainName),
 			port(_ASIO detail::socket_ops::network_to_host_short(*reinterpret_cast<const unsigned short*>(domainPtr + domainLen)))
 		{
-			new (buffer.data()) _STD string(domainPtr, domainLen);
+			new (GetBufferPtr()) _STD string(domainPtr, domainLen);
 		}
 		EndPointParser(const EndPointParser& val)
 		{
@@ -256,7 +257,7 @@ namespace FeedTheDog
 			}
 			this->aytp = val.aytp;
 			this->port = val.port;
-			memcpy_s(buffer.data(), UnionTypeSize, val.buffer.data(), val.UnionTypeSize);
+			memcpy_s(GetBufferPtr(), UnionTypeSize, val.GetBufferPtr(), val.UnionTypeSize);
 
 		}
 		~EndPointParser()
@@ -305,7 +306,7 @@ namespace FeedTheDog
 		{
 			return aytp;
 		}
-	private:	
+	private:
 		typedef union
 		{
 			_ASIO ip::address_v4 ipv4;
@@ -319,20 +320,27 @@ namespace FeedTheDog
 		_STD array<unsigned char, UnionTypeSize> buffer;
 		unsigned short port;
 		Atyp aytp;
-
+		unsigned char* GetBufferPtr()
+		{
+			return buffer.data();
+		}
+		const unsigned char* GetBufferPtr() const
+		{
+			return GetBufferPtr();
+		}
 		_ASIO ip::address_v4* GetV4Addr()
 		{
-			return reinterpret_cast<_ASIO ip::address_v4*>(buffer.data());
+			return reinterpret_cast<_ASIO ip::address_v4*>(GetBufferPtr());
 		}
 		_ASIO ip::address_v6* GetV6Addr()
 		{
-			return reinterpret_cast<_ASIO ip::address_v6*>(buffer.data());
+			return reinterpret_cast<_ASIO ip::address_v6*>(GetBufferPtr());
 		}
 		_STD string* GetDomain()
 		{
-			return reinterpret_cast<_STD string*>(buffer.data());
+			return reinterpret_cast<_STD string*>(GetBufferPtr());
 		}
-		
+
 	};
 
 	template<typename TSession>

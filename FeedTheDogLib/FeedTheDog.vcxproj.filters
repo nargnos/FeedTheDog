@@ -41,6 +41,9 @@
     <ClCompile Include="WorkerPool.cpp">
       <Filter>Service Manager\Worker</Filter>
     </ClCompile>
+    <ClCompile Include="SpinLock.cpp">
+      <Filter>Service Manager\Worker\SessionPool</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />

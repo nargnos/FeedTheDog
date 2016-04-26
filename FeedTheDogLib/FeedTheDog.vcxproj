@@ -230,6 +230,7 @@
     <ClCompile Include="ListenerFactory.cpp" />
     <ClCompile Include="Rfc1928.cpp" />
     <ClCompile Include="ServiceBase.cpp" />
+    <ClCompile Include="SpinLock.cpp" />
     <ClCompile Include="TraceLevel.cpp" />
     <ClCompile Include="EchoService.cpp" />
     <ClCompile Include="stdafx.cpp">
