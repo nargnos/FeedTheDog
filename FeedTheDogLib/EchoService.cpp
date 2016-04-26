@@ -6,7 +6,8 @@ namespace FeedTheDog
 
 	EchoService::EchoService(int port, const char* name) :
 		ServiceBase(name),
-		port_(port)
+		port_(port),
+		isStopped(false)
 	{
 	}
 

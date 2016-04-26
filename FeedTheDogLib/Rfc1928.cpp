@@ -5,7 +5,8 @@ namespace FeedTheDog
 	Rfc1928::Rfc1928(int port, const char* name, int timeout)
 		:ServiceBase(name),
 		port_(port),
-		timeoutSecond(timeout)
+		timeoutSecond(timeout),
+		isStopped(false)
 	{
 	}
 

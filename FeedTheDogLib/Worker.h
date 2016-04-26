@@ -30,7 +30,6 @@ namespace FeedTheDog
 	private:
 		unique_ptr<TTcpSessionPool> tcpSessionPool;
 		unique_ptr<TUdpSessionPool> udpSessionPool;
-
 		virtual void CloseAllSessions() override;
 		template<typename TProtocol>
 		inline const unique_ptr<typename TSessionPool<TProtocol>::TSessionPoolType>& GetSessionPool() const;
