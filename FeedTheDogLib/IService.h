@@ -6,7 +6,6 @@ namespace FeedTheDog
 	template<typename TServiceManager>
 	struct IService
 	{
-		typedef TServiceManager TServiceManager;
 		virtual const char* Name() const = 0;
 		virtual void Start() = 0;
 		virtual void Stop() = 0;

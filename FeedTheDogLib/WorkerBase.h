@@ -14,14 +14,16 @@ namespace FeedTheDog
 		void Start();
 		// 只在程序结束使用
 		void Stop();
-		_ASIO io_service& GetIoService();
+		_ASIO io_service& FASTCALL GetIoService();
+		const _ASIO io_service& FASTCALL GetIoService() const;
+		unsigned int FASTCALL GetSessionCount() const;
 	protected:
-		_ASIO io_service ioService;
-		unique_ptr<_ASIO io_service::work> work;
-		int id;
-
-		bool isRunning;
-		virtual void CloseAllSessions() = 0;
+		ALIGN _STD atomic<size_t> counter_;
+		ALIGN _ASIO io_service ioService_;
+		unique_ptr<_ASIO io_service::work> work_;
+		
+		int id_;
+		bool isRunning_;
 	};
 
 }  // namespace FeedTheDog

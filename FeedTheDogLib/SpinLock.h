@@ -1,7 +1,7 @@
 #pragma once
 namespace FeedTheDog
 {
-	class SpinLock :
+	class SpinLock final:
 		_BOOST noncopyable
 	{
 	public:
@@ -13,11 +13,11 @@ namespace FeedTheDog
 		inline void ThreadYield(unsigned int k);
 		_STD atomic_flag lock = ATOMIC_VAR_INIT(false);
 	};
-	class SpinLockGuard :
+	class SpinLockGuard final :
 		public _BOOST noncopyable
 	{
 	public:
-		SpinLockGuard(SpinLock& lock);
+		explicit SpinLockGuard(SpinLock& lock);
 
 		~SpinLockGuard();
 

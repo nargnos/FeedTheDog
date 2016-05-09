@@ -5,26 +5,18 @@ namespace FeedTheDog
 {
 	Worker::Worker()
 	{
-		tcpSessionPool = make_unique<TTcpSessionPool>(ioService);
-		udpSessionPool = make_unique<TUdpSessionPool>(ioService);
+
+		ForEachTypes<
+			TcpSession,
+			UdpSession,
+			TcpSessionNoBuffer,
+			UdpSessionNoBuffer
+		>::Run(CreatePools(*this));
+
+		ForEachTypes<Tcp, Udp>::Run(CreateResolvers(*this));
 	}
 	Worker::~Worker()
 	{
 	}
-	unsigned int Worker::GetSessionCount() const
-	{
-		return tcpSessionPool->GetSessionCount() +
-			udpSessionPool->GetSessionCount();
-	}
-	void Worker::CloseAllSessions()
-	{
-		tcpSessionPool->__PreDestruct();
-		tcpSessionPool->CloseAll();
-
-		udpSessionPool->__PreDestruct();
-		udpSessionPool->CloseAll();
-
-	}
-
 }  // namespace FeedTheDog
 

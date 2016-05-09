@@ -5,7 +5,8 @@ namespace FeedTheDog
 {
 	// TODO: 功能待完善，文件那里要能按日期分
 	class Config :
-		public TraceSource::TTraceConfig
+		public TraceSource::TTraceConfig,
+		public _BOOST noncopyable
 	{
 	public:
 		Config();

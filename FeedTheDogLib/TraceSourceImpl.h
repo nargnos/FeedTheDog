@@ -3,10 +3,11 @@
 namespace FeedTheDog
 {
 #ifdef _DEBUG
-	//#define OPEN_DEBUGPOINT
+	#define OPEN_DEBUGPOINT
 #endif // _DEBUG
 	template<typename TTracePolicy>
-	class TraceSourceImpl
+	class TraceSourceImpl:
+		public _BOOST noncopyable
 	{
 	public:
 		typedef typename TTracePolicy::TTraceLevel TTraceLevel;
@@ -31,14 +32,14 @@ namespace FeedTheDog
 
 		}
 
-		void __fastcall DebugPoint(const char* msg, bool useIndex = false, int index = 0, const char* str = NULL)
+		void FASTCALL DebugPoint(const char* msg, bool useIndex = false, int index = 0, const char* str = NULL)
 		{
 #ifdef OPEN_DEBUGPOINT
 			TracePoint(msg, useIndex, index, str, TLevel::Debug);
 #endif // OPEN_DEBUGPOINT
 		}
 
-		void __fastcall TracePoint(const char* msg, bool useIndex = false, int index = 0, const char* str = NULL, TLevel level = TLevel::Debug)
+		void FASTCALL TracePoint(const char* msg, bool useIndex = false, int index = 0, const char* str = NULL, TLevel level = TLevel::Debug)
 		{
 			if (!openTrace)
 			{
@@ -52,7 +53,7 @@ namespace FeedTheDog
 			TTracePolicy::WriteLine(listeners, msgStr, level);
 		}
 
-		void __fastcall TracePoint(const char* msg, TLevel level)
+		void FASTCALL TracePoint(const char* msg, TLevel level)
 		{
 			TracePoint(msg, false, 0, NULL, level);
 		}

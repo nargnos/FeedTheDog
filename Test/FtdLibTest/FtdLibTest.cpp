@@ -15,11 +15,11 @@ namespace FeedTheDog
 	class WorkerFriendProxy
 	{
 	public:
-		template<typename TProtocol, typename TWorker>
-		static const unique_ptr<typename TWorker::template TSessionPool<TProtocol>::TSessionPoolType>&
+		template<typename TProtocol, typename TWorker,typename TSession=TWorker::TSession<TProtocol, false>>
+		static const unique_ptr<typename TWorker::template TSessionPool<TSession>>&
 			GetSessionPool(TWorker* worker)
 		{
-			return worker->GetSessionPool<TProtocol>();
+			return worker->GetSessionPool<TSession>();
 		}
 	private:
 		WorkerFriendProxy() = delete;
@@ -32,14 +32,16 @@ namespace FeedTheDog
 
 void NewSessionTest(FeedTheDog::ServiceManager*core)
 {
-	count = 2000000;
-	// 测试创建析构session的速度，这里分配之后立马析构			
+	//10000;//
+	count =  3000000;
+	// 测试创建析构session的速度，这里分配之后立马析构		
+	//auto& sessionPool = *FeedTheDog::WorkerFriendProxy::GetSessionPool<_ASIO ip::tcp>(core->GetWorkerPool()->SelectIdleWorker());
 	startNewSession = clock();
 	for (size_t i = 0; i < count; i++)
 	{
-		auto tmpSession = FeedTheDog::WorkerFriendProxy::GetSessionPool<_ASIO ip::tcp>(core->GetWorkerPool()->SelectWorker())->NewSession();
+		//sessionPool.NewSession();
+		FeedTheDog::WorkerFriendProxy::GetSessionPool<_ASIO ip::tcp>(core->GetWorkerPool()->SelectIdleWorker())->NewSession();
 	}
-	// 不是new结束时间，newsession把最耗时的部分post进队列了
 	endNewSession = clock();
 	core->Stop();
 }
@@ -74,18 +76,14 @@ int main()
 	auto total = end - startNewSession;
 	os << "运行总时间 " << total << _STD endl;
 	auto plus = endNewSession - startNewSession;
-	os << "执行完new操作的时间 " << plus << _STD endl;
+	os << "执行完所有new/delete操作的时间 " << plus << _STD endl;
 	auto avgNew = plus / (double)count;
-	os << "平均new时间 " << avgNew << _STD endl;
+	os << "平均new/delete时间 " << avgNew << _STD endl;
 
 	os << "善后时间 " << end - endNewSession << _STD endl;
 
-	// 善后和析构部分从开头记起，加上单独的new部分得到较正确的总时间
-	auto avgTime = (total + plus) / (double)count;
-
-	os << "new/delete时间 " << avgTime << _STD endl;
-	os << "每秒可new " << 1 / avgNew << _STD endl;
-	os << "每秒可处理new/delete次数 " << 1 / avgTime << _STD endl;
+	// 创建和析构是同时进行的，跟之前实现的不同
+	os << "每秒可new/delete " << (double)count /plus  << _STD endl;
 
 	os << "结束" << _STD endl;
 
@@ -95,7 +93,7 @@ int main()
 
 
 	_STD cout << os.str();
-	//system("pause");
+	system("pause");
 	return 0;
 }
 

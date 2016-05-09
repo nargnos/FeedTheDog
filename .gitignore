@@ -1,4 +1,4 @@
-# Windows image file caches
+﻿# Windows image file caches
 Thumbs.db
 ehthumbs.db
 
@@ -93,6 +93,9 @@ build/
 bld/
 [Bb]in/
 [Oo]bj/
+
+#排除本地的svn目录
+.svn/
 
 #排除掉Lua库，文件太多了
 [Ll]ua/

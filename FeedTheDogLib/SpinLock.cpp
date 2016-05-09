@@ -35,6 +35,7 @@ namespace FeedTheDog
 #endif
 		else
 		{
+			// _STD cout << ".";
 			_STD this_thread::yield();
 		}
 	}

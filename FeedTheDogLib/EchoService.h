@@ -15,11 +15,11 @@ namespace FeedTheDog
 		bool isStopped;
 		int port_;
 		virtual bool InitService() override;
-		void ReadSome(shared_ptr<TTcpSession>&);
-		void HandleAccept(shared_ptr<TTcpSession>&,const _BOOST system::error_code& error);
-		void HandleRead(shared_ptr<TTcpSession>&, const _BOOST system::error_code& error, size_t bytes_transferred);
+		void FASTCALL ReadSome(shared_ptr<TcpSession>&);
+		void FASTCALL HandleAccept(shared_ptr<TcpSession>&,const _BOOST system::error_code& error);
+		void FASTCALL HandleRead(shared_ptr<TcpSession>&, const _BOOST system::error_code& error, size_t bytes_transferred);
 
-		void HandleWrite(shared_ptr<TTcpSession>& session, const _BOOST system::error_code & error);
+		void FASTCALL HandleWrite(shared_ptr<TcpSession>& session, const _BOOST system::error_code & error);
 
 		unique_ptr<_ASIO ip::tcp::acceptor> acceptor;
 

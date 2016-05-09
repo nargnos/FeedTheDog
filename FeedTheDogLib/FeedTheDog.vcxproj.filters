@@ -111,12 +111,6 @@
     <ClInclude Include="TracePolicy.h">
       <Filter>Trace</Filter>
     </ClInclude>
-    <ClInclude Include="SessionPoolPolicy.h">
-      <Filter>Service Manager\Worker\SessionPool</Filter>
-    </ClInclude>
-    <ClInclude Include="SessionManager.h">
-      <Filter>Service\ServiceBase</Filter>
-    </ClInclude>
     <ClInclude Include="WorkerPool.h">
       <Filter>Service Manager\Worker</Filter>
     </ClInclude>
@@ -152,6 +146,15 @@
     </ClInclude>
     <ClInclude Include="CorePolicy.h">
       <Filter>Service Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="CommondSession.h">
+      <Filter>Service\ServiceBase</Filter>
+    </ClInclude>
+    <ClInclude Include="SessionPoolImpl.h">
+      <Filter>Service Manager\Worker\SessionPool</Filter>
+    </ClInclude>
+    <ClInclude Include="ForEachTypes.h">
+      <Filter>Common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

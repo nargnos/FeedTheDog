@@ -5,89 +5,40 @@ namespace FeedTheDog
 
 	// TODO: session连接需要加密或者代理等扩展，要么做到addon里，要么做成新service，post到新的处理
 	class ServiceBase :
-		public IService<typename ServiceBaseImpl::TServiceManager>
+		public IService<ServiceDefines::TServiceManager>,
+		public _BOOST noncopyable,
+		public ServiceDefines
 	{
 	public:
-		// 这些类型可以替换成Wapper
-		typedef typename TServiceManager::TWorker TWorker;
-		typedef typename TServiceManager::TTraceSource TTraceSource;
-		typedef typename TServiceManager::TWorkerPool TWorkerPool;
-		typedef typename TServiceManager::TTraceSource::TLevel TLevel;
-		typedef typename TWorker::TTcp TTcp;
-		typedef typename TWorker::TUdp TUdp;
-		typedef typename TWorker::TTcpSessionPool TTcpSessionPool;
-		typedef typename TTcpSessionPool::TSession TTcpSession;
-		typedef typename TTcpSessionPool::TSession_NoBuffer TTcpSession_NoBuffer;
-		typedef typename TWorker::TUdpSessionPool TUdpSessionPool;
-		typedef typename TUdpSessionPool::TSession TUdpSession;
-		typedef typename TUdpSessionPool::TSession_NoBuffer TUdpSession_NoBuffer;
+	
+		ServiceBase(const char* name);
 
-		template<typename TProtocol>
-		struct TSessionPool
-		{
-			typedef typename TWorker::template TSessionPool<TProtocol>::TSessionPoolType TSessionPoolType;
-		};
-		template<typename TProtocol, bool hasBuffer>
-		struct TSession
-		{
-			typedef typename TSessionPool<TProtocol>::TSessionPoolType::template THasBuffer<hasBuffer>::TSessionType TSessionType;
-		};
-		ServiceBase(const char* name):
-			impl_(make_unique<ServiceBaseImpl>(name))
-		{
-		}
+		~ServiceBase();
 
-		~ServiceBase()
-		{
-		}
-
-		virtual const char * Name() const override
-		{
-			return impl_->Name();
-		}
-		virtual bool Init(TServiceManager * managerPtr) override
-		{
-			impl_->Init(managerPtr);
-			return InitService();
-		}
-		virtual bool AddAddon(shared_ptr<IAddon>& addon) override
-		{
-			return impl_ ->AddAddon(addon);
-		}
-		virtual void RemoveAddon(const char * ptr) override
-		{
-			return impl_->RemoveAddon(ptr);
-		}
+		virtual const char * Name() const override;
+		virtual bool Init(TServiceManager * managerPtr) override;
+		virtual bool AddAddon(shared_ptr<IAddon>& addon) override;
+		virtual void RemoveAddon(const char * ptr) override;
 	protected:
 		virtual bool InitService() = 0;
-		inline TWorker* SelectIdleWorker()
-		{
-			return impl_->SelectIdleWorker();
-		}
-		inline const unique_ptr<TTraceSource>& GetTrace() const
-		{
-			return impl_->GetTrace();
-		}
-		inline TWorker* SelectWorker()
-		{
-			return impl_->SelectWorker();
-		}
+		ServiceBase::TWorker* FASTCALL SelectIdleWorker();
+		const unique_ptr<ServiceBase::TTraceSource>& FASTCALL GetTrace() const;
+		ServiceBase::TWorker* FASTCALL SelectWorker();
 
 		template<typename TProtocol, bool hasBuffer = true>
-		inline shared_ptr<typename TSession<TProtocol, hasBuffer>::TSessionType> NewSession()
+		inline shared_ptr<TSession<TProtocol, hasBuffer>> FASTCALL NewSession()
 		{
-			return impl_->NewSession<TProtocol,hasBuffer>();
+			return impl_->NewSession<TProtocol, hasBuffer>();
 		}
-
 		template<typename TProtocol>
-		inline typename TSessionPool<TProtocol>::TSessionPoolType::TResolver& GetResolver()
+		inline const _STD unique_ptr<TResolver<TProtocol>>& FASTCALL GetResolver() const
 		{
 			return impl_->GetResolver<TProtocol>();
 		}
 
 	private:
-		unique_ptr<ServiceBaseImpl> impl_;
-
+		using ImplPtr = unique_ptr<ServiceBaseImpl>;
+		ImplPtr impl_;
 	};
 
 

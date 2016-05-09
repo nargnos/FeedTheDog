@@ -7,10 +7,10 @@ namespace FeedTheDog
 	class Core;
 	class Worker;
 
-	template< typename, typename, typename, typename>
+	template<typename>
 	class SessionPool;
 
-	template<typename, typename,bool>
+	template<typename,bool>
 	class Session;
 	class Config;
 	class WorkerPool;

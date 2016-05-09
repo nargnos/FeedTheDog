@@ -6,7 +6,7 @@ namespace FeedTheDog
 	class TraceFormat
 	{
 	public:
-		static ostringstream __fastcall Format(const char* msg, bool useIndex, int index, const char* str,typename TTraceLevel::Level level)
+		static ostringstream FASTCALL Format(const char* msg, bool useIndex, int index, const char* str,typename TTraceLevel::Level level)
 		{
 			auto time = _STD chrono::system_clock::to_time_t(_STD chrono::system_clock::now());
 
@@ -29,11 +29,11 @@ namespace FeedTheDog
 
 			return result;
 		}
-
-		~TraceFormat() = default;
-	private:
+private:
+		~TraceFormat() = delete;
+	
 		static const int TimeBufferSize = 64;
-		TraceFormat() = default;
+		TraceFormat() = delete;
 	};
 }  // namespace FeedTheDog
 

@@ -1,41 +1,48 @@
 #pragma once
 #include "ServiceManager.h"
-#include "SessionManager.h"
 namespace FeedTheDog
 {
 	class WorkerFriendProxy;
 
-	class ServiceBaseImpl
+	struct ServiceDefines
+	{
+		using TServiceManager = ServiceManager;
+
+		using TWorker = typename TServiceManager::TWorker;
+		using TTraceSource = typename TServiceManager::TTraceSource;
+		using TWorkerPool = typename TServiceManager::TWorkerPool;
+		using TLevel = typename TServiceManager::TTraceSource::TLevel;
+
+		using Tcp = typename TWorker::Tcp;
+		using Udp = typename TWorker::Udp;
+
+		using TcpSessionPool = typename TWorker::TcpSessionPool;
+		using TcpSession = typename TWorker::TcpSession;
+
+		using UdpSessionPool = typename TWorker::UdpSessionPool;
+		using UdpSession = typename TWorker::UdpSession;
+
+		using TcpSessionPoolNoBuffer = typename TWorker::TcpSessionPoolNoBuffer;
+		using TcpSessionNoBuffer = typename TWorker::TcpSessionNoBuffer;
+
+		using UdpSessionPoolNoBuffer = typename TWorker::UdpSessionPoolNoBuffer;
+		using UdpSessionNoBuffer = typename TWorker::UdpSessionNoBuffer;
+
+		template<typename TSession>
+		using TSessionPool = typename TWorker::TSessionPool<TSession>;
+
+		template<typename TProtocol, bool hasBuffer>
+		using TSession = typename TWorker::TSession<TProtocol, hasBuffer>;
+
+		template<typename TProtocol>
+		using TResolver = typename TWorker::TResolver<TProtocol>;
+	};
+
+	class ServiceBaseImpl :
+		private ServiceDefines
 	{
 	public:
 		friend class ServiceBase;
-		typedef ServiceManager TServiceManager;
-		typedef SessionManager TSessionManager;
-
-		typedef typename TServiceManager::TWorker TWorker;
-		typedef typename TServiceManager::TTraceSource TTraceSource;
-		typedef typename TServiceManager::TWorkerPool TWorkerPool;
-		typedef typename TServiceManager::TTraceSource::TLevel TLevel;
-		typedef typename TWorker::TTcp TTcp;
-		typedef typename TWorker::TUdp TUdp;
-		typedef typename TWorker::TTcpSessionPool TTcpSessionPool;
-		typedef typename TTcpSessionPool::TSession TTcpSession;
-		typedef typename TTcpSessionPool::TSession_NoBuffer TTcpSession_NoBuffer;
-		typedef typename TWorker::TUdpSessionPool TUdpSessionPool;
-		typedef typename TUdpSessionPool::TSession TUdpSession;
-		typedef typename TUdpSessionPool::TSession_NoBuffer TUdpSession_NoBuffer;
-
-		template<typename TProtocol>
-		struct TSessionPool
-		{
-			typedef typename TWorker::template TSessionPool<TProtocol>::TSessionPoolType TSessionPoolType;
-		};
-		template<typename TProtocol, bool hasBuffer>
-		struct TSession
-		{
-			typedef typename TSessionPool<TProtocol>::TSessionPoolType::template THasBuffer<hasBuffer>::TSessionType TSessionType;
-		};
-
 
 		ServiceBaseImpl(const char* name)
 		{
@@ -74,31 +81,31 @@ namespace FeedTheDog
 		{
 		}
 	protected:
-		inline TWorker* SelectIdleWorker()
+		inline TWorker* FASTCALL SelectIdleWorker()
 		{
 			assert(isInitialized);
 			return manager->GetWorkerPool()->SelectIdleWorker();
 		}
-		inline const unique_ptr<TTraceSource>& GetTrace() const
+		inline const unique_ptr<TTraceSource>& FASTCALL GetTrace() const
 		{
 			return manager->GetTrace();
 		}
-		inline TWorker* SelectWorker()
+		inline TWorker* FASTCALL SelectWorker()
 		{
 			assert(isInitialized);
 			return manager->GetWorkerPool()->SelectWorker();
 		}
 
-		template<typename TProtocol, bool hasBuffer = true>
-		inline shared_ptr<typename TSession<TProtocol, hasBuffer>::TSessionType> NewSession()
+		template<typename TProtocol, bool hasBuffer>
+		inline shared_ptr<TSession<TProtocol, hasBuffer>> FASTCALL NewSession()
 		{
-			return GetSessionPool<TProtocol>()->NewSession<hasBuffer>();
+			return GetSessionPool<TProtocol, hasBuffer>()->NewSession();
 		}
 
 		template<typename TProtocol>
-		inline typename TSessionPool<TProtocol>::TSessionPoolType::TResolver& GetResolver()
+		inline const _STD unique_ptr<TResolver<TProtocol>>& FASTCALL GetResolver()
 		{
-			return GetSessionPool<TProtocol>()->GetResolver();
+			return SelectIdleWorker()->GetResolver<TProtocol>();
 		}
 
 		concurrent_unordered_map<string, shared_ptr<IAddon>> addons;
@@ -106,10 +113,10 @@ namespace FeedTheDog
 		const char* name_;
 		bool isInitialized;
 	private:
-		template<typename TProtocol>
-		const unique_ptr<typename TSessionPool<TProtocol>::TSessionPoolType>& GetSessionPool()
+		template<typename TProtocol, bool hasBuffer>
+		const unique_ptr<TSessionPool< TSession<TProtocol, hasBuffer>>>& FASTCALL GetSessionPool()
 		{
-			return WorkerFriendProxy::GetSessionPool<TProtocol>(SelectIdleWorker());
+			return WorkerFriendProxy::GetSessionPool<TSession<TProtocol, hasBuffer>>(SelectIdleWorker());
 		}
 	};
 
@@ -118,11 +125,11 @@ namespace FeedTheDog
 	public:
 		friend ServiceBaseImpl;
 	private:
-		template<typename TProtocol, typename TWorker>
-		static const unique_ptr<typename TWorker::template TSessionPool<TProtocol>::TSessionPoolType>&
-			GetSessionPool(TWorker* worker)
+		template<typename TSession, typename TWorker>
+		static const unique_ptr<typename TWorker::template TSessionPool<TSession>>&
+			FASTCALL GetSessionPool(TWorker* worker)
 		{
-			return worker->GetSessionPool<TProtocol>();
+			return worker->GetSessionPool<TSession>();
 		}
 		WorkerFriendProxy() = delete;
 

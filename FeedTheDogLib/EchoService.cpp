@@ -17,11 +17,7 @@ namespace FeedTheDog
 	}
 	void EchoService::Start()
 	{
-		if (isStopped)
-		{
-			return;
-		}
-		auto& session = NewSession<_ASIO ip::tcp>();
+		auto& session = this->NewSession<Tcp>();
 		auto& socketRef = session->GetSocket();
 		acceptor->async_accept(socketRef,
 			[this, session_ = _STD move(session)](const _BOOST system::error_code & error) mutable
@@ -30,7 +26,7 @@ namespace FeedTheDog
 		});
 
 	}
-	void EchoService::ReadSome(shared_ptr<TTcpSession>& session)
+	void EchoService::ReadSome(shared_ptr<TcpSession>& session)
 	{
 		auto& buffer = session->GetBuffer();
 		auto& sessionRef = *session;
@@ -41,20 +37,15 @@ namespace FeedTheDog
 			HandleRead(session_, error, bytes_transferred);
 		});
 	}
-	void EchoService::HandleAccept(shared_ptr<TTcpSession>& session, const _BOOST system::error_code & error)
+	void EchoService::HandleAccept(shared_ptr<TcpSession>& session, const _BOOST system::error_code & error)
 	{
 		if (!error)
 		{
-			//auto& trace = manager->GetTrace();
-			//auto& endPoint = session->GetSocket().remote_endpoint();
-			//	_STD ostringstream str;
-			//	str << "Service " << name_ << ", New Connection: " << endPoint;
-				//trace->TracePoint(str.str().c_str(), TraceLevel::Trace);
 			ReadSome(session);
 			Start();
 		}
 	}
-	void EchoService::HandleRead(shared_ptr<TTcpSession>& session, const _BOOST system::error_code & error, size_t bytes_transferred)
+	void EchoService::HandleRead(shared_ptr<TcpSession>& session, const _BOOST system::error_code & error, size_t bytes_transferred)
 	{
 		if (!error)
 		{
@@ -68,7 +59,7 @@ namespace FeedTheDog
 		}
 	}
 
-	void EchoService::HandleWrite(shared_ptr<TTcpSession>& session, const _BOOST system::error_code & error)
+	void EchoService::HandleWrite(shared_ptr<TcpSession>& session, const _BOOST system::error_code & error)
 	{
 		if (!error)
 		{

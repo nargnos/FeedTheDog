@@ -19,9 +19,10 @@ namespace FeedTheDog
 
 		static TListenerVector CreateListeners(Json::Value & listenerConfig, bool isBuildAll = false);
 		static const TRegsterType& GetListenerRegister();
-		~ListenerFactory();
 	private:
-		ListenerFactory();
+		~ListenerFactory() = delete;
+
+		ListenerFactory() = delete;
 		template<typename TListener>
 		static unique_ptr<TraceSourcePolicy::TIListener> Create(Json::Value & listenerConfig)
 		{

@@ -38,21 +38,21 @@ int main()
 	using namespace FeedTheDog;
 
 	auto& core = make_shared<ServiceManager>();
-	auto a = make_shared<EchoService>(9999, "Echo No 1");
+	auto a = make_shared<EchoService>(1234, "Echo No 1");
 	core->AddService(a);
 	auto b = make_shared<EchoService>(7788, "Echo No 2");
 	core->AddService(b);
 	auto c = make_shared<Rfc1928>(8080, "rfc1928 server No 1");
 	core->AddService(c);
-	auto d = make_shared<EchoService>(1234, "Echo No 3");
+	auto d = make_shared<EchoService>(9999, "Echo No 3");
 	core->AddService(d);
 	auto e = make_shared<Rfc1928>(9090, "rfc1928 server No 2");
 	core->AddService(e);
-#if 0
+#if 1
 	// 测试运行中途退出的情况
 	auto& io = core->GetWorkerPool()->SelectIdleWorker()->GetIoService();
 	_ASIO deadline_timer t(io);
-	t.expires_from_now(_BOOST posix_time::seconds(60*30));
+	t.expires_from_now(_BOOST posix_time::seconds(60*2));
 	t.async_wait(_BOOST bind(&ServiceManager::Stop, core));
 #endif // fi
 

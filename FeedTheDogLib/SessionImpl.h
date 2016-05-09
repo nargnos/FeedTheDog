@@ -11,67 +11,62 @@ namespace FeedTheDog
 	{
 	public:
 		SessionImpl(io_service& ios) :
-			SessionBase(ios)
+			SessionBase(ios) {}
+		// Tcp
+		template <typename TMutableBufferSequence, typename TReadHandler>
+		void FASTCALL AsyncReadSome(const TMutableBufferSequence& buffers, TReadHandler&& handler)
 		{
-
+			socket_.async_read_some(buffers, _STD forward<TReadHandler>(handler));
 		}
 		// Tcp
-		template <typename MutableBufferSequence, typename ReadHandler>
-		inline void AsyncReadSome(const MutableBufferSequence& buffers, ReadHandler&& handler)
+		template <typename TMutableBufferSequence, typename TWriteHandler>
+		void FASTCALL AsyncWriteSome(const TMutableBufferSequence& buffers,
+			TWriteHandler&& handler)
 		{
-			socket_.async_read_some(buffers, _STD forward<ReadHandler>(handler));
-		}
-		// Tcp
-		template <typename MutableBufferSequence, typename WriteHandler>
-		inline void AsyncWriteSome(const MutableBufferSequence& buffers,
-			WriteHandler&& handler)
-		{
-			socket_.async_write_some(buffers, _STD forward<WriteHandler>(handler));
+			socket_.async_write_some(buffers, _STD forward<TWriteHandler>(handler));
 		}
 
 
 		// Tcp 的一些函数
-		template <typename MutableBufferSequence, typename ReadHandler>
-		inline void AsyncRead(const MutableBufferSequence& buffers, ReadHandler&& handler)
+		template <typename TMutableBufferSequence, typename TReadHandler>
+		void FASTCALL AsyncRead(const TMutableBufferSequence& buffers, TReadHandler&& handler)
 		{
-			_ASIO async_read(socket_, buffers, _STD forward<ReadHandler>(handler));
+			_ASIO async_read(socket_, buffers, _STD forward<TReadHandler>(handler));
 		}
 
-
-
-		template <typename MutableBufferSequence, typename WriteHandler>
-		inline void AsyncWrite(const MutableBufferSequence& buffers, WriteHandler&& handler)
+		template <typename TMutableBufferSequence, typename TWriteHandler>
+		void FASTCALL AsyncWrite(const TMutableBufferSequence& buffers, TWriteHandler&& handler)
 		{
-			_ASIO async_write(socket_, buffers, _STD forward<WriteHandler>(handler));
+			_ASIO async_write(socket_, buffers, _STD forward<TWriteHandler>(handler));
 		}
 
-		template <typename MutableBufferSequence>
-		inline _STD size_t Read(const MutableBufferSequence& buffers, _BOOST system::error_code& ec)
+		template <typename TMutableBufferSequence>
+		_STD size_t FASTCALL Read(const TMutableBufferSequence& buffers, _BOOST system::error_code& ec)
 		{
 			return _ASIO read(socket_, buffers, ec);
 		}
 
-		template <typename ConstBufferSequence>
-		inline _STD size_t Write(const ConstBufferSequence& buffers, _BOOST system::error_code& ec)
+		template <typename TConstBufferSequence>
+		_STD size_t FASTCALL Write(const TConstBufferSequence& buffers, _BOOST system::error_code& ec)
 		{
 			return _ASIO write(socket_, buffers, ec);
 		}
 
-		template <typename Iterator, typename ComposedConnectHandler>
-		inline void AsyncConnect(Iterator begin, ComposedConnectHandler&& handler)
+		template <typename TIterator, typename TComposedConnectHandler>
+		void FASTCALL AsyncConnect(TIterator begin, TComposedConnectHandler&& handler)
 		{
-			_ASIO async_connect(socket_, begin, _STD forward<ComposedConnectHandler>(handler));
+			_ASIO async_connect(socket_, begin, _STD forward<TComposedConnectHandler>(handler));
 		}
 
-		template <typename ConnectHandler>
-		inline void AsyncConnect(
+		template <typename TConnectHandler>
+		void FASTCALL AsyncConnect(
 			const typename TProtocol::endpoint& peer_endpoint,
-			ConnectHandler&& handler)
+			TConnectHandler&& handler)
 		{
-			socket_.async_connect(peer_endpoint, _STD forward<ConnectHandler>(handler));
+			socket_.async_connect(peer_endpoint, _STD forward<TConnectHandler>(handler));
 		}
-	private:
 	};
+
 	template<>
 	class SessionImpl<_ASIO ip::udp> :
 		public SessionBase<_ASIO ip::udp>
@@ -79,30 +74,27 @@ namespace FeedTheDog
 	public:
 
 		SessionImpl(io_service& ios) :
-			SessionBase(ios)
-		{
+			SessionBase(ios) {}
 
-		}
 		// Udp
-		template <typename MutableBufferSequence, typename ReadHandler>
-		inline void AsyncReadSome(
+		template <typename TMutableBufferSequence, typename TReadHandler>
+		void FASTCALL AsyncReadSome(
 			typename TProtocol::endpoint& endpoint,
-			const MutableBufferSequence& buffers,
-			ReadHandler&& handler)
+			const TMutableBufferSequence& buffers,
+			TReadHandler&& handler)
 		{
-			socket_.async_receive_from(buffers, endpoint, _STD forward<ReadHandler>(handler));
+			socket_.async_receive_from(buffers, endpoint, _STD forward<TReadHandler>(handler));
 		}
 
 		// Udp
-		template <typename MutableBufferSequence, typename WriteHandler>
-		inline void AsyncWriteSome(
+		template <typename TMutableBufferSequence, typename TWriteHandler>
+		void FASTCALL AsyncWriteSome(
 			typename TProtocol::endpoint& endpoint,
-			const MutableBufferSequence& buffers,
-			WriteHandler&& handler)
+			const TMutableBufferSequence& buffers,
+			TWriteHandler&& handler)
 		{
-			socket_.async_send_to(buffers, endpoint, _STD forward<WriteHandler>(handler));
+			socket_.async_send_to(buffers, endpoint, _STD forward<TWriteHandler>(handler));
 		}
 		// TODO: 用到再加
-	private:
 	};
 }  // namespace FeedTheDog

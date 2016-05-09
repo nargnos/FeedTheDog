@@ -4,16 +4,25 @@
 namespace FeedTheDog
 {
 	WorkerPool::WorkerPool() :
-		workerIndex(0)
+		workerIndex_(0)
 	{
-		unsigned int core = thread::hardware_concurrency() * 2;
-		threadCount = (core == 0) ? 1 : core;
+		core_ = thread::hardware_concurrency();
+		core_ = (core_ == 0) ? 1 : core_;
+		threadCount_ = core_;
 
-		for (unsigned int i = 0; i < threadCount; i++)
+		for (unsigned int i = 0; i < threadCount_; i++)
 		{
-			workers.push_back(make_unique<TWorker>());
+			auto tmpPtr = _BOOST alignment::aligned_alloc(ALIGNSIZE, sizeof(TWorker));
+			if (tmpPtr == nullptr)
+			{
+				throw;
+			}
+			new (tmpPtr) TWorker();
+			workers_.push_back(WorkerPtr(reinterpret_cast<TWorker*>(tmpPtr)));
 		}
-		isStopped = true;
+		isStopped_ = true;
+		workersBegin_ = workers_.begin();
+		workersEnd_ = workers_.end();
 	}
 
 	WorkerPool::~WorkerPool()
@@ -22,26 +31,35 @@ namespace FeedTheDog
 
 	void WorkerPool::Stop()
 	{
-		for each (auto& var in workers)
+		for each (auto& var in workers_)
 		{
 			var->Stop();
 		}
-		isStopped = true;
+		isStopped_ = true;
 	}
 
 	void WorkerPool::Start()
 	{
-		isStopped = false;
+		isStopped_ = false;
 		_STD vector<shared_ptr<thread>> threads;
-		for (size_t i = 1; i < threadCount; i++)
+		for (size_t i = 0; i < threadCount_; i++)
 		{
-			threads.push_back(make_shared<thread>(
-				[worker = workers[i].get()]()
+			auto tmp = make_shared<thread>(
+				[worker = workers_[i].get()]()
 			{
 				worker->Start();
-			}));
+			});
+#ifdef _WINDOWS_
+			if (core_ > 1)
+			{
+				auto result = SetThreadAffinityMask((HANDLE)tmp->native_handle(), 1 << (i%core_));
+				assert(result);
+			}
+#else
+			// TODO: Linux的线程关联核心
+#endif // _WINDOWS_
+			threads.push_back(tmp);
 		}
-		workers[0]->Start();
 		// join等待所有线程结束
 		for each (auto& var in threads)
 		{
@@ -51,49 +69,54 @@ namespace FeedTheDog
 
 	int WorkerPool::GetWorkerCount() const
 	{
-		return threadCount;
+		return threadCount_;
 	}
 
 	WorkerPool::TWorker * WorkerPool::SelectIdleWorker() const
 	{
-		if (isStopped)
+		TWorker* result = nullptr;
+		if (isStopped_)
 		{
 			// 当core未开时用于分散此时添加的服务
-			return SelectWorker();
+			result = SelectWorker();
 		}
 		else
 		{
-			auto it = workers.begin();
-			TWorker* result = (it++)->get();
-			unsigned int count = result->GetSessionCount();
-			auto end = workers.end();
+			// 大于0是常态，不需要用0比较
+			auto it = workersBegin_;
+			result = (it++)->get();
 
-			while (count != 0 && it < end)
+			unsigned int count = result->GetSessionCount();
+
+			while (it < workersEnd_)
 			{
 				auto tmp = it->get();
 				auto tmpCount = tmp->GetSessionCount();
 				if (count > tmpCount)
 				{
-					count = tmpCount;
 					result = tmp;
+					count = tmpCount;
 				}
 				++it;
 			}
-			return result;
+
+
 		}
+		assert(result != nullptr);
+		return result;
 	}
 	WorkerPool::TWorker * WorkerPool::SelectWorker() const
 	{
-		return workers[GetWorkerIndex()].get();
+		return workers_[GetWorkerIndex()].get();
 	}
 	int WorkerPool::GetWorkerIndex() const
 	{
-		int index = workerIndex;
+		int index = workerIndex_;
 		int nextIndex = 0;
 		do
 		{
-			nextIndex = (index + 1) % threadCount;
-		} while (!workerIndex.compare_exchange_weak(index, nextIndex, _STD memory_order_release));
+			nextIndex = (index + 1) % threadCount_;
+		} while (!workerIndex_.compare_exchange_weak(index, nextIndex, _STD memory_order_release));
 		return index;
 	}
 }  // namespace FeedTheDog

@@ -77,11 +77,11 @@ namespace FeedTheDog
 			// 此处会关并删掉会话
 			workerPool->Stop();
 		}
-		inline const unique_ptr<TTraceSource>& GetTrace() const
+		inline const unique_ptr<TTraceSource>& FASTCALL GetTrace() const
 		{
 			return trace;
 		}
-		inline const unique_ptr<TWorkerPool>& GetWorkerPool() const
+		inline const unique_ptr<TWorkerPool>& FASTCALL GetWorkerPool() const
 		{
 			return workerPool;
 		}

@@ -98,6 +98,7 @@ namespace FeedTheDog
 			AddressSize = 16
 		};
 		_STD array<unsigned char, AddressSize> Ipv6;
+
 		unsigned short Port;
 	};
 	struct ClientRequestDetailMessage
@@ -219,7 +220,7 @@ namespace FeedTheDog
 
 
 	// 除了domain字符串，其传入结构都是网络序
-	class EndPointParser :
+	class EndPointParser:
 		public _BOOST noncopyable
 	{
 	public:
@@ -231,35 +232,29 @@ namespace FeedTheDog
 		};
 		EndPointParser(const IPv4* val) :
 			aytp(AtypIPv4),
-			port(_ASIO detail::socket_ops::network_to_host_short(val->Port))
+			port(_BOOST endian::big_to_native(val->Port))
 		{
+			// _ASIO detail::socket_ops::network_to_host_short(parser->Port)
+
 			new (GetBufferPtr()) _ASIO ip::address_v4(_ASIO detail::socket_ops::network_to_host_long(val->Ipv4));
 		}
 		// FIX: ipv6字节序
 		EndPointParser(const IPv6* val) :
 			aytp(AtypIPv6),
-			port(_ASIO detail::socket_ops::network_to_host_short(val->Port))
+			port(_BOOST endian::big_to_native(val->Port))
 		{
+			//_ASIO detail::socket_ops::network_to_host_short(parser->Port)
 			new (GetBufferPtr()) _ASIO ip::address_v6(val->Ipv6);
 		}
 		// domainPtr字符串（无NULL结尾）后必须跟2位端口号
 		EndPointParser(const char* domainPtr, size_t domainLen) :
 			aytp(AtypDomainName),
-			port(_ASIO detail::socket_ops::network_to_host_short(*reinterpret_cast<const unsigned short*>(domainPtr + domainLen)))
+			port(_BOOST endian::big_to_native(*reinterpret_cast<const unsigned short*>(domainPtr + domainLen)))
 		{
+			// _ASIO detail::socket_ops::network_to_host_short(*reinterpret_cast<const unsigned short*>(domainPtr + domainLen))
 			new (GetBufferPtr()) _STD string(domainPtr, domainLen);
 		}
-		EndPointParser(const EndPointParser& val)
-		{
-			if (this == &val)
-			{
-				return;
-			}
-			this->aytp = val.aytp;
-			this->port = val.port;
-			memcpy_s(GetBufferPtr(), UnionTypeSize, val.GetBufferPtr(), val.UnionTypeSize);
-
-		}
+	
 		~EndPointParser()
 		{
 			switch (aytp)
@@ -326,19 +321,19 @@ namespace FeedTheDog
 		}
 		const unsigned char* GetBufferPtr() const
 		{
-			return GetBufferPtr();
+			return buffer.data();
 		}
-		_ASIO ip::address_v4* GetV4Addr()
+		const _ASIO ip::address_v4* GetV4Addr() const
 		{
-			return reinterpret_cast<_ASIO ip::address_v4*>(GetBufferPtr());
+			return reinterpret_cast<const _ASIO ip::address_v4*>(GetBufferPtr());
 		}
-		_ASIO ip::address_v6* GetV6Addr()
+		const _ASIO ip::address_v6* GetV6Addr() const
 		{
-			return reinterpret_cast<_ASIO ip::address_v6*>(GetBufferPtr());
+			return reinterpret_cast<const _ASIO ip::address_v6*>(GetBufferPtr());
 		}
-		_STD string* GetDomain()
+		const _STD string* GetDomain() const
 		{
-			return reinterpret_cast<_STD string*>(GetBufferPtr());
+			return reinterpret_cast<const _STD string*>(GetBufferPtr());
 		}
 
 	};

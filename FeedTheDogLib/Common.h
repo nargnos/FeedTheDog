@@ -1,27 +1,32 @@
 #pragma once
-
-
+#ifdef _WINDOWS
+#include <Windows.h>
+#endif
 #include <json\json.h>
 #define ASIO_HAS_MOVE
 #include <boost\asio.hpp>
 #include <boost\bind.hpp>
-#include <boost\bind\protect.hpp>
-#include <boost\atomic.hpp>
+#include <boost\align.hpp>
+#include <boost\pool\object_pool.hpp>
 #include <boost\pool\pool.hpp>
 #include <boost\utility.hpp>
 #include <boost\pool\pool_alloc.hpp>
-#include <boost\lockfree\queue.hpp>
 #include <boost\lexical_cast.hpp>
 #include <boost\algorithm\string.hpp>
-#include <filesystem>
+#include <boost\endian\conversion.hpp>
+#include <boost\container\allocator.hpp>
+#include <boost\container\adaptive_pool.hpp>
+#include <boost\container\deque.hpp>
+#include <atomic>
+#include <algorithm>
 #include <fstream>
 #include <vector>
 #include <list>
+#include <queue>
 #include <concurrent_unordered_map.h>
 #include <concurrent_unordered_set.h>
 #include <unordered_map>
 #include <unordered_set>
-
 #include <thread>
 #include <string>
 #include <sstream>
@@ -48,7 +53,7 @@ using Concurrency::concurrent_unordered_map;
 using Concurrency::concurrent_unordered_set;
 
 using Concurrency::concurrent_unordered_multimap;
-
+#define FASTCALL __fastcall
 #define _BOOST boost::
 #define _ASIO _BOOST asio::
 #define ALIGNSIZE 64

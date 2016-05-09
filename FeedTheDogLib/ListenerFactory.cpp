@@ -2,10 +2,7 @@
 #include "ListenerFactory.h"
 namespace FeedTheDog
 {
-	ListenerFactory::ListenerFactory()
-	{
-	}
-
+	
 
 	ListenerFactory::TListenerVector ListenerFactory::CreateListeners(Json::Value & listenerConfig, bool isBuildAll)
 	{
@@ -28,9 +25,6 @@ namespace FeedTheDog
 		return listenerRegister;
 	}
 
-	ListenerFactory::~ListenerFactory()
-	{
-	}
 	// TODO: 这里可以改成用载入dll的方式建立表
 	ListenerFactory::TRegsterType ListenerFactory::listenerRegister
 	{

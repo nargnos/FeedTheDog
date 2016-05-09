@@ -22,9 +22,10 @@ namespace FeedTheDog
 		static const char* Parse(TraceLevel::Level level);
 		inline static const char* ConvertToStr(char level);
 		inline static const char* ConvertToStr(TraceLevel::Level level);
-		~TraceLevel() = default;
 	private:
-		TraceLevel() = default;
+		~TraceLevel() = delete;
+
+		TraceLevel() = delete;
 		static const char* TraceLevelString[];
 		inline static bool CheckLevel(char level);
 	};

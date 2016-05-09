@@ -20,8 +20,8 @@ namespace FeedTheDog
 		{
 			auto& io = SelectIdleWorker()->GetIoService();
 			// ipv4后面再改
-			acceptor = make_unique<_ASIO ip::tcp::acceptor>(io,
-				_ASIO ip::tcp::endpoint(_ASIO ip::tcp::v4(), port_));
+			acceptor = make_unique<Tcp::acceptor>(io,
+				Tcp::endpoint(Tcp::v4(), port_));
 			// 设置支持的函数
 			memset(supportMethods, false, 0xff);
 			// FIX: 需要从配置读取或用策略传入
@@ -41,7 +41,7 @@ namespace FeedTheDog
 			return;
 		}
 		GetTrace()->DebugPoint(__func__);
-		auto& session = NewSession<_ASIO ip::tcp>();
+		auto& session = NewSession<Tcp>();
 		// buffer建议大于1k
 		assert(session->GetBuffer().max_size() > 1024);
 		auto& deadlineSession = make_shared<TTcpDeadlineSession>(_STD move(session));
@@ -351,10 +351,10 @@ namespace FeedTheDog
 		case TEndPointParser::AtypIPv6:
 		{
 
-			auto& remote = NewSession<_ASIO ip::tcp>();
+			auto& remote = NewSession<Tcp>();
 
 			auto& remoteRef = *remote;
-			remoteRef.AsyncConnect(parser->ParseEndpoint<_ASIO ip::tcp>(),
+			remoteRef.AsyncConnect(parser->ParseEndpoint<Tcp>(),
 				[this, ptr = _STD move(deadlineSession), remotePtr = _STD move(remote)]
 			(const _BOOST system::error_code & error) mutable {
 				HandleCmdConnectReply(ptr, remotePtr, error);
@@ -364,9 +364,9 @@ namespace FeedTheDog
 		case TEndPointParser::AtypDomainName:
 		{
 
-			GetResolver<_ASIO ip::tcp>().async_resolve(parser->ParseDomain<_ASIO ip::tcp>(),
+			GetResolver<Tcp>()->async_resolve(parser->ParseDomain<Tcp>(),
 				[this, ptr = _STD move(deadlineSession)]
-			(const _BOOST system::error_code & error, const _ASIO ip::tcp::resolver::iterator& endpoint_iterator) mutable {
+			(const _BOOST system::error_code & error, const Tcp::resolver::iterator& endpoint_iterator) mutable {
 				HandleResolver(ptr, endpoint_iterator, error);
 			});
 		}
@@ -378,7 +378,7 @@ namespace FeedTheDog
 	}
 
 	void Rfc1928::HandleResolver(shared_ptr<TTcpDeadlineSession>& deadlineSession,
-		const _ASIO ip::tcp::resolver::iterator& endpoint_iterator, const _BOOST system::error_code & error)
+		const Tcp::resolver::iterator& endpoint_iterator, const _BOOST system::error_code & error)
 	{
 		GetTrace()->DebugPoint(__func__);
 		if (isStopped)
@@ -394,19 +394,19 @@ namespace FeedTheDog
 		}
 
 		auto& session = deadlineSession->GetSession();
-		auto& remote = NewSession<_ASIO ip::tcp>();
+		auto& remote = NewSession<Tcp>();
 
 
 		auto& remoteRef = *remote;
 		remoteRef.AsyncConnect(endpoint_iterator,
 			[this, ptr = _STD move(deadlineSession), remotePtr = _STD move(remote)]
-		(const _BOOST system::error_code & error, const _ASIO ip::tcp::resolver::iterator& endpoint_iterator) mutable {
+		(const _BOOST system::error_code & error, const Tcp::resolver::iterator& endpoint_iterator) mutable {
 			HandleCmdConnectReply(ptr, remotePtr, error);
 		});
 	}
 
 	// 返回值为整个结构（包括地址）长度
-	int Rfc1928::BuildCmdConnectReplyMessage(ServerReplieMessage* reply, shared_ptr<TTcpSession>& remote,
+	int Rfc1928::BuildCmdConnectReplyMessage(ServerReplieMessage* reply, shared_ptr<TcpSession>& remote,
 		const _BOOST system::error_code & error)
 	{
 		GetTrace()->DebugPoint(__func__);
@@ -429,9 +429,9 @@ namespace FeedTheDog
 			{
 				reply->Atyp = ServerReplieMessage::AtypIPv4;
 				auto tmpV4 = reinterpret_cast<IPv4*>(addrPtr);
-				auto remoteV4 = reinterpret_cast<unsigned long*>(addr.to_v4().to_bytes().data());
-				tmpV4->Ipv4 = _ASIO detail::socket_ops::host_to_network_long(*remoteV4);
-				tmpV4->Port = _ASIO detail::socket_ops::host_to_network_short(ep.port());
+				auto remoteV4 = reinterpret_cast<unsigned int*>(addr.to_v4().to_bytes().data());
+				tmpV4->Ipv4 = _BOOST endian::native_to_big(*remoteV4); //_ASIO detail::socket_ops::host_to_network_long(*remoteV4);
+				tmpV4->Port = _BOOST endian::native_to_big(ep.port()); // _ASIO detail::socket_ops::host_to_network_short(ep.port());
 				//tmpV4->Ipv4 = *remoteV4;
 				//tmpV4->Port = ep.port();
 				result += sizeof(IPv4);
@@ -442,8 +442,15 @@ namespace FeedTheDog
 				reply->Atyp = ServerReplieMessage::AtypIPv6;
 				auto tmpV6 = reinterpret_cast<IPv6*>(addrPtr);
 				auto& remoteV6 = addr.to_v6().to_bytes();
+
+#ifdef _WINDOWS_
 				memcpy_s(tmpV6->Ipv6.data(), tmpV6->Ipv6.size(), remoteV6.data(), remoteV6.size());
-				tmpV6->Port = _ASIO detail::socket_ops::host_to_network_short(ep.port());
+#else	
+				auto srcBegin = remoteV6.data();
+				_STD copy(srcBegin, srcBegin + remoteV6.size(), tmpV6->Ipv6.data());
+#endif
+
+				tmpV6->Port = _BOOST endian::native_to_big(ep.port()); //_ASIO detail::socket_ops::host_to_network_short(ep.port());
 				result += sizeof(IPv6);
 			}
 			else
@@ -478,7 +485,7 @@ namespace FeedTheDog
 	}
 
 	void Rfc1928::HandleCmdConnectReply(shared_ptr<TTcpDeadlineSession>& deadlineSession,
-		shared_ptr<TTcpSession>& remote, const _BOOST system::error_code & error)
+		shared_ptr<TcpSession>& remote, const _BOOST system::error_code & error)
 	{
 		GetTrace()->DebugPoint(__func__);
 		if (isStopped)
@@ -495,11 +502,11 @@ namespace FeedTheDog
 		// 此时client的buffer还保留原来的数值
 		auto tmpRequestLen = BuildCmdConnectReplyMessage(reply, remote, error);
 		// 如果有错误返回的是除了地址之外的数据然后关闭连接，文档没写失败了地址发什么
-	
+
 
 		client->AsyncWrite(_ASIO buffer(reply, tmpRequestLen),
 			[this, ptr = _STD move(deadlineSession),
-			remotePtr = _STD move(remote), isRemoteConnected=!error]
+			remotePtr = _STD move(remote), isRemoteConnected = !error]
 		(const _BOOST system::error_code & writeError, size_t bytes_transferred) mutable
 		{
 			if (!isRemoteConnected || writeError)
@@ -519,7 +526,7 @@ namespace FeedTheDog
 
 	}
 
-	void Rfc1928::CreateForward(shared_ptr<TTcpSession>& client, shared_ptr<TTcpSession>& remote)
+	void Rfc1928::CreateForward(shared_ptr<TcpSession>& client, shared_ptr<TcpSession>& remote)
 	{
 		GetTrace()->DebugPoint(__func__);
 		client->AsyncReadSome(_ASIO buffer(client->GetBuffer()),

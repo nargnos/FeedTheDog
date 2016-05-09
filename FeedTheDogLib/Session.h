@@ -13,37 +13,34 @@ namespace FeedTheDog
 		{
 			BufferSize = 1024 * 8
 		};
-		typedef _STD array<unsigned char, BufferSize> TBufferType;
+		using TBufferType = _STD array<unsigned char, BufferSize>;
+
 		TBufferType& GetBuffer()
 		{
-			return buffer;
+			return buffer_;
+		}
+		const TBufferType& GetBuffer() const
+		{
+			return buffer_;
 		}
 	protected:
-		TBufferType buffer;
-
+		TBufferType buffer_;
 	};
 	template<>
 	class SessionBufferType<false>
 	{
 	};
 
-	template<typename TProtocol, typename TSessionPool, bool hasBuffer>
+	template<typename TProtocol, bool hasBuffer>
 	class Session :
 		public SessionImpl<TProtocol>,
 		public SessionBufferType<hasBuffer>
 	{
 	public:
-		friend TSessionPool;
 		Session(io_service& ios) :
 			SessionImpl(ios)
 		{
 		}
-		virtual ~Session()
-		{
-		}
-	protected:
-		typedef typename TSessionPool::template THasBuffer<hasBuffer>::TStorageIterator TStorageIterator;
-		TStorageIterator insertPosition;
 	};
 }  // namespace FeedTheDog
 
