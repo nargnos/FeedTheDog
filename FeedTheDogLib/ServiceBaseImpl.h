@@ -4,136 +4,126 @@ namespace FeedTheDog
 {
 	class WorkerFriendProxy;
 
-	struct ServiceDefines
+	struct ServiceDefines :WorkerDefines
 	{
 		using TServiceManager = ServiceManager;
 
 		using TWorker = typename TServiceManager::TWorker;
-		using TTraceSource = typename TServiceManager::TTraceSource;
 		using TWorkerPool = typename TServiceManager::TWorkerPool;
-		using TLevel = typename TServiceManager::TTraceSource::TLevel;
 
-		using Tcp = typename TWorker::Tcp;
-		using Udp = typename TWorker::Udp;
-
-		using TcpSessionPool = typename TWorker::TcpSessionPool;
-		using TcpSession = typename TWorker::TcpSession;
-
-		using UdpSessionPool = typename TWorker::UdpSessionPool;
-		using UdpSession = typename TWorker::UdpSession;
-
-		using TcpSessionPoolNoBuffer = typename TWorker::TcpSessionPoolNoBuffer;
-		using TcpSessionNoBuffer = typename TWorker::TcpSessionNoBuffer;
-
-		using UdpSessionPoolNoBuffer = typename TWorker::UdpSessionPoolNoBuffer;
-		using UdpSessionNoBuffer = typename TWorker::UdpSessionNoBuffer;
-
-		template<typename TSession>
-		using TSessionPool = typename TWorker::TSessionPool<TSession>;
-
-		template<typename TProtocol, bool hasBuffer>
-		using TSession = typename TWorker::TSession<TProtocol, hasBuffer>;
+	/*	template<typename TProtocol>
+		using TSocketPool = typename TWorker::template TSocketPool<TProtocol>;
+*/
+		template<typename TProtocol>
+		using TSocketPool = typename TWorker::template TSocketPool<TProtocol>;
 
 		template<typename TProtocol>
-		using TResolver = typename TWorker::TResolver<TProtocol>;
-	};
+		using TSessionPool = typename TWorker::template TSessionPool<TProtocol>;
 
+		template<typename TProtocol>
+		using TResolver = typename TWorker::template TResolver<TProtocol>;
+
+		template<typename TProtocol, SmartPtrTypeID ptrType>
+		using TSocketPoolResult = typename TSocketPool<TProtocol>::template TObjectPtr<ptrType>;
+
+		template<typename TFunc, typename... TArgs>
+		using TFutureType = TWorkerPool::TFuncResult<TFunc, TArgs... >;
+
+		template<BufferType bufferType, SmartPtrTypeID ptrType>
+		using TBufferPoolResult = typename TWorker::template TBufferPoolType<bufferType>::template TObjectPtr<ptrType>;
+
+		template<typename TProtocol>
+		using TSocketPointer = typename TSocketPool<TProtocol>::ObjectPointer;
+
+		template<BufferType bufferType>
+		using TBufferPointer = typename TWorker::template TBufferPoolType<bufferType>::ObjectPointer;
+
+		template<typename TProtocol>
+		using TSessionPointer = typename TSessionPool<TProtocol>::ObjectPointer;
+	};
+	// FIX: 不够易用
 	class ServiceBaseImpl :
-		private ServiceDefines
+		protected ServiceDefines,
+		public _BOOST noncopyable
 	{
 	public:
-		friend class ServiceBase;
+		explicit ServiceBaseImpl(TWorkerPool& workerPool);
 
-		ServiceBaseImpl(const char* name)
-		{
-			isInitialized = false;
-			name_ = name;
-		}
-		const char* Name() const
-		{
-			return name_;
-		}
-		void Init(TServiceManager* managerPtr)
-		{
-			assert(!isInitialized);
-			manager = managerPtr;
-			isInitialized = true;
-		}
-
-		// TODO: 如何使用插件
-		bool AddAddon(shared_ptr<IAddon>& addon)
-		{
-			if (addons.count(addon->Name()) > 0)
-			{
-				return false;
-			}
-			addons.insert({ addon->Name(), addon });
-			return true;
-		}
-		// TODO: 运行时删除需要多做一些处理
-		void RemoveAddon(const char* name)
-		{
-			addons.unsafe_erase(name);
-		}
+		virtual ~ServiceBaseImpl();
 
 
-		virtual ~ServiceBaseImpl()
+		// 以下函数是对workerpool和worker的桥接
+
+
+		inline _ASIO io_service& GetIoService()
 		{
+			return workerPool_.GetIoService();
 		}
+
+		template<typename TProtocol,
+			SmartPtrTypeID ptrType = SmartPtrTypeID::Unique,
+			WorkerSelector selector = WorkerSelector::CurrentWorker>
+			inline TSocketPoolResult<TProtocol, ptrType>
+			NewSocket()
+		{
+			return GetWorker<selector>()->NewSocket<TProtocol, ptrType>();
+		}
+		template<typename TProtocol,
+			WorkerSelector selector = WorkerSelector::CurrentWorker>
+			inline const _STD unique_ptr<TResolver<TProtocol>>&
+			GetResolver()
+		{
+			return GetWorker<selector>()->GetResolver<TProtocol>();
+		}
+
+		template<typename TFunc>
+		inline void PostTask(TFunc&& handler)
+		{
+			workerPool_.PostTask(_STD forward<TFunc>(handler));
+		}
+
+		template<typename TFunc, typename... TArgs>
+		inline _STD future<_STD result_of_t<_STD decay_t<TFunc>(_STD decay_t<TArgs>...)>>
+			Async(TFunc&& func, TArgs&&... args)
+		{
+			return workerPool_.Async(_STD forward<TFunc>(func), _STD forward<TArgs>(args)...);
+		}
+
+		template<BufferType bufferType = BufferType::Array,
+			SmartPtrTypeID ptrType = SmartPtrTypeID::Unique,
+			WorkerSelector selector = WorkerSelector::CurrentWorker>
+			inline TBufferPoolResult<bufferType, ptrType> NewBuffer()
+		{
+			return GetWorker<selector>()->NewBuffer<bufferType, ptrType>();
+		}
+
+		template<SmartPtrTypeID ptrType = SmartPtrTypeID::Unique,
+			WorkerSelector selector = WorkerSelector::CurrentWorker>
+			inline TBufferPoolResult<Vector, ptrType> NewBuffer(size_t size)
+		{
+			return GetWorker<selector>()->NewBuffer<ptrType>(size);
+		}
+		template<typename TProtocol,
+			SmartPtrTypeID ptrType = SmartPtrTypeID::Unique,
+			WorkerSelector selector = WorkerSelector::CurrentWorker>
+			inline typename TSessionPool<TProtocol>::template TObjectPtr<ptrType> NewSession()
+		{
+			return GetWorker<selector>()->NewSession<TProtocol, ptrType>();
+		}
+
 	protected:
-		inline TWorker* FASTCALL SelectIdleWorker()
-		{
-			assert(isInitialized);
-			return manager->GetWorkerPool()->SelectIdleWorker();
-		}
-		inline const unique_ptr<TTraceSource>& FASTCALL GetTrace() const
-		{
-			return manager->GetTrace();
-		}
-		inline TWorker* FASTCALL SelectWorker()
-		{
-			assert(isInitialized);
-			return manager->GetWorkerPool()->SelectWorker();
-		}
 
-		template<typename TProtocol, bool hasBuffer>
-		inline shared_ptr<TSession<TProtocol, hasBuffer>> FASTCALL NewSession()
-		{
-			return GetSessionPool<TProtocol, hasBuffer>()->NewSession();
-		}
 
-		template<typename TProtocol>
-		inline const _STD unique_ptr<TResolver<TProtocol>>& FASTCALL GetResolver()
-		{
-			return SelectIdleWorker()->GetResolver<TProtocol>();
-		}
-
-		concurrent_unordered_map<string, shared_ptr<IAddon>> addons;
-		TServiceManager* manager;
-		const char* name_;
-		bool isInitialized;
 	private:
-		template<typename TProtocol, bool hasBuffer>
-		const unique_ptr<TSessionPool< TSession<TProtocol, hasBuffer>>>& FASTCALL GetSessionPool()
+
+
+		template<WorkerSelector selector>
+		inline const TWorkerPool::WorkerPtr& GetWorker() const
 		{
-			return WorkerFriendProxy::GetSessionPool<TSession<TProtocol, hasBuffer>>(SelectIdleWorker());
+			return workerPool_.GetWorker<selector>();
 		}
+		TWorkerPool& workerPool_;
 	};
 
-	class WorkerFriendProxy
-	{
-	public:
-		friend ServiceBaseImpl;
-	private:
-		template<typename TSession, typename TWorker>
-		static const unique_ptr<typename TWorker::template TSessionPool<TSession>>&
-			FASTCALL GetSessionPool(TWorker* worker)
-		{
-			return worker->GetSessionPool<TSession>();
-		}
-		WorkerFriendProxy() = delete;
 
-		~WorkerFriendProxy() = delete;
-
-	};
 }  // namespace FeedTheDog

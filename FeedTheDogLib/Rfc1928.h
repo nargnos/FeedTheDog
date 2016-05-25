@@ -4,7 +4,7 @@
 namespace FeedTheDog
 {
 	// FIX: 协商部分需要限制读取最大长度，防止恶意请求
-
+	// UNDONE: 只完成了NoAuthenticationRequired的tcp部分
 	class Rfc1928 :
 		public ServiceBase
 	{
@@ -48,9 +48,9 @@ namespace FeedTheDog
 
 			auto leftSize = (maxSize == 0 ? buffer.max_size() : maxSize) - alreadyTransferred;
 			assert(leftSize > 0);
-			session->AsyncReadSome(_ASIO buffer(bufferData + alreadyTransferred, leftSize), _STD forward<ReadHandler>(handler));
+			session->GetSocket().async_read_some(_ASIO buffer(bufferData + alreadyTransferred, leftSize), _STD forward<ReadHandler>(handler));
 		}
-		virtual bool InitService() override;
+		virtual bool Init() override;
 		static bool FASTCALL CheckVersionMessage(size_t, const VersionMessage *);
 		int FASTCALL BuildCmdConnectReplyMessage(ServerReplieMessage *, shared_ptr<TcpSession>&, const _BOOST system::error_code &);
 		void FASTCALL ReplySelectedMethod(shared_ptr<TTcpDeadlineSession>&, VersionMessage *);

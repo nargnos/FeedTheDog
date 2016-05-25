@@ -339,7 +339,8 @@ namespace FeedTheDog
 	};
 
 	template<typename TSession>
-	class DeadlineSession :public _BOOST noncopyable
+	class DeadlineSession :
+		public _BOOST noncopyable
 	{
 	public:
 		DeadlineSession(shared_ptr<TSession>&& val) :
@@ -355,7 +356,7 @@ namespace FeedTheDog
 		void Close(_BOOST system::error_code& ignore)
 		{
 			CancelTimer(ignore);
-			session->Close(ignore);
+			session->GetSocket().close(ignore);
 		}
 		void CancelTimer(_BOOST system::error_code& ignore)
 		{
@@ -375,7 +376,8 @@ namespace FeedTheDog
 	};
 
 	template<typename TSession>
-	class TcpForward :public _BOOST noncopyable
+	class TcpForward :
+		public _BOOST noncopyable
 	{
 	public:
 		TcpForward(shared_ptr<TSession>& read_, shared_ptr<TSession>& write_) :

@@ -1,17 +1,23 @@
 #pragma once
 namespace FeedTheDog
 {
-	template<typename>
-	struct IService;
-	template<typename>
+	// buffer大小在此设置
+	enum
+	{
+		BufferSize = 1024 * 10,
+
+		TcpPoolNextSize = 512,
+		UdpPoolNextSize = 256,
+		BufferPoolNextSize = TcpPoolNextSize,
+	};
+
+	__interface IService;
 	class Core;
 	class Worker;
 
-	template<typename>
-	class SessionPool;
-
-	template<typename,bool>
-	class Session;
 	class Config;
 	class WorkerPool;
+	class ServiceBaseImpl;
+	template<typename>
+	class TraceSourceImpl;
 }  // namespace FeedTheDog

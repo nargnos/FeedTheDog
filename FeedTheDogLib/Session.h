@@ -1,46 +1,45 @@
-ï»¿#pragma once
-#include "SessionImpl.h"
+#pragma once
+#include "Define.h"
 namespace FeedTheDog
 {
-	template<bool hasBuffer>
-	class SessionBufferType;
-
-	template<>
-	class SessionBufferType<true>
+	template<typename TProtocol>
+	class Session
 	{
 	public:
-		enum
-		{
-			BufferSize = 1024 * 8
-		};
-		using TBufferType = _STD array<unsigned char, BufferSize>;
+		using TSocket = typename TProtocol::socket;
+		using TBuffer = _STD array<unsigned char, BufferSize>;
 
-		TBufferType& GetBuffer()
+		explicit Session(_ASIO io_service& ios):
+			socket_(ios)
+		{
+		}
+
+		~Session()
+		{
+		}
+		//void Encrypt()
+		//{
+
+		//}
+		//void Decrypt()
+		//{
+		//	// Vector²ÅÄÜÐÞ¸Ä´óÐ¡£¬ÕâÑù»¹ÒªÅªÒ»¸ö¼ÓÃÜ°æ±¾µÄsession
+		//}
+		_ASIO io_service& GetIoService()
+		{
+			return socket_.get_io_service();
+		}
+		TSocket& GetSocket()
+		{
+			return socket_;
+		}
+		TBuffer& GetBuffer()
 		{
 			return buffer_;
 		}
-		const TBufferType& GetBuffer() const
-		{
-			return buffer_;
-		}
-	protected:
-		TBufferType buffer_;
-	};
-	template<>
-	class SessionBufferType<false>
-	{
-	};
+	private:
+		TSocket socket_;
+		TBuffer buffer_;
 
-	template<typename TProtocol, bool hasBuffer>
-	class Session :
-		public SessionImpl<TProtocol>,
-		public SessionBufferType<hasBuffer>
-	{
-	public:
-		Session(io_service& ios) :
-			SessionImpl(ios)
-		{
-		}
 	};
 }  // namespace FeedTheDog
-

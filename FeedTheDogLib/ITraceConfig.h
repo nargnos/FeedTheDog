@@ -3,7 +3,7 @@
 namespace FeedTheDog
 {
 	template<typename TIListener>
-	struct ITraceConfig
+	struct NOVTABLE ITraceConfig
 	{
 		typedef _STD vector<unique_ptr<TIListener>> TListenerVector;
 		virtual bool IsOpenTrace() const = 0;

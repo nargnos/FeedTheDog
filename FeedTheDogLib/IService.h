@@ -3,15 +3,14 @@
 #include "IAddon.h"
 namespace FeedTheDog
 {
-	template<typename TServiceManager>
-	struct IService
+	class ServiceBaseImpl;
+	__interface IService
 	{
-		virtual const char* Name() const = 0;
-		virtual void Start() = 0;
-		virtual void Stop() = 0;
-		virtual bool Init(TServiceManager*) = 0;
-		virtual bool AddAddon(shared_ptr<IAddon>&) = 0;
-		virtual void RemoveAddon(const char*) = 0;
-		virtual ~IService() = default;
+		const char* Name() const;
+		void Start();
+		void Stop();
+		bool Init(const shared_ptr<ServiceBaseImpl>&);
+		bool AddAddon(shared_ptr<IAddon>&);
+		void RemoveAddon(const char*);
 	};
 }  // namespace FeedTheDog

@@ -15,4 +15,4 @@
 #include <crtdbg.h>
 #include <Common.h>
 #include <boost\container\vector.hpp>
-
+#include <array>

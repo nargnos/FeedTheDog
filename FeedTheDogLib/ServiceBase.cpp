@@ -4,40 +4,38 @@
 namespace FeedTheDog
 {
 	ServiceBase::ServiceBase(const char * name) :
-		impl_(make_unique<ServiceBaseImpl>(name))
+		name_(name)
+		
 	{
 	}
 	ServiceBase::~ServiceBase()
 	{
+		
 	}
 	const char * ServiceBase::Name() const
 	{
-		return impl_->Name();
-	}
-	bool ServiceBase::Init(TServiceManager * managerPtr)
-	{
-		impl_->Init(managerPtr);
-		return InitService();
+		return name_;
 	}
 	bool ServiceBase::AddAddon(shared_ptr<IAddon>& addon)
 	{
-		return impl_->AddAddon(addon);
+		return true;
 	}
 	void ServiceBase::RemoveAddon(const char * ptr)
 	{
-		return impl_->RemoveAddon(ptr);
+		
 	}
-	ServiceBase::TWorker * ServiceBase::SelectIdleWorker()
+
+	const ServiceBase::ImplPtr& ServiceBase::Impl()const
 	{
-		return impl_->SelectIdleWorker();
+		assert(impl_);
+		return impl_;
 	}
-	const unique_ptr<ServiceBase::TTraceSource>& ServiceBase::GetTrace() const
+
+	bool ServiceBase::Init(const shared_ptr<ServiceBaseImpl>& impl)
 	{
-		return impl_->GetTrace();
-	}
-	ServiceBase::TWorker * ServiceBase::SelectWorker()
-	{
-		return impl_->SelectWorker();
+		assert(!impl_);
+		impl_ = impl;
+		return Init();
 	}
 	
 }  // namespace FeedTheDog

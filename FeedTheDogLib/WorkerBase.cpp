@@ -7,17 +7,13 @@ namespace FeedTheDog
 	WorkerBase::WorkerBase():
 		ioService_(1)
 	{
-		counter_ = 0;
 		isRunning_ = false;
 		static int wid = 0;
 		id_ = ++wid;
 	}
 	WorkerBase::~WorkerBase()
 	{
-		if (isRunning_)
-		{
-			Stop();
-		}
+		assert(!isRunning_);
 	}
 	int WorkerBase::GetID() const
 	{
@@ -26,28 +22,19 @@ namespace FeedTheDog
 
 	void WorkerBase::Start()
 	{
-		ioService_.reset();
-		work_ = make_unique<_ASIO io_service::work>(ioService_);
+		_ASIO io_service::work work(ioService_);		
 		isRunning_ = true;
 		ioService_.run();
 	}
 
 	void WorkerBase::Stop()
 	{
+		ioService_.stop();		
 		isRunning_ = false;
-		work_.reset();
-		ioService_.stop();
 	}
 	_ASIO io_service & WorkerBase::GetIoService()
 	{
 		return ioService_;
 	}
-	const _ASIO io_service & WorkerBase::GetIoService() const
-	{
-		return ioService_;
-	}
-	unsigned int WorkerBase::GetSessionCount() const
-	{
-		return counter_.load(_STD memory_order_relaxed);
-	}
+
 }  // namespace FeedTheDog

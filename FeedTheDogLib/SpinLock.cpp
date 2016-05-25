@@ -3,24 +3,21 @@
 
 namespace FeedTheDog
 {
-	SpinLock::SpinLock()
+	bool SpinLock::try_lock()
 	{
+		return !lock_.test_and_set(_STD memory_order_acquire);
 	}
-	bool SpinLock::TryLock()
-	{
-		return !lock.test_and_set(_STD memory_order_acquire);
-	}
-	void SpinLock::Lock()
+	void SpinLock::lock()
 	{
 		unsigned int i = 0;
-		while (!TryLock())
+		while (!try_lock())
 		{
 			ThreadYield(++i);
 		}
 	}
-	void SpinLock::Unlock()
+	void SpinLock::unlock()
 	{
-		lock.clear(_STD memory_order_release);
+		lock_.clear(_STD memory_order_release);
 	}
 	void SpinLock::ThreadYield(unsigned int k)
 	{
@@ -35,17 +32,7 @@ namespace FeedTheDog
 #endif
 		else
 		{
-			// _STD cout << ".";
 			_STD this_thread::yield();
 		}
-	}
-	SpinLockGuard::SpinLockGuard(SpinLock & lock) :
-		lock_(lock)
-	{
-		lock_.Lock();
-	}
-	SpinLockGuard::~SpinLockGuard()
-	{
-		lock_.Unlock();
 	}
 }  // namespace FeedTheDog

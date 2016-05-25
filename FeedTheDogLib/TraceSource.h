@@ -8,5 +8,5 @@
 
 namespace FeedTheDog
 {
-	typedef TraceSourceImpl<TraceSourcePolicy> TraceSource;
+	using TraceSource = TraceSourceImpl<TraceSourcePolicy>;
 }  // namespace FeedTheDog

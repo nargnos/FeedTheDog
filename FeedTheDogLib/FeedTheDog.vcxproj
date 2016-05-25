@@ -92,7 +92,7 @@
       <SubSystem>Windows</SubSystem>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>$(SolutionDir)\..\Boost\Lib;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\..\boost\stage\lib;</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -113,7 +113,7 @@
       <SubSystem>Windows</SubSystem>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>$(SolutionDir)\..\Boost\Lib;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\..\boost\stage\lib;</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -143,7 +143,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>$(SolutionDir)\..\Boost\Lib;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\..\boost\stage\lib;</AdditionalLibraryDirectories>
     </Lib>
     <Bscmake>
       <PreserveSbr>true</PreserveSbr>
@@ -175,65 +175,65 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>$(SolutionDir)\..\Boost\Lib;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\..\boost\stage\lib;</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Text Include="!这部分应该分出去.txt" />
+    <Text Include="!这部分之后要弄dll.txt" />
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common.h" />
     <ClInclude Include="Config.h" />
-    <ClInclude Include="Core.h" />
     <ClInclude Include="ConsoleListener.h" />
-    <ClInclude Include="CorePolicy.h" />
+    <ClInclude Include="Core.h" />
     <ClInclude Include="DebugListener.h" />
+    <ClInclude Include="DlmallocAllocatorNewDelete.h" />
+    <ClInclude Include="EchoService.h" />
     <ClInclude Include="FileListener.h" />
     <ClInclude Include="ForEachTypes.h" />
     <ClInclude Include="IAddon.h" />
     <ClInclude Include="IListener.h" />
+    <ClInclude Include="IService.h" />
     <ClInclude Include="ITraceConfig.h" />
     <ClInclude Include="ListenerBase.h" />
     <ClInclude Include="ListenerFactory.h" />
+    <ClInclude Include="ObjectPool.h" />
+    <ClInclude Include="PoolTrait.h" />
+    <ClInclude Include="MemoryPoolType.h" />
     <ClInclude Include="Rfc1928.h" />
     <ClInclude Include="Rfc1928Def.h" />
+    <ClInclude Include="ServiceBase.h" />
     <ClInclude Include="ServiceBaseImpl.h" />
     <ClInclude Include="ServiceManager.h" />
     <ClInclude Include="Session.h" />
-    <ClInclude Include="SessionBase.h" />
-    <ClInclude Include="SessionImpl.h" />
-    <ClInclude Include="CommondSession.h" />
-    <ClInclude Include="SessionPool.h" />
-    <ClInclude Include="SessionPoolImpl.h" />
     <ClInclude Include="SpinLock.h" />
     <ClInclude Include="TraceFormat.h" />
     <ClInclude Include="TraceLevel.h" />
     <ClInclude Include="TraceSource.h" />
     <ClInclude Include="TraceSourceImpl.h" />
     <ClInclude Include="TracePolicy.h" />
-    <ClInclude Include="Worker.h" />
-    <ClInclude Include="IService.h" />
-    <ClInclude Include="EchoService.h" />
-    <ClInclude Include="ServiceBase.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Define.h" />
+    <ClInclude Include="Worker.h" />
     <ClInclude Include="WorkerBase.h" />
     <ClInclude Include="WorkerPool.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Config.cpp" />
     <ClCompile Include="ConsoleListener.cpp" />
+    <ClCompile Include="Core.cpp" />
     <ClCompile Include="DebugListener.cpp" />
+    <ClCompile Include="EchoService.cpp" />
     <ClCompile Include="FileListener.cpp" />
     <ClCompile Include="ListenerBase.cpp" />
     <ClCompile Include="ListenerFactory.cpp" />
     <ClCompile Include="Rfc1928.cpp" />
     <ClCompile Include="ServiceBase.cpp" />
+    <ClCompile Include="ServiceBaseImpl.cpp" />
     <ClCompile Include="SpinLock.cpp" />
     <ClCompile Include="TraceLevel.cpp" />
-    <ClCompile Include="EchoService.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

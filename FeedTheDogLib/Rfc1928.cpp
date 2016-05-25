@@ -14,11 +14,11 @@ namespace FeedTheDog
 	{
 	}
 
-	bool Rfc1928::InitService()
+	bool Rfc1928::Init()
 	{
 		if (!acceptor)
 		{
-			auto& io = SelectIdleWorker()->GetIoService();
+			auto& io = Impl()->GetIoService();
 			// ipv4后面再改
 			acceptor = make_unique<Tcp::acceptor>(io,
 				Tcp::endpoint(Tcp::v4(), port_));
@@ -40,14 +40,14 @@ namespace FeedTheDog
 		{
 			return;
 		}
-		GetTrace()->DebugPoint(__func__);
-		auto& session = NewSession<Tcp>();
+		auto& session = Impl()->NewSession<Tcp, Shared, NextWorker>();
 		// buffer建议大于1k
 		assert(session->GetBuffer().max_size() > 1024);
 		auto& deadlineSession = make_shared<TTcpDeadlineSession>(_STD move(session));
 
 		deadlineSession->GetTimer().async_wait(
-			[this, deadlineSession](const _BOOST system::error_code& error) mutable {
+			[this, deadlineSession](const _BOOST system::error_code& error) mutable
+		{
 			CheckDeadline(deadlineSession, error);
 		});
 		auto& tmpSession = deadlineSession->GetSession();
@@ -60,7 +60,6 @@ namespace FeedTheDog
 	void Rfc1928::CheckDeadline(shared_ptr<TTcpDeadlineSession>& deadlineSession,
 		const _BOOST system::error_code& error)
 	{
-		GetTrace()->DebugPoint(__func__);
 		if (error || isStopped)
 		{
 			return;
@@ -68,7 +67,7 @@ namespace FeedTheDog
 		auto& timer = deadlineSession->GetTimer();
 		if (timer.expires_at() <= _ASIO deadline_timer::traits_type::now())
 		{
-			deadlineSession->GetSession()->Close(ignore);
+			deadlineSession->GetSession()->GetSocket().close();
 			return;
 		}
 		timer.async_wait(
@@ -79,7 +78,6 @@ namespace FeedTheDog
 
 	void Rfc1928::Stop()
 	{
-		GetTrace()->DebugPoint("stop", false, 0, Name());
 		isStopped = true;
 		acceptor->close();
 	}
@@ -87,7 +85,7 @@ namespace FeedTheDog
 	void Rfc1928::HandleAccept(shared_ptr<TTcpDeadlineSession>& deadlineSession,
 		const _BOOST system::error_code & error)
 	{
-		GetTrace()->DebugPoint(__func__);
+
 		if (error || isStopped)
 		{
 			deadlineSession->Close(ignore);
@@ -96,7 +94,7 @@ namespace FeedTheDog
 		deadlineSession->GetTimer().expires_from_now(timeoutSecond);
 		auto& session = deadlineSession->GetSession();
 
-		session->AsyncReadSome(_ASIO buffer(session->GetBuffer(), VersionMessage::MaxSize),
+		session->GetSocket().async_read_some(_ASIO buffer(session->GetBuffer(), VersionMessage::MaxSize),
 			[this, ptr = _STD move(deadlineSession)](const _BOOST system::error_code & error, size_t bytes_transferred) mutable {
 			HandleReadVersionMessage(ptr, 0, bytes_transferred, error);
 		});
@@ -106,7 +104,7 @@ namespace FeedTheDog
 	void Rfc1928::HandleReadVersionMessage(shared_ptr<TTcpDeadlineSession>& deadlineSession,
 		size_t alreadyTransferred, size_t bytes_transferred, const _BOOST system::error_code & error)
 	{
-		GetTrace()->DebugPoint(__func__);
+
 		if (error || isStopped)
 		{
 			deadlineSession->Close(ignore);
@@ -151,7 +149,7 @@ namespace FeedTheDog
 	// 返回选择的函数
 	void Rfc1928::ReplySelectedMethod(shared_ptr<TTcpDeadlineSession>& deadlineSession, VersionMessage* vmHeader)
 	{
-		GetTrace()->DebugPoint(__func__);
+
 		auto& session = deadlineSession->GetSession();
 		unsigned char nmethods = vmHeader->NMethods;
 		// 使用原本的buffer存储返回信息
@@ -169,7 +167,8 @@ namespace FeedTheDog
 		}
 		assert(replyBuffer->Ver = MethodSelectionMessage::VerValue);
 		// 返回给客户端
-		session->AsyncWrite(_ASIO buffer(replyBuffer, sizeof(MethodSelectionMessage)),
+
+		_ASIO async_write(session->GetSocket(), _ASIO buffer(replyBuffer, sizeof(MethodSelectionMessage)),
 			[this, ptr = _STD move(deadlineSession), method = replyBuffer->Method]
 		(const _BOOST system::error_code & error, size_t bytes_transferred) mutable
 		{
@@ -182,7 +181,7 @@ namespace FeedTheDog
 
 	void Rfc1928::RunMethod(shared_ptr<TTcpDeadlineSession>& deadlineSession, unsigned char selectedMethod)
 	{
-		GetTrace()->DebugPoint(__func__);
+
 		auto& timer = deadlineSession->GetTimer();
 		auto& session = deadlineSession->GetSession();
 		switch (selectedMethod)
@@ -227,7 +226,7 @@ namespace FeedTheDog
 	void Rfc1928::HandleNoAuthenticationRequired(shared_ptr<TTcpDeadlineSession>& deadlineSession,
 		size_t alreadyTransferred, size_t bytes_transferred, const _BOOST system::error_code & error)
 	{
-		GetTrace()->DebugPoint(__func__);
+
 		if (isStopped || error)
 		{
 			deadlineSession->Close(ignore);
@@ -322,7 +321,7 @@ namespace FeedTheDog
 	void Rfc1928::DoCmd(shared_ptr<TTcpDeadlineSession>& deadlineSession, unique_ptr<TEndPointParser>& parser,
 		unsigned char cmd)
 	{
-		GetTrace()->DebugPoint(__func__);
+
 		switch (cmd)
 		{
 		case ClientRequestDetailMessage::CmdConnect:
@@ -343,7 +342,7 @@ namespace FeedTheDog
 
 	void Rfc1928::DoCmdConnect(shared_ptr<TTcpDeadlineSession>& deadlineSession, unique_ptr<TEndPointParser>& parser)
 	{
-		GetTrace()->DebugPoint(__func__);
+
 		auto& session = deadlineSession->GetSession();
 		switch (parser->GetAtyp())
 		{
@@ -351,10 +350,11 @@ namespace FeedTheDog
 		case TEndPointParser::AtypIPv6:
 		{
 
-			auto& remote = NewSession<Tcp>();
+			auto& remote = Impl()->NewSession<Tcp, Shared, CurrentWorker>();
 
 			auto& remoteRef = *remote;
-			remoteRef.AsyncConnect(parser->ParseEndpoint<Tcp>(),
+
+			remoteRef.GetSocket().async_connect(parser->ParseEndpoint<Tcp>(),
 				[this, ptr = _STD move(deadlineSession), remotePtr = _STD move(remote)]
 			(const _BOOST system::error_code & error) mutable {
 				HandleCmdConnectReply(ptr, remotePtr, error);
@@ -363,8 +363,7 @@ namespace FeedTheDog
 		return;
 		case TEndPointParser::AtypDomainName:
 		{
-
-			GetResolver<Tcp>()->async_resolve(parser->ParseDomain<Tcp>(),
+			Impl()->GetResolver<Tcp, CurrentWorker>()->async_resolve(parser->ParseDomain<Tcp>(),
 				[this, ptr = _STD move(deadlineSession)]
 			(const _BOOST system::error_code & error, const Tcp::resolver::iterator& endpoint_iterator) mutable {
 				HandleResolver(ptr, endpoint_iterator, error);
@@ -380,7 +379,7 @@ namespace FeedTheDog
 	void Rfc1928::HandleResolver(shared_ptr<TTcpDeadlineSession>& deadlineSession,
 		const Tcp::resolver::iterator& endpoint_iterator, const _BOOST system::error_code & error)
 	{
-		GetTrace()->DebugPoint(__func__);
+
 		if (isStopped)
 		{
 			deadlineSession->Close(ignore);
@@ -394,11 +393,11 @@ namespace FeedTheDog
 		}
 
 		auto& session = deadlineSession->GetSession();
-		auto& remote = NewSession<Tcp>();
+		auto& remote = Impl()->NewSession<Tcp, Shared, CurrentWorker>();
 
 
 		auto& remoteRef = *remote;
-		remoteRef.AsyncConnect(endpoint_iterator,
+		_ASIO async_connect(remoteRef.GetSocket(), endpoint_iterator,
 			[this, ptr = _STD move(deadlineSession), remotePtr = _STD move(remote)]
 		(const _BOOST system::error_code & error, const Tcp::resolver::iterator& endpoint_iterator) mutable {
 			HandleCmdConnectReply(ptr, remotePtr, error);
@@ -409,7 +408,7 @@ namespace FeedTheDog
 	int Rfc1928::BuildCmdConnectReplyMessage(ServerReplieMessage* reply, shared_ptr<TcpSession>& remote,
 		const _BOOST system::error_code & error)
 	{
-		GetTrace()->DebugPoint(__func__);
+
 		assert(reply->Ver == ServerReplieMessage::VerValue);
 		assert(reply->Rsv == ServerReplieMessage::RsvValue);
 
@@ -487,11 +486,11 @@ namespace FeedTheDog
 	void Rfc1928::HandleCmdConnectReply(shared_ptr<TTcpDeadlineSession>& deadlineSession,
 		shared_ptr<TcpSession>& remote, const _BOOST system::error_code & error)
 	{
-		GetTrace()->DebugPoint(__func__);
+
 		if (isStopped)
 		{
 			deadlineSession->Close(ignore);
-			remote->Close(ignore);
+			remote->GetSocket().close(ignore);
 			return;
 		}
 
@@ -504,7 +503,7 @@ namespace FeedTheDog
 		// 如果有错误返回的是除了地址之外的数据然后关闭连接，文档没写失败了地址发什么
 
 
-		client->AsyncWrite(_ASIO buffer(reply, tmpRequestLen),
+		_ASIO async_write(client->GetSocket(), _ASIO buffer(reply, tmpRequestLen),
 			[this, ptr = _STD move(deadlineSession),
 			remotePtr = _STD move(remote), isRemoteConnected = !error]
 		(const _BOOST system::error_code & writeError, size_t bytes_transferred) mutable
@@ -514,7 +513,7 @@ namespace FeedTheDog
 				// client 写失败
 				// remote connect 失败
 				ptr->Close(ignore);
-				remotePtr->Close(ignore);
+				remotePtr->GetSocket().close(ignore);
 				return;
 			}
 			// session脱离deadline
@@ -528,13 +527,13 @@ namespace FeedTheDog
 
 	void Rfc1928::CreateForward(shared_ptr<TcpSession>& client, shared_ptr<TcpSession>& remote)
 	{
-		GetTrace()->DebugPoint(__func__);
-		client->AsyncReadSome(_ASIO buffer(client->GetBuffer()),
+
+		client->GetSocket().async_read_some(_ASIO buffer(client->GetBuffer()),
 			[this, ptr = make_shared<TTcpForward>(client, remote)]
 		(const _BOOST system::error_code & error, size_t bytes_transferred) mutable {
 			ForwardRead(ptr, error, bytes_transferred);
 		});
-		remote->AsyncReadSome(_ASIO buffer(remote->GetBuffer()),
+		remote->GetSocket().async_read_some(_ASIO buffer(remote->GetBuffer()),
 			[this, ptr = make_shared<TTcpForward>(remote, client)]
 		(const _BOOST system::error_code & error, size_t bytes_transferred) mutable {
 			ForwardRead(ptr, error, bytes_transferred);
@@ -547,22 +546,24 @@ namespace FeedTheDog
 		auto& writeSession = forward->GetWriteSession();
 		if (error || isStopped)
 		{
-			if (writeSession->IsOpen())
+			auto& socket = writeSession->GetSocket();
+			if (socket.is_open())
 			{
 				if (error == _ASIO error::eof)
 				{
-					writeSession->ShutDown(_ASIO socket_base::shutdown_both, ignore);
+					socket.shutdown(_ASIO socket_base::shutdown_both, ignore);
 				}
 				else
 				{
-					writeSession->Close(ignore);
+					socket.close(ignore);
 				}
 				//
 			}
 			return;
 		}
 		auto& readSession = forward->GetReadSession();
-		writeSession->AsyncWrite(_ASIO buffer(readSession->GetBuffer(), bytes_transferred),
+
+		_ASIO async_write(writeSession->GetSocket(), _ASIO buffer(readSession->GetBuffer(), bytes_transferred),
 			[this, ptr = _STD move(forward)](const _BOOST system::error_code & error, size_t bytes_transferred) mutable {
 			ForwardWrite(ptr, error, bytes_transferred);
 		});
@@ -574,22 +575,23 @@ namespace FeedTheDog
 		auto& readSession = forward->GetReadSession();
 		if (error || isStopped)
 		{
-			if (readSession->IsOpen())
+			auto& socket = readSession->GetSocket();
+			if (socket.is_open())
 			{
 				if (error == _ASIO error::eof)
 				{
-					readSession->ShutDown(_ASIO socket_base::shutdown_both, ignore);
+					socket.shutdown(_ASIO socket_base::shutdown_both, ignore);
 				}
 				else
 				{
-					readSession->Close(ignore);
+					socket.close(ignore);
 				}
 				//
 			}
 			return;
 		}
 		auto& readBuffer = forward->GetReadBuffer();
-		readSession->AsyncReadSome(readBuffer,
+		readSession->GetSocket().async_read_some(readBuffer,
 			[this, ptr = _STD move(forward)](const _BOOST system::error_code & error, size_t bytes_transferred) mutable {
 			ForwardRead(ptr, error, bytes_transferred);
 		});

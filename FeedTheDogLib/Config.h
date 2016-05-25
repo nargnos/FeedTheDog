@@ -3,6 +3,7 @@
 #include "TraceSource.h"
 namespace FeedTheDog
 {
+	// TODO: 全局单例，trace也是
 	// TODO: 功能待完善，文件那里要能按日期分
 	class Config :
 		public TraceSource::TTraceConfig,

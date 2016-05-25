@@ -1,162 +1,169 @@
 #pragma once
 #include "Define.h"
-#include "ForEachTypes.h"
 #include "WorkerBase.h"
+#include "ObjectPool.h"
 #include "Session.h"
-#include "SessionPool.h"
 namespace FeedTheDog
 {
-	class Worker :
-		public WorkerBase
+	enum BufferType
 	{
-	public:
-		using Tcp = _ASIO ip::tcp;
-		using Udp = _ASIO ip::udp;
+		Array,
+		Vector
+	};
 
+	struct WorkerDefines
+	{
 		template<typename TProtocol>
 		using TResolver = typename TProtocol::resolver;
 
-		template<typename TProtocol, bool hasBuffer>
-		using TSession = Session<TProtocol, hasBuffer>;
+		// 需要object_pool管理socket析构
+		template<typename TProtocol>
+		using TSocketPool = ObjectPool<typename TProtocol::socket>;
 
-		template<bool hasBuffer>
-		using TTcpSession = TSession<Tcp, hasBuffer>;
-		using TcpSession = TTcpSession<true>;
-		using TcpSessionNoBuffer = TTcpSession<false>;
+		using TcpSocketPool = TSocketPool<Tcp>;
+		using UdpSocketPool = TSocketPool<Udp>;		
 
-		template<bool hasBuffer>
-		using TUdpSession = TSession<Udp, hasBuffer>;
-		using UdpSession = TUdpSession<true>;
-		using UdpSessionNoBuffer = TUdpSession<false>;
+		using ArrayBuffer = _STD array<unsigned char, BufferSize>;
+		using VectorBuffer = _STD vector<unsigned char, _BOOST container::allocator<unsigned char>>;
 
-		// 修改SessionPool类型在此处
-		template<typename TSession>
-		using TSessionPool = SessionPool<TSession>;
+		// 析不析构无所谓，池析构时不会有泄露
+		using ArrayPool = ObjectPool<ArrayBuffer, _BOOST pool>;
+		using VectorPool = ObjectPool<VectorBuffer, _BOOST pool>;
 
+		// BufferType::Array -> ArrayPool
+		// BufferType::Vector -> VectorPool
+		// 错误值 -> void
+		template<BufferType bufferType>
+		using TBufferPoolType =
+			typename _STD _If<
+			bufferType == BufferType::Array,
+			ArrayPool,
+			typename _STD _If<
+			bufferType == BufferType::Vector,
+			VectorPool,
+			void
+			>::type
+			>::type;
 
-		using TcpSessionPool = TSessionPool<TcpSession>;
-		using UdpSessionPool = TSessionPool<UdpSession>;
+		template<typename TProtocol>
+		using TSession = Session<TProtocol>;
 
-		using TcpSessionPoolNoBuffer = TSessionPool<TcpSessionNoBuffer>;
-		using UdpSessionPoolNoBuffer = TSessionPool<UdpSessionNoBuffer>;
+		using TcpSession = TSession<Tcp>;
+		using UdpSession = TSession<Udp>;
 
+		// 需要object_pool管理析构
+		template<typename TProtocol>
+		using TSessionPool = ObjectPool<TSession<TProtocol>>;
 
+		using TcpSessionPool = TSessionPool<Tcp>;
+		using UdpSessionPool = TSessionPool<Udp>;
+
+		using TcpSessionPointer = TcpSessionPool::ObjectPointer;
+		using UdpSessionPointer = UdpSessionPool::ObjectPointer;
+	};
+	class Worker :
+		public WorkerBase,
+		public WorkerDefines
+	{
+	public:
 
 		Worker();
 		~Worker();
-
 		
 		template<typename TProtocol>
-		const unique_ptr<TResolver<TProtocol>>& FASTCALL GetResolver();
+		const unique_ptr<TResolver<TProtocol>>& GetResolver();
 
 		template<>
-		const unique_ptr<TResolver<Tcp>>& FASTCALL GetResolver<Tcp>()
+		const unique_ptr<TResolver<Tcp>>& GetResolver<Tcp>()
 		{
-			return tcpResolver;
+			return tcpResolver_;
 		}
 		template<>
-		const unique_ptr<TResolver<Udp>>& FASTCALL GetResolver<Udp>()
+		const unique_ptr<TResolver<Udp>>& GetResolver<Udp>()
 		{
-			return udpResolver;
+			return udpResolver_;
 		}
-		friend class WorkerFriendProxy;
+
+		template<typename TProtocol, SmartPtrTypeID ptrType = SmartPtrTypeID::Unique>
+		typename TSocketPool<TProtocol>::template TObjectPtr<ptrType> NewSocket()
+		{
+			return GetSocketPool<TSocketPool<TProtocol>>()->Construct<ptrType>(ioService_);
+		}
+
+		template<BufferType bufferType = BufferType::Array, SmartPtrTypeID ptrType = SmartPtrTypeID::Unique>
+		typename TBufferPoolType<bufferType>::template TObjectPtr<ptrType> NewBuffer()
+		{
+			return GetBufferPool<bufferType>()->Construct<ptrType>();
+		}
+
+		template<SmartPtrTypeID ptrType = SmartPtrTypeID::Unique>
+		typename TBufferPoolType<Vector>::template TObjectPtr<ptrType> NewBuffer(size_t size)
+		{
+			return GetBufferPool<Vector>()->Construct<ptrType>(size);
+		}
+
+		template<typename TProtocol, SmartPtrTypeID ptrType = SmartPtrTypeID::Unique>
+		typename TSessionPool<TProtocol>::template TObjectPtr<ptrType> NewSession()
+		{
+			return GetSessionPool<TSessionPool<TProtocol>>()->Construct<ptrType>(ioService_);
+		}
 	protected:
-		unique_ptr<TcpSessionPool> tcpSessionPool;
-		unique_ptr<UdpSessionPool> udpSessionPool;
-
-		unique_ptr<TcpSessionPoolNoBuffer> tcpSessionPoolNoBuffer;
-		unique_ptr<UdpSessionPoolNoBuffer> udpSessionPoolNoBuffer;
-
-		unique_ptr<TResolver<Tcp>> tcpResolver;
-		unique_ptr<TResolver<Udp>> udpResolver;
-
-
-
-		class CreateResolvers
-		{
-		public:
-			CreateResolvers(Worker& worker) :
-				worker_(worker)
-			{}
-			template<typename TProtocol>
-			void Do()
-			{
-				using TResolverType = TResolver<TProtocol>;
-				auto& ptr = const_cast<unique_ptr<TResolverType>&>(worker_.GetResolver<TProtocol>());
-				ptr = _STD move(make_unique<TResolverType>(_STD ref(worker_.ioService_)));
-			}
-		protected:
-			Worker& worker_;
-		};
-
-		
-		template<typename TSessionType>
-		inline const unique_ptr<TSessionPool<TSessionType>>& GetSessionPool() const;
+		template<typename TSocketPool>
+		inline const unique_ptr<TSocketPool>& GetSocketPool() const;
 
 		template<>
-		inline const unique_ptr<TcpSessionPool>& GetSessionPool<TcpSession>() const
+		inline const unique_ptr<TcpSocketPool>& GetSocketPool<TcpSocketPool>() const
 		{
-			return tcpSessionPool;
+			return tcpSocketPool_;
 		}
 		template<>
-		inline const unique_ptr<UdpSessionPool>& GetSessionPool<UdpSession>() const
+		inline const unique_ptr<UdpSocketPool>& GetSocketPool<UdpSocketPool>() const
 		{
-			return udpSessionPool;
+			return udpSocketPool_;
+		}
+
+		template<BufferType bufferType>
+		inline const unique_ptr<TBufferPoolType<bufferType>>& GetBufferPool() const;
+
+		template<>
+		inline const unique_ptr<ArrayPool>& GetBufferPool<BufferType::Array>() const
+		{
+			return arrayPool_;
 		}
 
 		template<>
-		inline const unique_ptr<TcpSessionPoolNoBuffer>& GetSessionPool<TcpSessionNoBuffer>() const
+		inline const unique_ptr<VectorPool>& GetBufferPool<BufferType::Vector>() const
 		{
-			return tcpSessionPoolNoBuffer;
-		}
-		template<>
-		inline const unique_ptr<UdpSessionPoolNoBuffer>& GetSessionPool<UdpSessionNoBuffer>() const
-		{
-			return udpSessionPoolNoBuffer;
+			return vectorPool_;
 		}
 
-		// Udp用得比较少，不分太多内存
-		template<typename TSessionType>
-		struct SessionTrait;
+
+		template<typename TPool>
+		inline const unique_ptr<TPool>& GetSessionPool() const;
 
 		template<>
-		struct SessionTrait<TcpSession>
+		inline const unique_ptr<TcpSessionPool>& GetSessionPool<TcpSessionPool>() const
 		{
-			static constexpr size_t PoolSize = 2048;
-		};
+			return tcpSessionPool_;
+		}
 		template<>
-		struct SessionTrait<UdpSession>
+		inline const unique_ptr<UdpSessionPool>& GetSessionPool<UdpSessionPool>() const
 		{
-			static constexpr size_t PoolSize = 128;
-		};
-		template<>
-		struct SessionTrait<TcpSessionNoBuffer>
-		{
-			static constexpr size_t PoolSize = 1024;
-		};
-		template<>
-		struct SessionTrait<UdpSessionNoBuffer>
-		{
-			static constexpr size_t PoolSize = 256;
-		};
+			return udpSessionPool_;
+		}
 
-		class CreatePools
-		{
-		public:
-			CreatePools(Worker& worker):
-				worker_(worker)
-			{}
-			template<typename TSessionType>
-			void Do()
-			{
-				using TPoolType = TSessionPool<TSessionType>;
-				auto& ptr = const_cast<unique_ptr<TPoolType>&>(worker_.GetSessionPool<TSessionType>());
-				// 两个参数都已在父类初始化
-				ptr = _STD move(make_unique<TPoolType>(worker_.ioService_, SessionTrait<TSessionType>::PoolSize, worker_.counter_));
-			}
-		protected:
-			Worker& worker_;
-		};
+		unique_ptr<ArrayPool> arrayPool_;
+		unique_ptr<VectorPool> vectorPool_;
+
+		unique_ptr<TcpSessionPool> tcpSessionPool_;
+		unique_ptr<UdpSessionPool> udpSessionPool_;
+
+		unique_ptr<TcpSocketPool> tcpSocketPool_;
+		unique_ptr<UdpSocketPool> udpSocketPool_;
+
+		unique_ptr<TResolver<Tcp>> tcpResolver_;
+		unique_ptr<TResolver<Udp>> udpResolver_;
+
 	};
 
 

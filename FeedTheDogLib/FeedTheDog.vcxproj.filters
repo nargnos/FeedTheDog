@@ -23,51 +23,39 @@
     <ClCompile Include="ListenerFactory.cpp">
       <Filter>Trace\Listener</Filter>
     </ClCompile>
-    <ClCompile Include="Rfc1928.cpp">
-      <Filter>Service\Rfc1928</Filter>
-    </ClCompile>
-    <ClCompile Include="EchoService.cpp">
-      <Filter>Service\Echo</Filter>
+    <ClCompile Include="SpinLock.cpp">
+      <Filter>Common</Filter>
     </ClCompile>
     <ClCompile Include="Worker.cpp">
-      <Filter>Service Manager\Worker</Filter>
+      <Filter>Worker</Filter>
     </ClCompile>
     <ClCompile Include="WorkerBase.cpp">
-      <Filter>Service Manager\Worker</Filter>
+      <Filter>Worker</Filter>
+    </ClCompile>
+    <ClCompile Include="Core.cpp">
+      <Filter>Service Manager</Filter>
     </ClCompile>
     <ClCompile Include="ServiceBase.cpp">
       <Filter>Service\ServiceBase</Filter>
     </ClCompile>
-    <ClCompile Include="WorkerPool.cpp">
-      <Filter>Service Manager\Worker</Filter>
+    <ClCompile Include="ServiceBaseImpl.cpp">
+      <Filter>Service\ServiceBase</Filter>
     </ClCompile>
-    <ClCompile Include="SpinLock.cpp">
-      <Filter>Service Manager\Worker\SessionPool</Filter>
+    <ClCompile Include="WorkerPool.cpp">
+      <Filter>Worker</Filter>
+    </ClCompile>
+    <ClCompile Include="EchoService.cpp">
+      <Filter>Service\Echo</Filter>
+    </ClCompile>
+    <ClCompile Include="Rfc1928.cpp">
+      <Filter>Service\Rfc1928</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="Core.h">
-      <Filter>Service Manager</Filter>
-    </ClInclude>
-    <ClInclude Include="Worker.h">
-      <Filter>Service Manager\Worker</Filter>
-    </ClInclude>
-    <ClInclude Include="SessionBase.h">
-      <Filter>Service Manager\Worker\SessionPool</Filter>
-    </ClInclude>
-    <ClInclude Include="Session.h">
-      <Filter>Service Manager\Worker\SessionPool</Filter>
-    </ClInclude>
     <ClInclude Include="Config.h">
       <Filter>Config</Filter>
-    </ClInclude>
-    <ClInclude Include="WorkerBase.h">
-      <Filter>Service Manager\Worker</Filter>
-    </ClInclude>
-    <ClInclude Include="ServiceBase.h">
-      <Filter>Service\ServiceBase</Filter>
     </ClInclude>
     <ClInclude Include="ConsoleListener.h">
       <Filter>Trace\Listener</Filter>
@@ -83,12 +71,6 @@
     </ClInclude>
     <ClInclude Include="TraceSource.h">
       <Filter>Trace</Filter>
-    </ClInclude>
-    <ClInclude Include="SessionPool.h">
-      <Filter>Service Manager\Worker\SessionPool</Filter>
-    </ClInclude>
-    <ClInclude Include="ServiceManager.h">
-      <Filter>Service Manager</Filter>
     </ClInclude>
     <ClInclude Include="TraceFormat.h">
       <Filter>Trace</Filter>
@@ -111,55 +93,73 @@
     <ClInclude Include="TracePolicy.h">
       <Filter>Trace</Filter>
     </ClInclude>
-    <ClInclude Include="WorkerPool.h">
-      <Filter>Service Manager\Worker</Filter>
-    </ClInclude>
     <ClInclude Include="IAddon.h">
       <Filter>Interface</Filter>
-    </ClInclude>
-    <ClInclude Include="Rfc1928.h">
-      <Filter>Service\Rfc1928</Filter>
-    </ClInclude>
-    <ClInclude Include="Rfc1928Def.h">
-      <Filter>Service\Rfc1928</Filter>
-    </ClInclude>
-    <ClInclude Include="EchoService.h">
-      <Filter>Service\Echo</Filter>
     </ClInclude>
     <ClInclude Include="IListener.h">
       <Filter>Trace\Listener</Filter>
     </ClInclude>
-    <ClInclude Include="IService.h">
-      <Filter>Service\ServiceBase</Filter>
-    </ClInclude>
     <ClInclude Include="ITraceConfig.h">
       <Filter>Trace</Filter>
-    </ClInclude>
-    <ClInclude Include="SessionImpl.h">
-      <Filter>Service Manager\Worker\SessionPool</Filter>
-    </ClInclude>
-    <ClInclude Include="SpinLock.h">
-      <Filter>Service Manager\Worker\SessionPool</Filter>
-    </ClInclude>
-    <ClInclude Include="ServiceBaseImpl.h">
-      <Filter>Service\ServiceBase</Filter>
-    </ClInclude>
-    <ClInclude Include="CorePolicy.h">
-      <Filter>Service Manager</Filter>
-    </ClInclude>
-    <ClInclude Include="CommondSession.h">
-      <Filter>Service\ServiceBase</Filter>
-    </ClInclude>
-    <ClInclude Include="SessionPoolImpl.h">
-      <Filter>Service Manager\Worker\SessionPool</Filter>
     </ClInclude>
     <ClInclude Include="ForEachTypes.h">
       <Filter>Common</Filter>
     </ClInclude>
+    <ClInclude Include="SpinLock.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="DlmallocAllocatorNewDelete.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectPool.h">
+      <Filter>Pool</Filter>
+    </ClInclude>
+    <ClInclude Include="Worker.h">
+      <Filter>Worker</Filter>
+    </ClInclude>
+    <ClInclude Include="WorkerBase.h">
+      <Filter>Worker</Filter>
+    </ClInclude>
+    <ClInclude Include="IService.h">
+      <Filter>Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="Core.h">
+      <Filter>Service Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="ServiceManager.h">
+      <Filter>Service Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="ServiceBaseImpl.h">
+      <Filter>Service\ServiceBase</Filter>
+    </ClInclude>
+    <ClInclude Include="ServiceBase.h">
+      <Filter>Service\ServiceBase</Filter>
+    </ClInclude>
+    <ClInclude Include="PoolTrait.h">
+      <Filter>Pool</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryPoolType.h">
+      <Filter>Pool</Filter>
+    </ClInclude>
+    <ClInclude Include="Session.h">
+      <Filter>Session</Filter>
+    </ClInclude>
+    <ClInclude Include="WorkerPool.h">
+      <Filter>Worker</Filter>
+    </ClInclude>
+    <ClInclude Include="EchoService.h">
+      <Filter>Service\Echo</Filter>
+    </ClInclude>
+    <ClInclude Include="Rfc1928Def.h">
+      <Filter>Service\Rfc1928</Filter>
+    </ClInclude>
+    <ClInclude Include="Rfc1928.h">
+      <Filter>Service\Rfc1928</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
-    <Text Include="!这部分应该分出去.txt">
+    <Text Include="!这部分之后要弄dll.txt">
       <Filter>Service</Filter>
     </Text>
   </ItemGroup>
@@ -188,17 +188,20 @@
     <Filter Include="Common">
       <UniqueIdentifier>{04ab5aa8-270a-47d7-a955-2cae8e638617}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Service Manager\Worker">
-      <UniqueIdentifier>{d8450132-530c-4f30-95e3-c9e09fd492de}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Service Manager\Worker\SessionPool">
-      <UniqueIdentifier>{f1d3e8d0-75b8-420e-8236-603794a11fe2}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Service\Rfc1928">
       <UniqueIdentifier>{47857798-b7e5-40ec-a29c-bd0f23a35768}</UniqueIdentifier>
     </Filter>
     <Filter Include="Service\Echo">
       <UniqueIdentifier>{29161188-4da2-4577-9e7c-3375d93a5561}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pool">
+      <UniqueIdentifier>{8d2b63d5-1cf2-48fa-b98d-06bbc687628b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Worker">
+      <UniqueIdentifier>{d8450132-530c-4f30-95e3-c9e09fd492de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Session">
+      <UniqueIdentifier>{64475884-815b-4e05-860b-669db79cdca9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
