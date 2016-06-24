@@ -10,10 +10,11 @@ namespace FeedTheDog
 
 		using TWorker = typename TServiceManager::TWorker;
 		using TWorkerPool = typename TServiceManager::TWorkerPool;
+		using TWorkerRef = const TWorkerPool::WorkerPtr&;
 
-	/*	template<typename TProtocol>
-		using TSocketPool = typename TWorker::template TSocketPool<TProtocol>;
-*/
+		/*	template<typename TProtocol>
+			using TSocketPool = typename TWorker::template TSocketPool<TProtocol>;
+	*/
 		template<typename TProtocol>
 		using TSocketPool = typename TWorker::template TSocketPool<TProtocol>;
 
@@ -60,21 +61,7 @@ namespace FeedTheDog
 			return workerPool_.GetIoService();
 		}
 
-		template<typename TProtocol,
-			SmartPtrTypeID ptrType = SmartPtrTypeID::Unique,
-			WorkerSelector selector = WorkerSelector::CurrentWorker>
-			inline TSocketPoolResult<TProtocol, ptrType>
-			NewSocket()
-		{
-			return GetWorker<selector>()->NewSocket<TProtocol, ptrType>();
-		}
-		template<typename TProtocol,
-			WorkerSelector selector = WorkerSelector::CurrentWorker>
-			inline const _STD unique_ptr<TResolver<TProtocol>>&
-			GetResolver()
-		{
-			return GetWorker<selector>()->GetResolver<TProtocol>();
-		}
+
 
 		template<typename TFunc>
 		inline void PostTask(TFunc&& handler)
@@ -88,27 +75,60 @@ namespace FeedTheDog
 		{
 			return workerPool_.Async(_STD forward<TFunc>(func), _STD forward<TArgs>(args)...);
 		}
+		/*
+				template<typename TProtocol,
+					WorkerSelector selector = WorkerSelector::CurrentWorker>
+					inline const _STD unique_ptr<TResolver<TProtocol>>&
+					GetResolver()
+				{
+					return GetWorker<selector>()->GetResolver<TProtocol>();
+				}
+				template<typename TProtocol,
+					SmartPtrTypeID ptrType = SmartPtrTypeID::Unique,
+					WorkerSelector selector = WorkerSelector::CurrentWorker>
+					inline TSocketPoolResult<TProtocol, ptrType>
+					NewSocket()
+				{
+					return GetWorker<selector>()->NewSocket<TProtocol, ptrType>();
+				}
+				template<BufferType bufferType = BufferType::Array,
+					SmartPtrTypeID ptrType = SmartPtrTypeID::Unique,
+					WorkerSelector selector = WorkerSelector::CurrentWorker>
+					inline TBufferPoolResult<bufferType, ptrType> NewBuffer()
+				{
+					return GetWorker<selector>()->NewBuffer<bufferType, ptrType>();
+				}
 
-		template<BufferType bufferType = BufferType::Array,
-			SmartPtrTypeID ptrType = SmartPtrTypeID::Unique,
-			WorkerSelector selector = WorkerSelector::CurrentWorker>
-			inline TBufferPoolResult<bufferType, ptrType> NewBuffer()
+				template<SmartPtrTypeID ptrType = SmartPtrTypeID::Unique,
+					WorkerSelector selector = WorkerSelector::CurrentWorker>
+					inline TBufferPoolResult<Vector, ptrType> NewBuffer(size_t size)
+				{
+					return GetWorker<selector>()->NewBuffer<ptrType>(size);
+				}
+				template<typename TProtocol,
+					SmartPtrTypeID ptrType = SmartPtrTypeID::Unique,
+					WorkerSelector selector = WorkerSelector::CurrentWorker>
+					inline typename TSessionPool<TProtocol>::template TObjectPtr<ptrType> NewSession()
+				{
+					return GetWorker<selector>()->NewSession<TProtocol, ptrType>();
+				}*/
+		// 取与当前线程绑定的Worker
+		TWorkerRef GetCurrentWorker()
 		{
-			return GetWorker<selector>()->NewBuffer<bufferType, ptrType>();
+			return GetWorker<WorkerSelector::CurrentWorker>();
 		}
 
-		template<SmartPtrTypeID ptrType = SmartPtrTypeID::Unique,
-			WorkerSelector selector = WorkerSelector::CurrentWorker>
-			inline TBufferPoolResult<Vector, ptrType> NewBuffer(size_t size)
+		// 取轮询序的下一个Worker，在回调中操作worker是线程安全的
+		// void (TWorkerRef)
+		template<typename TFunc>
+		void AsyncGetWorker(TFunc&& callback)
 		{
-			return GetWorker<selector>()->NewBuffer<ptrType>(size);
-		}
-		template<typename TProtocol,
-			SmartPtrTypeID ptrType = SmartPtrTypeID::Unique,
-			WorkerSelector selector = WorkerSelector::CurrentWorker>
-			inline typename TSessionPool<TProtocol>::template TObjectPtr<ptrType> NewSession()
-		{
-			return GetWorker<selector>()->NewSession<TProtocol, ptrType>();
+
+			auto& worker = GetWorker<WorkerSelector::NextWorker>();
+			worker->GetIoService().post([&worker, func = _STD move(callback)]()
+			{
+				func(worker);
+			});
 		}
 
 	protected:
@@ -118,7 +138,7 @@ namespace FeedTheDog
 
 
 		template<WorkerSelector selector>
-		inline const TWorkerPool::WorkerPtr& GetWorker() const
+		inline TWorkerRef GetWorker() const
 		{
 			return workerPool_.GetWorker<selector>();
 		}

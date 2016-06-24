@@ -13,22 +13,25 @@ namespace FeedTheDog
 
 	struct WorkerDefines
 	{
+		// 池锁，设置为空，省掉开销，互斥部分用异步取worker处理
+		using PoolLock = _BOOST details::pool::null_mutex;
+
 		template<typename TProtocol>
 		using TResolver = typename TProtocol::resolver;
 
 		// 需要object_pool管理socket析构
 		template<typename TProtocol>
-		using TSocketPool = ObjectPool<typename TProtocol::socket>;
+		using TSocketPool = ObjectPool<typename TProtocol::socket, _BOOST object_pool, PoolLock>;
 
 		using TcpSocketPool = TSocketPool<Tcp>;
-		using UdpSocketPool = TSocketPool<Udp>;		
+		using UdpSocketPool = TSocketPool<Udp>;
 
 		using ArrayBuffer = _STD array<unsigned char, BufferSize>;
 		using VectorBuffer = _STD vector<unsigned char, _BOOST container::allocator<unsigned char>>;
 
 		// 析不析构无所谓，池析构时不会有泄露
-		using ArrayPool = ObjectPool<ArrayBuffer, _BOOST pool>;
-		using VectorPool = ObjectPool<VectorBuffer, _BOOST pool>;
+		using ArrayPool = ObjectPool<ArrayBuffer, _BOOST pool, PoolLock>;
+		using VectorPool = ObjectPool<VectorBuffer, _BOOST pool, PoolLock>;
 
 		// BufferType::Array -> ArrayPool
 		// BufferType::Vector -> VectorPool
@@ -53,7 +56,7 @@ namespace FeedTheDog
 
 		// 需要object_pool管理析构
 		template<typename TProtocol>
-		using TSessionPool = ObjectPool<TSession<TProtocol>>;
+		using TSessionPool = ObjectPool<TSession<TProtocol>, _BOOST object_pool, PoolLock>;
 
 		using TcpSessionPool = TSessionPool<Tcp>;
 		using UdpSessionPool = TSessionPool<Udp>;
@@ -61,6 +64,9 @@ namespace FeedTheDog
 		using TcpSessionPointer = TcpSessionPool::ObjectPointer;
 		using UdpSessionPointer = UdpSessionPool::ObjectPointer;
 	};
+
+
+
 	class Worker :
 		public WorkerBase,
 		public WorkerDefines
@@ -69,7 +75,7 @@ namespace FeedTheDog
 
 		Worker();
 		~Worker();
-		
+
 		template<typename TProtocol>
 		const unique_ptr<TResolver<TProtocol>>& GetResolver();
 
@@ -83,25 +89,25 @@ namespace FeedTheDog
 		{
 			return udpResolver_;
 		}
-
+		// 非线程安全
 		template<typename TProtocol, SmartPtrTypeID ptrType = SmartPtrTypeID::Unique>
 		typename TSocketPool<TProtocol>::template TObjectPtr<ptrType> NewSocket()
 		{
 			return GetSocketPool<TSocketPool<TProtocol>>()->Construct<ptrType>(ioService_);
 		}
-
+		// 非线程安全
 		template<BufferType bufferType = BufferType::Array, SmartPtrTypeID ptrType = SmartPtrTypeID::Unique>
 		typename TBufferPoolType<bufferType>::template TObjectPtr<ptrType> NewBuffer()
 		{
 			return GetBufferPool<bufferType>()->Construct<ptrType>();
 		}
-
+		// 非线程安全
 		template<SmartPtrTypeID ptrType = SmartPtrTypeID::Unique>
 		typename TBufferPoolType<Vector>::template TObjectPtr<ptrType> NewBuffer(size_t size)
 		{
 			return GetBufferPool<Vector>()->Construct<ptrType>(size);
 		}
-
+		// 非线程安全
 		template<typename TProtocol, SmartPtrTypeID ptrType = SmartPtrTypeID::Unique>
 		typename TSessionPool<TProtocol>::template TObjectPtr<ptrType> NewSession()
 		{

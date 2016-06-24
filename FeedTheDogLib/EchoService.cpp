@@ -28,14 +28,16 @@ namespace FeedTheDog
 	}
 	void EchoService::Start()
 	{
-		auto& session = Impl()->NewSession<Tcp, Pointer, NextWorker>(); // 手动控制对象析构并不会比智能指针快多少
-		auto& socketRef = session->GetSocket();
-		acceptor->async_accept(socketRef,
-			[this, session_ = _STD move(session)](const _BOOST system::error_code & error) mutable
+		Impl()->AsyncGetWorker([&](TWorkerRef worker)
 		{
-			HandleAccept(session_, error);
+			auto session = worker->NewSession<Tcp, Pointer>(); // 手动控制对象析构并不会比智能指针快多少
+			auto& socketRef = session->GetSocket();
+			acceptor->async_accept(socketRef,
+				[this, session_ = _STD move(session)](const _BOOST system::error_code & error) mutable
+			{
+				HandleAccept(session_, error);
+			});
 		});
-
 	}
 	void EchoService::Stop()
 	{
