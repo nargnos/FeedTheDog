@@ -40,23 +40,21 @@ namespace FeedTheDog
 		{
 			return;
 		}
-		Impl()->AsyncGetWorker([this](TWorkerRef worker)
-		{
-			auto& session = worker->NewSession<Tcp, Shared>();
-			// buffer建议大于1k
-			assert(session->GetBuffer().max_size() > 1024);
-			auto& deadlineSession = make_shared<TTcpDeadlineSession>(_STD move(session));
 
-			deadlineSession->GetTimer().async_wait(
-				[this, deadlineSession](const _BOOST system::error_code& error) mutable
-			{
-				CheckDeadline(deadlineSession, error);
-			});
-			auto& tmpSession = deadlineSession->GetSession();
-			acceptor->async_accept(tmpSession->GetSocket(),
-				[this, ptr = _STD move(deadlineSession)](const _BOOST system::error_code & error) mutable {
-				HandleAccept(ptr, error);
-			});
+		auto& session = Impl()->GetWorker<NextWorker>()->NewSession<Tcp, Shared>();
+		// buffer建议大于1k
+		assert(session->GetBuffer().max_size() > 1024);
+		auto& deadlineSession = make_shared<TTcpDeadlineSession>(_STD move(session));
+
+		deadlineSession->GetTimer().async_wait(
+			[this, deadlineSession](const _BOOST system::error_code& error) mutable
+		{
+			CheckDeadline(deadlineSession, error);
+		});
+		auto& tmpSession = deadlineSession->GetSession();
+		acceptor->async_accept(tmpSession->GetSocket(),
+			[this, ptr = _STD move(deadlineSession)](const _BOOST system::error_code & error) mutable {
+			HandleAccept(ptr, error);
 		});
 
 	}
@@ -354,7 +352,7 @@ namespace FeedTheDog
 		case TEndPointParser::AtypIPv6:
 		{
 
-			auto& remote = Impl()->GetCurrentWorker()->NewSession<Tcp, Shared>();
+			auto& remote = Impl()->GetWorker<CurrentWorker>()->NewSession<Tcp, Shared>();
 
 			auto& remoteRef = *remote;
 
@@ -367,7 +365,7 @@ namespace FeedTheDog
 		return;
 		case TEndPointParser::AtypDomainName:
 		{
-			Impl()->GetCurrentWorker()->GetResolver<Tcp>()->async_resolve(parser->ParseDomain<Tcp>(),
+			Impl()->GetWorker<CurrentWorker>()->GetResolver<Tcp>()->async_resolve(parser->ParseDomain<Tcp>(),
 				[this, ptr = _STD move(deadlineSession)]
 			(const _BOOST system::error_code & error, const Tcp::resolver::iterator& endpoint_iterator) mutable {
 				HandleResolver(ptr, endpoint_iterator, error);
@@ -397,7 +395,7 @@ namespace FeedTheDog
 		}
 
 		auto& session = deadlineSession->GetSession();
-		auto& remote = Impl()->GetCurrentWorker()->NewSession<Tcp, Shared>();
+		auto& remote = Impl()->GetWorker<CurrentWorker>()->NewSession<Tcp, Shared>();
 
 
 		auto& remoteRef = *remote;

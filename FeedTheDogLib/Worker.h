@@ -13,9 +13,9 @@ namespace FeedTheDog
 
 	struct WorkerDefines
 	{
-		// 池锁，设置为空，省掉开销，互斥部分用异步取worker处理
-		using PoolLock = _BOOST details::pool::null_mutex;
-
+		// 池锁，设置为空，省掉开销，互斥部分用异步取worker处理。。。 这个不行，acceptor结束时持有的session不会在分配它的worker析构
+		// using PoolLock = _BOOST details::pool::null_mutex;
+		using PoolLock = SpinLock;
 		template<typename TProtocol>
 		using TResolver = typename TProtocol::resolver;
 

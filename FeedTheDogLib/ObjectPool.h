@@ -22,10 +22,10 @@ namespace FeedTheDog
 		typename TLock = SpinLock,
 		typename TAllocator = DlmallocAllocatorNewDelete,
 		// 在内部定义此类型会极大的影响VS自动提示速度，所以只能放到这里
-		typename TPool = typename _STD _If<
+		typename TPool = typename _STD conditional<
 		PoolTrait<TPoolType>::Value == MemoryPoolType::BoostObjectPool,
 		_BOOST object_pool<TObject, TAllocator>,
-		typename _STD _If<
+		typename _STD conditional<
 		PoolTrait<TPoolType>::Value == MemoryPoolType::BoostPool,
 		_BOOST pool<TAllocator>,
 		void
@@ -44,10 +44,10 @@ namespace FeedTheDog
 		// Unique -> unique_ptr<TObject, ObjectDeletor>
 		// Default -> ObjectPointer 手动控制删除
 		template<SmartPtrTypeID type>
-		using TObjectPtr = typename _STD _If<
+		using TObjectPtr = typename _STD conditional<
 			type == SmartPtrTypeID::Shared,
 			shared_ptr<TObject>,
-			typename _STD _If<
+			typename _STD conditional<
 			type == SmartPtrTypeID::Unique,
 			unique_ptr<TObject, ObjectDeletor>,
 			ObjectPointer

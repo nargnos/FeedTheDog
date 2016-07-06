@@ -40,7 +40,7 @@ namespace FeedTheDog
 		threadPool_(threadPoolSize_)
 	{
 		threadCount_ = (core_ == 0) ? 1 : core_;
-		threadCount_ *= ThreadCountScale;
+		threadCount_ = static_cast<int>(threadCount_ * ThreadCountScale);
 
 		for (int i = 0; i < threadCount_; i++)
 		{
@@ -74,7 +74,7 @@ namespace FeedTheDog
 			threadToWorker_.push_back({ tmpWorkerThread->get_id(),i });
 		}
 		// 单独线程用来处理一些accept什么的
-	
+
 		auto count = threadPoolSize_ >> 1;
 		assert(threadPoolSize_ > 0);
 		for (int i = 0; i < count; i++)
