@@ -11,7 +11,10 @@ CrtSetDbgFlag dbg;
 #endif
 int main()
 {
-
+	// FIX: 弄个manager目的是提供服务间统一的交流方式，但是好像各个服务间不需要什么交流啊。。。需要运行多个服务就改成分开成各个程序吧，manager删掉
+	// 需要弄一个机制直接替换（或hook）掉发送接收函数，这样方便修改加密
+	// （用队列asio已经有了，在出入队前后修改数据（需要注意加密后数据扩展的处理），发送接收需要桥接asio的函数，并且统一成较少的函数，这样不用写太多）
+	// 整体这样设计不太好，业务逻辑想用lua替换，再想想怎么设计
 	using namespace FeedTheDog;
 
 	auto& core = make_shared<ServiceManager>();
