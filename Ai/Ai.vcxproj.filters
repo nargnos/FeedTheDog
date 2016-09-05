@@ -25,6 +25,9 @@
     <Filter Include="Ai\NeuralNetwork\Detail\Function">
       <UniqueIdentifier>{a745ebea-47d4-4825-ad98-5a349bb726b2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Ai\NeuralNetwork\Detail\Policy">
+      <UniqueIdentifier>{12079352-38ba-4c16-b403-5d9a878af832}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -33,29 +36,47 @@
     <ClInclude Include="targetver.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Linear.h">
-      <Filter>Ai\NeuralNetwork\Detail\Function</Filter>
-    </ClInclude>
-    <ClInclude Include="Neuron.h">
+    <ClInclude Include="ILayer.h">
       <Filter>Ai\NeuralNetwork\Detail</Filter>
     </ClInclude>
-    <ClInclude Include="PerceptronBase.h">
+    <ClInclude Include="ISample.h">
       <Filter>Ai\NeuralNetwork\Detail</Filter>
     </ClInclude>
-    <ClInclude Include="Perceptron.h">
-      <Filter>Ai\NeuralNetwork</Filter>
-    </ClInclude>
-    <ClInclude Include="PerceptronDesire.h">
-      <Filter>Ai\NeuralNetwork</Filter>
+    <ClInclude Include="LayerBase.h">
+      <Filter>Ai\NeuralNetwork\Detail</Filter>
     </ClInclude>
     <ClInclude Include="NeuralNetwork.h">
       <Filter>Ai\NeuralNetwork</Filter>
     </ClInclude>
-    <ClInclude Include="Sigmoid.h">
-      <Filter>Ai\NeuralNetwork\Detail\Function</Filter>
+    <ClInclude Include="SampleBase.h">
+      <Filter>Ai\NeuralNetwork\Detail</Filter>
+    </ClInclude>
+    <ClInclude Include="LayerFactory.h">
+      <Filter>Ai\NeuralNetwork</Filter>
+    </ClInclude>
+    <ClInclude Include="Layer.h">
+      <Filter>Ai\NeuralNetwork</Filter>
+    </ClInclude>
+    <ClInclude Include="Neural.h">
+      <Filter>Ai\NeuralNetwork\Detail</Filter>
+    </ClInclude>
+    <ClInclude Include="INeuralProxy.h">
+      <Filter>Ai\NeuralNetwork\Detail</Filter>
+    </ClInclude>
+    <ClInclude Include="NeuralProxy.h">
+      <Filter>Ai\NeuralNetwork\Detail</Filter>
     </ClInclude>
     <ClInclude Include="Define.h">
       <Filter>Ai\NeuralNetwork\Detail</Filter>
+    </ClInclude>
+    <ClInclude Include="DefaultInputPolicy.h">
+      <Filter>Ai\NeuralNetwork\Detail\Policy</Filter>
+    </ClInclude>
+    <ClInclude Include="TransformPolicy.h">
+      <Filter>Ai\NeuralNetwork\Detail\Policy</Filter>
+    </ClInclude>
+    <ClInclude Include="SigmoidActivation.h">
+      <Filter>Ai\NeuralNetwork\Detail\Function</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
