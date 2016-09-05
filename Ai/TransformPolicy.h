@@ -3,33 +3,33 @@
 #include <cassert>
 #include <amp.h>
 #include "Define.h"
-#include "Neural.h"
 
 template<typename TNeuralActivationFunction>
 struct TransformPolicy
 {
-	template<typename TNeuralType, int NeuralCount>
+	template<typename TNeuralType>
 	static void Transform(
 		const _STD vector<FloatingPoint>& input,
 		_Out_ _STD vector<FloatingPoint>& output,
-		const _STD array<TNeuralType, NeuralCount>& neurals)
+		const _STD vector<TNeuralType>& neurals)
 	{
 		assert(input.size() >= TNeuralType::WeightSize);
-		if (output.size() < NeuralCount)
+		auto neuralCount = neurals.size();
+		if (output.size() < neuralCount)
 		{
-			output.resize(NeuralCount);
+			output.resize(neuralCount);
 		}
-		
+
 		concurrency::array_view<const FloatingPoint, 1> inputView(TNeuralType::WeightSize, input);
 
-		concurrency::array_view<const TNeuralType, 1> neuralsView(NeuralCount, neurals);
+		concurrency::array_view<const TNeuralType, 1> neuralsView(neuralCount, neurals);
 
 		// 中间数据(为了分更多gpu线程)
 		constexpr auto neuralDataSize = TNeuralType::WeightSize + 1;
-		constexpr auto allWeightCount = NeuralCount * neuralDataSize;
+		auto allWeightCount = neuralCount * neuralDataSize;
 		_STD vector<FloatingPoint> tmpData(allWeightCount);
 		// 纵表示不同的元，横表示元的权（最后的是阈值）
-		concurrency::array_view<FloatingPoint, 2> tmpDataView(NeuralCount, neuralDataSize, tmpData);
+		concurrency::array_view<FloatingPoint, 2> tmpDataView(neuralCount, neuralDataSize, tmpData);
 		tmpDataView.discard_data();
 
 		// 算 权重 * 权
@@ -39,7 +39,8 @@ struct TransformPolicy
 			auto weightIdx = idx[1];
 			if (weightIdx == TNeuralType::WeightSize)
 			{
-				tmpDataView[idx] = neuralsView[neuralIndex].GetThreshold();
+				// 一些书里用的是正数
+				tmpDataView[idx] = -neuralsView[neuralIndex].GetThreshold();
 			}
 			else
 			{
@@ -50,7 +51,7 @@ struct TransformPolicy
 		});
 		tmpDataView.synchronize();
 
-		concurrency::array_view<FloatingPoint, 1> outputView(NeuralCount, output);
+		concurrency::array_view<FloatingPoint, 1> outputView(neuralCount, output);
 		outputView.discard_data();
 
 		// 算 净权重并转化输出

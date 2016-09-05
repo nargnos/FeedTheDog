@@ -28,6 +28,9 @@
     <Filter Include="Ai\NeuralNetwork\Detail\Policy">
       <UniqueIdentifier>{12079352-38ba-4c16-b403-5d9a878af832}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Ai\NeuralNetwork\Detail\Interface">
+      <UniqueIdentifier>{5fe2e7ff-9e9e-4236-b67d-85487e8229bc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -35,12 +38,6 @@
     </ClInclude>
     <ClInclude Include="targetver.h">
       <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="ILayer.h">
-      <Filter>Ai\NeuralNetwork\Detail</Filter>
-    </ClInclude>
-    <ClInclude Include="ISample.h">
-      <Filter>Ai\NeuralNetwork\Detail</Filter>
     </ClInclude>
     <ClInclude Include="LayerBase.h">
       <Filter>Ai\NeuralNetwork\Detail</Filter>
@@ -51,16 +48,7 @@
     <ClInclude Include="SampleBase.h">
       <Filter>Ai\NeuralNetwork\Detail</Filter>
     </ClInclude>
-    <ClInclude Include="LayerFactory.h">
-      <Filter>Ai\NeuralNetwork</Filter>
-    </ClInclude>
-    <ClInclude Include="Layer.h">
-      <Filter>Ai\NeuralNetwork</Filter>
-    </ClInclude>
     <ClInclude Include="Neural.h">
-      <Filter>Ai\NeuralNetwork\Detail</Filter>
-    </ClInclude>
-    <ClInclude Include="INeuralProxy.h">
       <Filter>Ai\NeuralNetwork\Detail</Filter>
     </ClInclude>
     <ClInclude Include="NeuralProxy.h">
@@ -78,12 +66,42 @@
     <ClInclude Include="SigmoidActivation.h">
       <Filter>Ai\NeuralNetwork\Detail\Function</Filter>
     </ClInclude>
+    <ClInclude Include="RandomLayerBuilder.h">
+      <Filter>Ai\NeuralNetwork</Filter>
+    </ClInclude>
+    <ClInclude Include="Layer.h">
+      <Filter>Ai\NeuralNetwork\Detail</Filter>
+    </ClInclude>
+    <ClInclude Include="ILayer.h">
+      <Filter>Ai\NeuralNetwork\Detail\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="ILayerBuilder.h">
+      <Filter>Ai\NeuralNetwork\Detail\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="INeuralProxy.h">
+      <Filter>Ai\NeuralNetwork\Detail\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="ISample.h">
+      <Filter>Ai\NeuralNetwork\Detail\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="DefaultLayer.h">
+      <Filter>Ai\NeuralNetwork</Filter>
+    </ClInclude>
+    <ClInclude Include="TrainPolicy.h">
+      <Filter>Ai\NeuralNetwork\Detail\Policy</Filter>
+    </ClInclude>
+    <ClInclude Include="ValueLayerBuilder.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="NeuralNetwork.cpp">
+      <Filter>Ai\NeuralNetwork</Filter>
+    </ClCompile>
+    <ClCompile Include="RandomLayerBuilder.cpp">
       <Filter>Ai\NeuralNetwork</Filter>
     </ClCompile>
   </ItemGroup>

@@ -4,14 +4,7 @@
 #include <type_traits>
 #include <vector>
 #include "Define.h"
-FloatingPoint _GenerateWeight(FloatingPoint defaultWeightMin, FloatingPoint defaultWeightMax)
-{
-	using namespace std;
-	static random_device seed;
-	static default_random_engine ng(seed());
-	uniform_real_distribution<FloatingPoint> ud(defaultWeightMin, defaultWeightMax);
-	return ud(ng);
-}
+
 template<typename TActivationFunction>
 class Neuron
 {

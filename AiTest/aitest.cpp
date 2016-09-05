@@ -4,8 +4,10 @@
 #include <amp.h>
 #include <array>
 #include <vector>
-//#include <Ai\Perceptron.h>
 #include <Ai\NeuralNetwork.h>
+#include <Ai\DefaultLayer.h>
+#include <Ai\RandomLayerBuilder.h>
+#include <Ai\ValueLayerBuilder.h>
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace AiTest
@@ -38,14 +40,37 @@ namespace AiTest
 				val.v4 = 1;
 				val.v5 = 1;
 				val.XX();
+
 			});
 			view.synchronize();
-
 		}
 
 		TEST_METHOD(NeuralNetworkTest)
 		{
+			using namespace std;
 			NeuralNetwork nn;
+			//RandomLayerBuilder<DefaultHiddenLayer<2, 2>> hiddenLayerBuilder;
+			//RandomLayerBuilder<DefaultOutputLayer<2, 1>> outputLayerBuilder;
+
+			using HiddenLayerBuilder = ValueLayerBuilder<DefaultHiddenLayer<2, 2>>;
+			HiddenLayerBuilder hiddenLayerBuilder
+			({
+				{0.5f, 0.4f, 0.8f},
+				{0.9f, 1.f, -0.1f}
+			});
+
+			using OutputLayerBuilder = ValueLayerBuilder<DefaultOutputLayer<1,2>>;
+			OutputLayerBuilder outputLayerBuilder
+			({
+				{-1.2f, 1.1f, 0.3f}
+			});
+
+
+			nn.AddLayer(hiddenLayerBuilder);
+			nn.AddLayer(outputLayerBuilder);
+
+			vector<FloatingPoint> input{ 1,1 };
+			auto x = nn.Transform(input);
 			//nn.GetLayer(0).
 		}
 

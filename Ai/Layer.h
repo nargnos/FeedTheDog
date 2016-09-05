@@ -8,8 +8,8 @@
 #include "NeuralProxy.h"
 
 
-template<size_t InputSize,
-	size_t NeuralCount,
+template<size_t NeuralCount,
+	size_t InputSize,
 	typename TTransformPolicy,
 	typename TTrainPolicy,
 	typename TInputPolicy>
@@ -17,10 +17,16 @@ template<size_t InputSize,
 	public LayerBase
 {
 public:
-	constexpr size_t NeuralWeightSize = TInputPolicy::GetSize(InputSize);
-	using NeuralType = Neural<NeuralWeightSize>;
+	static_assert(NeuralCount > 0, "NeuralCount > 0");
+	constexpr static size_t NeuralInputSize = TInputPolicy::GetSize(InputSize);
+	constexpr static size_t Count = NeuralCount;
 
-	Layer() = default;
+	using NeuralType = Neural<NeuralInputSize>;
+
+	Layer() :
+		neurals_(NeuralCount)
+	{
+	}
 	~Layer() = default;
 
 	virtual size_t GetInputSize() const override
@@ -33,22 +39,23 @@ public:
 		return NeuralCount;
 	}
 
-	virtual _STD unique_ptr<INeuralProxy> GetNeural(int index) override
+	virtual _STD unique_ptr<INeuralProxy> GetNeural(size_t index) override
 	{
 		assert(NeuralCount > index && index >= 0);
-		return _STD make_unique<NeuralProxy>(_STD ref(neurals_[index]));
+		return _STD make_unique<NeuralProxy<NeuralType>>(_STD ref(neurals_[index]));
 	}
 
 	virtual void Transform(const _STD vector<FloatingPoint>& input, _Out_ _STD vector<FloatingPoint>& output) const override
 	{
-		assert(input.size() >= NeuralWeightSize);
-		TTransformPolicy::Transform<NeuralType, NeuralCount>(input, output, neurals_);
+		assert(input.size() >= NeuralInputSize);
+		TTransformPolicy::Transform<NeuralType>(input, output, neurals_);
 	}
 	virtual FloatingPoint Train(const ISample & sample) override
 	{
 		return TTrainPolicy::Train(sample, neurals_);
 	}
 protected:
-	_STD array<NeuralType, NeuralCount> neurals_;
-	
+	_STD vector<NeuralType> neurals_;
 };
+
+

@@ -136,13 +136,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="DefaultInputPolicy.h" />
+    <ClInclude Include="DefaultLayer.h" />
     <ClInclude Include="Define.h" />
     <ClInclude Include="ILayer.h" />
+    <ClInclude Include="ILayerBuilder.h" />
     <ClInclude Include="INeuralProxy.h" />
     <ClInclude Include="ISample.h" />
     <ClInclude Include="Layer.h" />
     <ClInclude Include="LayerBase.h" />
-    <ClInclude Include="LayerFactory.h" />
+    <ClInclude Include="RandomLayerBuilder.h" />
     <ClInclude Include="SigmoidActivation.h" />
     <ClInclude Include="Neural.h" />
     <ClInclude Include="NeuralNetwork.h" />
@@ -150,10 +152,13 @@
     <ClInclude Include="SampleBase.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="TrainPolicy.h" />
     <ClInclude Include="TransformPolicy.h" />
+    <ClInclude Include="ValueLayerBuilder.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="NeuralNetwork.cpp" />
+    <ClCompile Include="RandomLayerBuilder.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

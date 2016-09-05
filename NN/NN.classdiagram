@@ -51,6 +51,10 @@ Neural必须无虚
             <classMoniker Id="6963149f-7279-47fd-a21b-64146cc12381" LastKnownName="Sample" />
             <elementDefinition Id="f96c137e-1f19-48f7-b3bf-d21206494196" />
           </dependency>
+          <dependency Id="9bde295f-386e-4e3a-8238-1b662ad001f3">
+            <interfaceMoniker Id="77160c3e-3609-4cc6-ac13-46f31b577852" LastKnownName="ILayerBuilder" />
+            <elementDefinition Id="137e25bb-7511-4d72-a51d-a234bb88f47e" />
+          </dependency>
         </suppliersInternal>
         <targetEnds>
           <association Id="232ba9e9-8dc1-4617-a605-3aeff911faff" isDerived="false" sourceEndRoleName="NeuralNetwork" targetEndRoleName="Layer" isLeaf="false" isAbstract="false">
@@ -206,27 +210,6 @@ Neural必须无虚
           </dependency>
         </suppliersInternal>
         <ownedOperations>
-          <operation Id="3c4e2823-888d-4f7e-8d50-8121150690d9" name="GetNeural" isLeaf="false" isStatic="false" isAbstract="true" concurrency="Sequential" isQuery="false">
-            <elementDefinition Id="8c175b6e-fb6e-4f81-bbb0-7f277440b481" />
-            <ownedParameters>
-              <operationHasOwnedParameters>
-                <parameter Id="b31b59c3-07df-4162-8c61-dc4f2efb0768" name="index" direction="In" isUnique="false">
-                  <elementDefinition Id="ef1dcd78-932d-4603-9974-991f5903a85a" />
-                  <type_NamedElement>
-                    <referencedTypeMoniker Id="5368aa87-ee03-4081-9026-fb3ccdeb97c1" LastKnownName="int" />
-                  </type_NamedElement>
-                </parameter>
-              </operationHasOwnedParameters>
-              <operationHasOwnedParameters>
-                <parameter Id="94f95bfc-71f7-44c1-b58f-e593042b59b1" direction="Return" isUnique="false">
-                  <elementDefinition Id="25bac7e7-2f1c-4dd8-961c-055295b58685" />
-                  <type_NamedElement>
-                    <referencedTypeMoniker Id="3b56a73f-38f1-4431-b905-337c1bd8031c" LastKnownName="INeuralProxy" />
-                  </type_NamedElement>
-                </parameter>
-              </operationHasOwnedParameters>
-            </ownedParameters>
-          </operation>
           <operation Id="fcb645fa-f732-4722-97c5-fca93f42f0a3" name="GetInputSize" isLeaf="false" isStatic="false" isAbstract="true" concurrency="Sequential" isQuery="false">
             <elementDefinition Id="a4e0e0bc-b4a8-4be8-a4c9-d3c640076eaa" />
           </operation>
@@ -238,6 +221,9 @@ Neural必须无虚
           </operation>
           <operation Id="f9149cd4-7d93-41a9-9017-e764f78fe57f" name="Train" isLeaf="false" isStatic="false" isAbstract="true" concurrency="Sequential" isQuery="false">
             <elementDefinition Id="e49ba5b1-aee6-4074-a963-967cecdd767b" />
+          </operation>
+          <operation Id="f1874bb3-b181-4866-84e9-dcdcd21d680c" name="GetNeural" isLeaf="false" isStatic="false" isAbstract="true" concurrency="Sequential" isQuery="false">
+            <elementDefinition Id="8acdea8d-b219-4fbb-a2af-6857d803201d" />
           </operation>
         </ownedOperations>
       </Interface>
@@ -300,11 +286,6 @@ Neural必须无虚
         <elementDefinition Id="29d7dde1-0602-4895-8728-3ba5ec703298" />
       </Interface>
     </logicalClassDesignerModelHasTypes>
-    <packageHasNamedElement>
-      <referencedType Id="5368aa87-ee03-4081-9026-fb3ccdeb97c1" name="int" isAbstract="false" isLeaf="false" cachedFullName="int">
-        <elementDefinition Id="46f12264-3536-4f3f-9030-c5577167cd7c" />
-      </referencedType>
-    </packageHasNamedElement>
     <logicalClassDesignerModelHasTypes>
       <class Id="7392af18-466a-46e0-85c4-1ed3ab2345e2" name="LayerBase" isAbstract="false" isLeaf="false" isActiveClass="false">
         <elementDefinition Id="098bb53b-83db-43b6-9e8e-953ea6bfca57" />
@@ -315,27 +296,6 @@ Neural必须无虚
           </interfaceRealization>
         </suppliersInternal>
         <ownedOperationsInternal>
-          <operation Id="eaafa14c-4922-45cb-aafe-086a5e47e027" name="GetNeural" isLeaf="false" isStatic="false" isAbstract="false" concurrency="Sequential" isQuery="false">
-            <elementDefinition Id="00f9245c-6943-4d21-9e7b-69cef787bd09" />
-            <ownedParameters>
-              <operationHasOwnedParameters>
-                <parameter Id="b50e280a-cdba-4a25-815c-0e164240ef39" name="index" direction="In" isUnique="false">
-                  <elementDefinition Id="07e230a5-1089-4ad8-a41c-aef08e4ecca1" />
-                  <type_NamedElement>
-                    <referencedTypeMoniker Id="5368aa87-ee03-4081-9026-fb3ccdeb97c1" LastKnownName="int" />
-                  </type_NamedElement>
-                </parameter>
-              </operationHasOwnedParameters>
-              <operationHasOwnedParameters>
-                <parameter Id="686c3b48-d0ff-415b-b7cd-ac30d0681150" direction="Return" isUnique="false">
-                  <elementDefinition Id="c53c91b1-f131-4e42-aa24-417a901750b0" />
-                  <type_NamedElement>
-                    <referencedTypeMoniker Id="3b56a73f-38f1-4431-b905-337c1bd8031c" LastKnownName="INeuralProxy" />
-                  </type_NamedElement>
-                </parameter>
-              </operationHasOwnedParameters>
-            </ownedParameters>
-          </operation>
           <operation Id="4c27d4fd-8473-4186-bc8b-a63c2dac442f" name="GetInputSize" isLeaf="false" isStatic="false" isAbstract="false" concurrency="Sequential" isQuery="false">
             <elementDefinition Id="00dad2cb-b6fe-43fb-9e8c-73c954523ffb" />
           </operation>
@@ -348,11 +308,14 @@ Neural必须无虚
           <operation Id="723a67af-af4d-434c-8b67-0c5be0badfd4" name="Train" isLeaf="false" isStatic="false" isAbstract="false" concurrency="Sequential" isQuery="false">
             <elementDefinition Id="67982614-3a20-4fdf-b11b-96ec000016a2" />
           </operation>
+          <operation Id="ae674914-c1b1-4781-8d46-526098ebc09d" name="GetNeural" isLeaf="false" isStatic="false" isAbstract="false" concurrency="Sequential" isQuery="false">
+            <elementDefinition Id="80ece4d6-2d9c-4f8c-8133-1fe44fc63e0a" />
+          </operation>
         </ownedOperationsInternal>
       </class>
     </logicalClassDesignerModelHasTypes>
     <logicalClassDesignerModelHasTypes>
-      <class Id="491ee940-0e90-4415-820e-acf5efac1e43" name="LayerFactory" isAbstract="false" isLeaf="false" isActiveClass="false">
+      <class Id="491ee940-0e90-4415-820e-acf5efac1e43" name="LayerBuilder" isAbstract="false" isLeaf="false" isActiveClass="false">
         <description>用来生成有随机权的层</description>
         <elementDefinition Id="c4a9e731-e991-4b99-9eb6-b3bd29dd9e3b" />
         <suppliersInternal>
@@ -360,7 +323,16 @@ Neural必须无虚
             <classMoniker Id="b25bab02-9144-4653-ae59-72a1bde126d0" LastKnownName="Layer" />
             <elementDefinition Id="217fc083-fd7a-459f-9463-d4b7f3d5ec21" />
           </dependency>
+          <interfaceRealization Id="51d31a99-9a4b-4f55-88cc-e1e6d9c3a7ea">
+            <interfaceMoniker Id="77160c3e-3609-4cc6-ac13-46f31b577852" LastKnownName="ILayerBuilder" />
+            <elementDefinition Id="46f5bb09-c708-4eff-a398-a9d1a22663e2" />
+          </interfaceRealization>
         </suppliersInternal>
+        <ownedOperationsInternal>
+          <operation Id="81415086-2150-4256-9854-3dcb4e52d570" name="Build" isLeaf="false" isStatic="false" isAbstract="false" concurrency="Sequential" isQuery="false">
+            <elementDefinition Id="2424b13b-98fb-4c37-8309-8f6cffa29ffb" />
+          </operation>
+        </ownedOperationsInternal>
       </class>
     </logicalClassDesignerModelHasTypes>
     <logicalClassDesignerModelHasTypes>
@@ -373,11 +345,6 @@ Neural必须无虚
         <elementDefinition Id="b68bad06-3e31-4102-83cb-2411e9477f6a" />
       </Interface>
     </logicalClassDesignerModelHasTypes>
-    <packageHasNamedElement>
-      <referencedType Id="3b56a73f-38f1-4431-b905-337c1bd8031c" name="INeuralProxy" isAbstract="false" isLeaf="false" cachedFullName="NN::INeuralProxy">
-        <elementDefinition Id="b68bad06-3e31-4102-83cb-2411e9477f6a" />
-      </referencedType>
-    </packageHasNamedElement>
     <logicalClassDesignerModelHasTypes>
       <class Id="a5f9ad50-fc6a-4176-a20e-addde835fb71" name="NeuralProxy" isAbstract="false" isLeaf="false" isActiveClass="false">
         <elementDefinition Id="1e2fea19-2202-4faf-9630-53fca9f9fdf6" />
@@ -407,6 +374,16 @@ Neural必须无虚
           </redefinableTemplateSignature>
         </ownedRedefinableTemplateSignatureInternal>
       </class>
+    </logicalClassDesignerModelHasTypes>
+    <logicalClassDesignerModelHasTypes>
+      <Interface Id="77160c3e-3609-4cc6-ac13-46f31b577852" name="ILayerBuilder" isAbstract="false" isLeaf="false">
+        <elementDefinition Id="c0c87954-4b11-410b-9a0e-5cace6776e90" />
+        <ownedOperations>
+          <operation Id="c14a4312-f075-4b4c-b6ac-715298953604" name="Build" isLeaf="false" isStatic="false" isAbstract="true" concurrency="Sequential" isQuery="false">
+            <elementDefinition Id="2ef3feaa-884f-417e-be37-9317365ed8ff" />
+          </operation>
+        </ownedOperations>
+      </Interface>
     </logicalClassDesignerModelHasTypes>
   </packagedElements>
   <package Id="426f6e2e-3807-4fc2-91b9-4d5e0dae9112" name="NN">
