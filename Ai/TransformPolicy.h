@@ -4,16 +4,21 @@
 #include <amp.h>
 #include "Define.h"
 
-void _ResizeOutput(_STD vector<FloatingPoint> & output, size_t neuralCount)
-{
-	if (output.size() < neuralCount)
-	{
-		output.resize(neuralCount);
-	}
-}
 
+struct TransformPolicyBase
+{
+	static void _ResizeOutput(_STD vector<FloatingPoint> & output, size_t neuralCount)
+	{
+		if (output.size() < neuralCount)
+		{
+			output.resize(neuralCount);
+		}
+	}
+};
+// FIX: 这里会导致不同参数的每一层都会编译不同的代码，需要把共性抽出来
 template<typename TNeuralActivationFunction>
-struct TransformPolicy
+struct TransformPolicy :
+	public TransformPolicyBase
 {
 	template<typename TNeuralType, size_t TNeuralCount, size_t TNeuralDataSize = TNeuralType::WeightSize + 1>
 	static void Transform(
@@ -39,17 +44,19 @@ struct TransformPolicy
 			auto weightIdx = idx.global[1];
 			tile_static FloatingPoint tmpData[TNeuralCount][TNeuralDataSize];
 
+			auto& tmpNeuralData = tmpData[neuralIndex];
+			auto& tmpWeightData = tmpNeuralData[weightIdx];
 			// 算 权重 * 输入
 			if (weightIdx == TNeuralType::WeightSize)
 			{
 				// 一些书里用的是正数
-				tmpData[neuralIndex][weightIdx] = -neuralsView[neuralIndex].GetThreshold();
+				tmpWeightData = -neuralsView[neuralIndex].GetThreshold();
 			}
 			else
 			{
 				auto tmp = neuralsView[neuralIndex].GetWeights()[weightIdx];
 				tmp *= inputView[weightIdx];
-				tmpData[neuralIndex][weightIdx] = tmp;
+				tmpWeightData = tmp;
 			}
 
 			idx.barrier.wait_with_tile_static_memory_fence();
@@ -60,7 +67,7 @@ struct TransformPolicy
 				FloatingPoint netWeight = 0;
 				for (size_t i = 0; i < TNeuralDataSize; i++)
 				{
-					netWeight += tmpData[neuralIndex][i];
+					netWeight += tmpNeuralData[i];
 				}
 
 				// 净权重转换

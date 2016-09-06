@@ -27,6 +27,11 @@ public:
 		assert(index >= 0 && index < GetLayerCount());
 		return *layers_[index];
 	}
+	ILayer& GetLayer(size_t index)
+	{
+		assert(index >= 0 && index < GetLayerCount());
+		return *layers_[index];
+	}
 	_STD vector<FloatingPoint> Transform(const _STD vector<FloatingPoint>& input) const
 	{
 		_STD vector<FloatingPoint> result(input);

@@ -8,6 +8,7 @@
 #include <Ai\DefaultLayer.h>
 #include <Ai\RandomLayerBuilder.h>
 #include <Ai\ValueLayerBuilder.h>
+
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace AiTest
@@ -44,22 +45,30 @@ namespace AiTest
 			});
 			view.synchronize();
 		}
+		// ¸ÐÖªÆ÷²âÊÔ
+		TEST_METHOD(PerceptronTest)
+		{
+			NeuralNetwork nn;
+			RandomLayerBuilder<StepLayer<2, 1>> builder;
+			nn.AddLayer(builder);
 
+
+		}
 		TEST_METHOD(NeuralNetworkTest)
 		{
 			using namespace std;
 			NeuralNetwork nn;
-			//RandomLayerBuilder<DefaultHiddenLayer<2, 20>> hiddenLayerBuilder;
-			//RandomLayerBuilder<DefaultOutputLayer<20, 1>> outputLayerBuilder;
+			//RandomLayerBuilder<SigmoidLayer<2, 20>> hiddenLayerBuilder;
+			//RandomLayerBuilder<LinearLayer<20, 1>> outputLayerBuilder;
 
-			using HiddenLayerBuilder = ValueLayerBuilder<DefaultHiddenLayer<2, 2>>;
+			using HiddenLayerBuilder = ValueLayerBuilder<SigmoidLayer<2, 2>>;
 			HiddenLayerBuilder hiddenLayerBuilder
 			({
 				{0.5f, 0.4f, 0.8f},
 				{0.9f, 1.f, -0.1f}
 			});
 
-			using OutputLayerBuilder = ValueLayerBuilder<DefaultOutputLayer<2,1>>;
+			using OutputLayerBuilder = ValueLayerBuilder<SigmoidLayer<2, 1>>;
 			OutputLayerBuilder outputLayerBuilder
 			({
 				{-1.2f, 1.1f, 0.3f}

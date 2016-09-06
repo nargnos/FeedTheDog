@@ -12,7 +12,6 @@
 template<size_t TInputSize,
 	size_t TNeuralCount,	
 	typename TTransformPolicy,
-	typename TTrainPolicy,
 	typename TInputPolicy>
 	class Layer :
 	public LayerBase
@@ -51,10 +50,7 @@ public:
 		assert(input.size() >= NeuralInputSize);
 		TTransformPolicy::Transform<NeuralType, TNeuralCount>(input, output, neurals_);
 	}
-	virtual FloatingPoint Train(const ISample & sample) override
-	{
-		return TTrainPolicy::Train(sample, neurals_);
-	}
+
 protected:
 	_STD vector<NeuralType> neurals_;
 };

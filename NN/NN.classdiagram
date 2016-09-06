@@ -59,7 +59,11 @@ Neural必须无虚
 或者创建layer的时候做模板策略传入？
 
 
-训练速率的调整是相对于例子还是相对于整体？</body>
+训练速率的调整是相对于例子还是相对于整体？
+
+用Train对象，ctor传入网络进行构造，这样便一对一可以保存中间变量
+
+网络需要对其友元</body>
       <annotatedElements>
         <classMoniker Id="6963149f-7279-47fd-a21b-64146cc12381" LastKnownName="Sample" />
       </annotatedElements>
@@ -119,9 +123,6 @@ Neural必须无虚
           </operation>
           <operation Id="50f4ee81-79e8-4546-badd-c8d86921a7bb" name="GetLayerCount" isLeaf="false" isStatic="false" isAbstract="false" concurrency="Sequential" isQuery="false">
             <elementDefinition Id="c3b0018f-b744-4e35-b8b8-2f480983daf1" />
-          </operation>
-          <operation Id="e57a519b-4c9c-49b8-8ba7-5f774198f932" name="Train" isLeaf="false" isStatic="false" isAbstract="false" concurrency="Sequential" isQuery="false">
-            <elementDefinition Id="82144c93-026a-41f9-b295-fa516459532e" />
           </operation>
         </ownedOperationsInternal>
       </class>
@@ -205,16 +206,8 @@ Neural必须无虚
               <classifierTemplateParameter Id="c6dfe0d6-0655-4c02-b8a1-9008d0c1cf42">
                 <elementDefinition Id="f4825835-8fcf-4b7c-b0f5-b77ed95afed1" />
                 <ownedParameterableElement>
-                  <class Id="0d1a8453-4712-46e7-958d-ea1fe1d977c0" name="TTrainPolicy" isAbstract="false" isLeaf="false" isActiveClass="false">
+                  <class Id="0d1a8453-4712-46e7-958d-ea1fe1d977c0" name="TInputPolicy" isAbstract="false" isLeaf="false" isActiveClass="false">
                     <elementDefinition Id="54f243a7-e180-40d0-9a55-46b36b50a161" />
-                  </class>
-                </ownedParameterableElement>
-              </classifierTemplateParameter>
-              <classifierTemplateParameter Id="a1dcec72-ee71-4e42-886e-8561e84f8393">
-                <elementDefinition Id="90a4cadd-0bbe-479f-827c-db07e28d1fd4" />
-                <ownedParameterableElement>
-                  <class Id="69153572-cad3-4b80-814d-e45b8073e14f" name="TInputPolicy" isAbstract="false" isLeaf="false" isActiveClass="false">
-                    <elementDefinition Id="4fe7c866-95d8-4abe-bd72-977683b75e07" />
                   </class>
                 </ownedParameterableElement>
               </classifierTemplateParameter>
@@ -241,9 +234,6 @@ Neural必须无虚
           </operation>
           <operation Id="7b93686e-eaf4-4709-8fba-1989ff908737" name="Transform" isLeaf="false" isStatic="false" isAbstract="true" concurrency="Sequential" isQuery="false">
             <elementDefinition Id="5f231935-fca9-40e4-8e9a-e53f0492f15e" />
-          </operation>
-          <operation Id="f9149cd4-7d93-41a9-9017-e764f78fe57f" name="Train" isLeaf="false" isStatic="false" isAbstract="true" concurrency="Sequential" isQuery="false">
-            <elementDefinition Id="e49ba5b1-aee6-4074-a963-967cecdd767b" />
           </operation>
           <operation Id="f1874bb3-b181-4866-84e9-dcdcd21d680c" name="GetNeural" isLeaf="false" isStatic="false" isAbstract="true" concurrency="Sequential" isQuery="false">
             <elementDefinition Id="8acdea8d-b219-4fbb-a2af-6857d803201d" />
@@ -343,9 +333,6 @@ Neural必须无虚
           </operation>
           <operation Id="87329f17-6b94-45c0-9fca-3020a570c5cd" name="Transform" isLeaf="false" isStatic="false" isAbstract="false" concurrency="Sequential" isQuery="false">
             <elementDefinition Id="b1ae4aa9-b433-4fb2-a20b-38327e87211e" />
-          </operation>
-          <operation Id="723a67af-af4d-434c-8b67-0c5be0badfd4" name="Train" isLeaf="false" isStatic="false" isAbstract="false" concurrency="Sequential" isQuery="false">
-            <elementDefinition Id="67982614-3a20-4fdf-b11b-96ec000016a2" />
           </operation>
           <operation Id="ae674914-c1b1-4781-8d46-526098ebc09d" name="GetNeural" isLeaf="false" isStatic="false" isAbstract="false" concurrency="Sequential" isQuery="false">
             <elementDefinition Id="80ece4d6-2d9c-4f8c-8133-1fe44fc63e0a" />

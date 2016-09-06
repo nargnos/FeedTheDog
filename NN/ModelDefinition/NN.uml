@@ -77,7 +77,11 @@ Neural必须无虚
 或者创建layer的时候做模板策略传入？
 
 
-训练速率的调整是相对于例子还是相对于整体？</body>
+训练速率的调整是相对于例子还是相对于整体？
+
+用Train对象，ctor传入网络进行构造，这样便一对一可以保存中间变量
+
+网络需要对其友元</body>
       <annotatedElements>
         <classMoniker
           Id="bbfb25fc-a4ba-43c4-ad25-08f63c9be604"
@@ -206,14 +210,6 @@ Neural必须无虚
           <operation
             Id="c3b0018f-b744-4e35-b8b8-2f480983daf1"
             name="GetLayerCount"
-            isLeaf="false"
-            isStatic="false"
-            isAbstract="false"
-            concurrency="Sequential"
-            isQuery="false" />
-          <operation
-            Id="82144c93-026a-41f9-b295-fa516459532e"
-            name="Train"
             isLeaf="false"
             isStatic="false"
             isAbstract="false"
@@ -350,17 +346,6 @@ Neural必须无虚
                 <ownedParameterableElement>
                   <class
                     Id="54f243a7-e180-40d0-9a55-46b36b50a161"
-                    name="TTrainPolicy"
-                    isAbstract="false"
-                    isLeaf="false"
-                    isActiveClass="false" />
-                </ownedParameterableElement>
-              </classifierTemplateParameter>
-              <classifierTemplateParameter
-                Id="90a4cadd-0bbe-479f-827c-db07e28d1fd4">
-                <ownedParameterableElement>
-                  <class
-                    Id="4fe7c866-95d8-4abe-bd72-977683b75e07"
                     name="TInputPolicy"
                     isAbstract="false"
                     isLeaf="false"
@@ -407,14 +392,6 @@ Neural必须无虚
           <operation
             Id="5f231935-fca9-40e4-8e9a-e53f0492f15e"
             name="Transform"
-            isLeaf="false"
-            isStatic="false"
-            isAbstract="true"
-            concurrency="Sequential"
-            isQuery="false" />
-          <operation
-            Id="e49ba5b1-aee6-4074-a963-967cecdd767b"
-            name="Train"
             isLeaf="false"
             isStatic="false"
             isAbstract="true"
@@ -618,14 +595,6 @@ Neural必须无虚
           <operation
             Id="b1ae4aa9-b433-4fb2-a20b-38327e87211e"
             name="Transform"
-            isLeaf="false"
-            isStatic="false"
-            isAbstract="false"
-            concurrency="Sequential"
-            isQuery="false" />
-          <operation
-            Id="67982614-3a20-4fdf-b11b-96ec000016a2"
-            name="Train"
             isLeaf="false"
             isStatic="false"
             isAbstract="false"

@@ -1,12 +1,17 @@
 #pragma once
 #include "Layer.h"
 #include "DefaultInputPolicy.h"
-#include "TrainPolicy.h"
 #include "TransformPolicy.h"
 #include "SigmoidActivation.h"
+#include "LinearActivation.h"
+#include "ReluActivation.h"
 
 template<size_t TInputSize, size_t TNeuralCount >
-using DefaultHiddenLayer = Layer<TInputSize, TNeuralCount, TransformPolicy<SigmoidActivation>, TrainPolicy, DefaultInputPolicy>;
+using SigmoidLayer = Layer<TInputSize, TNeuralCount, TransformPolicy<SigmoidActivation>, DefaultInputPolicy>;
 
 template<size_t TInputSize, size_t TNeuralCount >
-using DefaultOutputLayer = Layer<TInputSize, TNeuralCount, TransformPolicy<SigmoidActivation>, TrainPolicy, DefaultInputPolicy>;
+using LinearLayer = Layer<TInputSize, TNeuralCount, TransformPolicy<LinearActivation>, DefaultInputPolicy>;
+
+template<size_t TInputSize, size_t TNeuralCount >
+using ReluLayer = Layer<TInputSize, TNeuralCount, TransformPolicy<ReluActivation>, DefaultInputPolicy>;
+
