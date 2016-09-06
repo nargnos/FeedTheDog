@@ -5,44 +5,85 @@
   name="NN" xmlns="http://schemas.microsoft.com/dsltools/ModelStore">
   <ownedCommentsInternal>
     <comment
-      Id="41cf20eb-4079-48f5-9a51-54e6e07eb35c">
+      Id="c05a5885-6741-4875-8f91-331c1cab9fec">
+      <body>反馈网络没看到，之后可能要添加扩展</body>
+    </comment>
+    <comment
+      Id="3c2e9fc0-8630-4f45-b162-49a00e1c6f0b">
+      <body>激活函数在TTransformPolicy里</body>
+      <annotatedElements>
+        <redefinableTemplateSignatureMoniker
+          Id="6d1f8d6c-412f-4344-bcbf-a081cbf545c4"
+          LastKnownLocation="NN.uml" />
+      </annotatedElements>
+    </comment>
+    <comment
+      Id="970afe31-18c7-4d14-861a-0c3167d22d04">
+      <body>用来处理神经元的访问，Neural不方便做接口继承</body>
+      <annotatedElements>
+        <redefinableTemplateSignatureMoniker
+          Id="07cbf6eb-5250-4b4f-931b-569b34bdfc8e"
+          LastKnownLocation="NN.uml" />
+      </annotatedElements>
+    </comment>
+    <comment
+      Id="2272c60e-3373-4dac-bae3-975682974877">
+      <body>输入方式，就是上一层的数据如何输入到这层中,可对输入过滤，这样导致神经元的权数是跟它关联的</body>
+      <annotatedElements>
+        <redefinableTemplateSignatureMoniker
+          Id="6d1f8d6c-412f-4344-bcbf-a081cbf545c4"
+          LastKnownLocation="NN.uml" />
+      </annotatedElements>
+    </comment>
+    <comment
+      Id="eed28aaf-a3ec-47f3-95f0-1b9969bb4a6e">
+      <body>这里可以继承或者组合TrainPolicy，用作算法中间变量存储</body>
+      <annotatedElements>
+        <classMoniker
+          Id="5c596596-fd4b-46af-ab70-17315b6dfc38"
+          LastKnownName="Layer"
+          LastKnownLocation="NN.uml" />
+      </annotatedElements>
+    </comment>
+    <comment
+      Id="363d8d40-fbe9-421b-a5a0-ca9c715898f4">
       <body>为了载入gpu
 Neural必须无虚
 所以不能为同层神经元设置不同的激活函数，因为amp函数中不能用虚函数
 
 同一layer里支持放n个layer应该可以解决这个问题
 或者向amp函数传一个记录类型的tuple（不过这样的话创建layer蛮累的）</body>
+      <annotatedElements>
+        <classMoniker
+          Id="1416b2ce-a5aa-46ab-a45d-a08fad62aa2a"
+          LastKnownName="Neural"
+          LastKnownLocation="NN.uml" />
+      </annotatedElements>
     </comment>
     <comment
-      Id="ec1c457c-a974-498e-9e6d-77a35ed4197d">
-      <body>都静态函数，可以用继承扩展</body>
+      Id="4e4e0e4d-77dc-4439-a4cf-878ccaac873c">
+      <body>策略类，都静态函数，可以用继承扩展</body>
+      <annotatedElements>
+        <classMoniker
+          Id="769b0c91-7568-4324-8c74-c7d30c012b00"
+          LastKnownName="Function"
+          LastKnownLocation="NN.uml" />
+      </annotatedElements>
     </comment>
     <comment
-      Id="2e157da5-d773-4a6b-8674-e8fb6ca359fd">
-      <body>输入方式，就是上一层的数据如何输入到这层中,可对输入过滤，这样导致神经元的权数是跟它关联的</body>
-    </comment>
-    <comment
-      Id="c05a5885-6741-4875-8f91-331c1cab9fec">
-      <body>反馈网络没看到，之后可能要添加扩展</body>
-    </comment>
-    <comment
-      Id="92682fe3-2552-41ed-a4d1-dc3807df31b2">
+      Id="fc4f2a9c-f483-4347-9da1-953d80a04cb3">
       <body>训练方式需要跟网络解耦
 但是如果解耦的话神经元中不应该存在训练算法用到的成员变量，那么这些变量要存哪？
 或者创建layer的时候做模板策略传入？
-</body>
-    </comment>
-    <comment
-      Id="f070c700-6cf8-4450-87a9-f376dd76018f">
-      <body>这里继承或者组合TrainPolicy，用作算法中间变量存储</body>
-    </comment>
-    <comment
-      Id="47add267-949d-4c7c-97b9-cbc7c28b2618">
-      <body>用来处理神经元的访问，Neural不方便做接口继承</body>
-    </comment>
-    <comment
-      Id="341317b7-8749-43d9-921b-65705678750a">
-      <body>激活函数在TTransformPolicy里</body>
+
+
+训练速率的调整是相对于例子还是相对于整体？</body>
+      <annotatedElements>
+        <classMoniker
+          Id="bbfb25fc-a4ba-43c4-ad25-08f63c9be604"
+          LastKnownName="Sample"
+          LastKnownLocation="NN.uml" />
+      </annotatedElements>
     </comment>
   </ownedCommentsInternal>
   <profileInstances>
@@ -490,6 +531,24 @@ Neural必须无虚
             aggregation="None"
             isComposite="false" />
         </ownedAttributesInternal>
+        <ownedOperationsInternal>
+          <operation
+            Id="bf7bc1c4-b43e-46ad-966a-8cfe50a6955c"
+            name="GetInput"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false" />
+          <operation
+            Id="e4aeb97d-3336-429e-b8f3-1a4662c00ef2"
+            name="GetDesire"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false" />
+        </ownedOperationsInternal>
       </class>
     </packageHasNamedElement>
     <packageHasNamedElement>
@@ -497,7 +556,26 @@ Neural必须无虚
         Id="29d7dde1-0602-4895-8728-3ba5ec703298"
         name="ISample"
         isAbstract="false"
-        isLeaf="false" />
+        isLeaf="false">
+        <ownedOperations>
+          <operation
+            Id="e30b3050-6e41-4294-9094-1d9a36960744"
+            name="GetInput"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="true"
+            concurrency="Sequential"
+            isQuery="false" />
+          <operation
+            Id="01f2aaa9-813d-436b-81a9-683d01cb5870"
+            name="GetDesire"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="true"
+            concurrency="Sequential"
+            isQuery="false" />
+        </ownedOperations>
+      </Interface>
     </packageHasNamedElement>
     <packageHasNamedElement>
       <undefinedType

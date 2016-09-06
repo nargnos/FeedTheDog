@@ -8,12 +8,9 @@
 class NeuralNetwork
 {
 public:
-	NeuralNetwork()
-	{
-	}
-	~NeuralNetwork()
-	{
-	}
+	NeuralNetwork() = default;
+	~NeuralNetwork() = default;
+
 	size_t GetLayerCount() const
 	{
 		return layers_.size();
@@ -21,7 +18,7 @@ public:
 	void AddLayer(const ILayerBuilder& builder)
 	{
 		auto tmp = builder.Build();
-		assert(IsCanAdd(tmp));
+		assert(IsLayerCanAdd(tmp));
 		layers_.push_back(_STD move(tmp));
 	}
 
@@ -41,7 +38,7 @@ public:
 		return result;
 	}
 protected:
-	bool IsCanAdd(_STD unique_ptr<ILayer>& layer) const
+	bool IsLayerCanAdd(_STD unique_ptr<ILayer>& layer) const
 	{
 		if (!layers_.empty())
 		{

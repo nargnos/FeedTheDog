@@ -49,8 +49,8 @@ namespace AiTest
 		{
 			using namespace std;
 			NeuralNetwork nn;
-			//RandomLayerBuilder<DefaultHiddenLayer<2, 2>> hiddenLayerBuilder;
-			//RandomLayerBuilder<DefaultOutputLayer<2, 1>> outputLayerBuilder;
+			//RandomLayerBuilder<DefaultHiddenLayer<2, 20>> hiddenLayerBuilder;
+			//RandomLayerBuilder<DefaultOutputLayer<20, 1>> outputLayerBuilder;
 
 			using HiddenLayerBuilder = ValueLayerBuilder<DefaultHiddenLayer<2, 2>>;
 			HiddenLayerBuilder hiddenLayerBuilder
@@ -59,7 +59,7 @@ namespace AiTest
 				{0.9f, 1.f, -0.1f}
 			});
 
-			using OutputLayerBuilder = ValueLayerBuilder<DefaultOutputLayer<1,2>>;
+			using OutputLayerBuilder = ValueLayerBuilder<DefaultOutputLayer<2,1>>;
 			OutputLayerBuilder outputLayerBuilder
 			({
 				{-1.2f, 1.1f, 0.3f}

@@ -1,45 +1,68 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <logicalClassDesignerModel xmlns:dm0="http://schemas.microsoft.com/VisualStudio/2008/DslTools/Core" xmlns:dm1="http://schemas.microsoft.com/dsltools/Kernel" xmlns:dm2="http://schemas.microsoft.com/dsltools/Component" xmlns:dm3="http://schemas.microsoft.com/dsltools/Activity" xmlns:dm4="http://schemas.microsoft.com/dsltools/UseCase" xmlns:dm5="http://schemas.microsoft.com/dsltools/Interaction" xmlns:dm6="http://schemas.microsoft.com/dsltools/UmlModelLibrary" xmlns:dm7="http://schemas.microsoft.com/dsltools/UmlDiagrams" xmlns:dm8="http://schemas.microsoft.com/dsltools/ModelStore" dslVersion="1.0.0.0" Id="6d53f59e-f290-4c5f-a2b1-c6ca9e413a18" name="NN" linkedPackageId="426f6e2e-3807-4fc2-91b9-4d5e0dae9112" xmlns="http://schemas.microsoft.com/dsltools/LogicalClassDesigner">
   <ownedCommentsInternal>
-    <comment Id="1309ac7e-c686-46a0-b619-06dac55e7733">
-      <elementDefinition Id="41cf20eb-4079-48f5-9a51-54e6e07eb35c" />
+    <comment Id="e8d06355-0493-492a-bf5a-a4c00afb1eb8">
+      <elementDefinition Id="c05a5885-6741-4875-8f91-331c1cab9fec" />
+      <body>反馈网络没看到，之后可能要添加扩展</body>
+    </comment>
+    <comment Id="90614d0c-d254-4664-b8a8-b101fb7ccfd1">
+      <elementDefinition Id="3c2e9fc0-8630-4f45-b162-49a00e1c6f0b" />
+      <body>激活函数在TTransformPolicy里</body>
+      <annotatedElements>
+        <redefinableTemplateSignatureMoniker Id="49978509-75b1-487c-8e50-3380acf3cdc5" />
+      </annotatedElements>
+    </comment>
+    <comment Id="c5dc7dfc-40bf-4a3c-8145-ff8bc3abdf49">
+      <elementDefinition Id="970afe31-18c7-4d14-861a-0c3167d22d04" />
+      <body>用来处理神经元的访问，Neural不方便做接口继承</body>
+      <annotatedElements>
+        <redefinableTemplateSignatureMoniker Id="4ba2bfe6-d5f2-426d-88aa-7ea7d5d19025" />
+      </annotatedElements>
+    </comment>
+    <comment Id="0ebfb1fd-8f06-429d-bf87-87dc64f8c8a8">
+      <elementDefinition Id="2272c60e-3373-4dac-bae3-975682974877" />
+      <body>输入方式，就是上一层的数据如何输入到这层中,可对输入过滤，这样导致神经元的权数是跟它关联的</body>
+      <annotatedElements>
+        <redefinableTemplateSignatureMoniker Id="49978509-75b1-487c-8e50-3380acf3cdc5" />
+      </annotatedElements>
+    </comment>
+    <comment Id="230e7229-1145-4f3e-9734-31d588cabf00">
+      <elementDefinition Id="eed28aaf-a3ec-47f3-95f0-1b9969bb4a6e" />
+      <body>这里可以继承或者组合TrainPolicy，用作算法中间变量存储</body>
+      <annotatedElements>
+        <classMoniker Id="b25bab02-9144-4653-ae59-72a1bde126d0" LastKnownName="Layer" />
+      </annotatedElements>
+    </comment>
+    <comment Id="b9b9cdc0-fe69-492f-845a-2d9b299c4602">
+      <elementDefinition Id="363d8d40-fbe9-421b-a5a0-ca9c715898f4" />
       <body>为了载入gpu
 Neural必须无虚
 所以不能为同层神经元设置不同的激活函数，因为amp函数中不能用虚函数
 
 同一layer里支持放n个layer应该可以解决这个问题
 或者向amp函数传一个记录类型的tuple（不过这样的话创建layer蛮累的）</body>
+      <annotatedElements>
+        <classMoniker Id="7dcd0d82-03c2-44d4-806a-f4d7f1a3c8e5" LastKnownName="Neural" />
+      </annotatedElements>
     </comment>
-    <comment Id="6a4a0707-6f86-45b6-b1d2-f111473cafe8">
-      <elementDefinition Id="ec1c457c-a974-498e-9e6d-77a35ed4197d" />
-      <body>都静态函数，可以用继承扩展</body>
+    <comment Id="6cacccbd-9ffa-4e6b-8117-f44541dc6870">
+      <elementDefinition Id="4e4e0e4d-77dc-4439-a4cf-878ccaac873c" />
+      <body>策略类，都静态函数，可以用继承扩展</body>
+      <annotatedElements>
+        <classMoniker Id="4cd69b2f-ae3d-4911-a78f-4dd7a2c738bc" LastKnownName="Function" />
+      </annotatedElements>
     </comment>
-    <comment Id="1de3ac7f-d193-4f8a-9aa2-fc9d8c8c8880">
-      <elementDefinition Id="2e157da5-d773-4a6b-8674-e8fb6ca359fd" />
-      <body>输入方式，就是上一层的数据如何输入到这层中,可对输入过滤，这样导致神经元的权数是跟它关联的</body>
-    </comment>
-    <comment Id="e8d06355-0493-492a-bf5a-a4c00afb1eb8">
-      <elementDefinition Id="c05a5885-6741-4875-8f91-331c1cab9fec" />
-      <body>反馈网络没看到，之后可能要添加扩展</body>
-    </comment>
-    <comment Id="3f5e79c8-166c-4040-8879-483ebdb5a13a">
-      <elementDefinition Id="92682fe3-2552-41ed-a4d1-dc3807df31b2" />
+    <comment Id="01b38ab1-dc10-41a0-9702-a1cf257828fc">
+      <elementDefinition Id="fc4f2a9c-f483-4347-9da1-953d80a04cb3" />
       <body>训练方式需要跟网络解耦
 但是如果解耦的话神经元中不应该存在训练算法用到的成员变量，那么这些变量要存哪？
 或者创建layer的时候做模板策略传入？
-</body>
-    </comment>
-    <comment Id="42d3ea66-6ffe-4c5a-83e8-048f2d53b0a0">
-      <elementDefinition Id="f070c700-6cf8-4450-87a9-f376dd76018f" />
-      <body>这里继承或者组合TrainPolicy，用作算法中间变量存储</body>
-    </comment>
-    <comment Id="834197b7-0d1b-4235-8ed3-88127b0b7ee3">
-      <elementDefinition Id="47add267-949d-4c7c-97b9-cbc7c28b2618" />
-      <body>用来处理神经元的访问，Neural不方便做接口继承</body>
-    </comment>
-    <comment Id="c243c614-d0c8-4504-9619-d9f4f5a47bfe">
-      <elementDefinition Id="341317b7-8749-43d9-921b-65705678750a" />
-      <body>激活函数在TTransformPolicy里</body>
+
+
+训练速率的调整是相对于例子还是相对于整体？</body>
+      <annotatedElements>
+        <classMoniker Id="6963149f-7279-47fd-a21b-64146cc12381" LastKnownName="Sample" />
+      </annotatedElements>
     </comment>
   </ownedCommentsInternal>
   <packagedElements>
@@ -279,11 +302,27 @@ Neural必须无虚
             <elementDefinition Id="79bb6372-c188-4270-a59b-3216c99ca6be" />
           </property>
         </ownedAttributesInternal>
+        <ownedOperationsInternal>
+          <operation Id="a81ff8ca-ed4e-47c0-a62f-1300527a52ce" name="GetInput" isLeaf="false" isStatic="false" isAbstract="false" concurrency="Sequential" isQuery="false">
+            <elementDefinition Id="bf7bc1c4-b43e-46ad-966a-8cfe50a6955c" />
+          </operation>
+          <operation Id="468c2d46-bda2-4850-8031-7f6d69db2ce9" name="GetDesire" isLeaf="false" isStatic="false" isAbstract="false" concurrency="Sequential" isQuery="false">
+            <elementDefinition Id="e4aeb97d-3336-429e-b8f3-1a4662c00ef2" />
+          </operation>
+        </ownedOperationsInternal>
       </class>
     </logicalClassDesignerModelHasTypes>
     <logicalClassDesignerModelHasTypes>
       <Interface Id="31fc2f7e-83d6-4e6a-8b6d-4d0e7ad6ae8c" name="ISample" isAbstract="false" isLeaf="false">
         <elementDefinition Id="29d7dde1-0602-4895-8728-3ba5ec703298" />
+        <ownedOperations>
+          <operation Id="71598a8a-822d-4625-bbff-a070cf61b541" name="GetInput" isLeaf="false" isStatic="false" isAbstract="true" concurrency="Sequential" isQuery="false">
+            <elementDefinition Id="e30b3050-6e41-4294-9094-1d9a36960744" />
+          </operation>
+          <operation Id="1eb847cd-ef74-4bc0-b749-9e49acc1a446" name="GetDesire" isLeaf="false" isStatic="false" isAbstract="true" concurrency="Sequential" isQuery="false">
+            <elementDefinition Id="01f2aaa9-813d-436b-81a9-683d01cb5870" />
+          </operation>
+        </ownedOperations>
       </Interface>
     </logicalClassDesignerModelHasTypes>
     <logicalClassDesignerModelHasTypes>

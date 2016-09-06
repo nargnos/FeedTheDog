@@ -3,6 +3,7 @@
 #include <ppl.h>
 #include <type_traits>
 #include "ILayerBuilder.h"
+
 template<typename TLayer>
 class RandomLayerBuilder :
 	public ILayerBuilder

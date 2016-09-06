@@ -4,68 +4,72 @@
 #include <amp.h>
 #include "Define.h"
 
+void _ResizeOutput(_STD vector<FloatingPoint> & output, size_t neuralCount)
+{
+	if (output.size() < neuralCount)
+	{
+		output.resize(neuralCount);
+	}
+}
+
 template<typename TNeuralActivationFunction>
 struct TransformPolicy
 {
-	template<typename TNeuralType>
+	template<typename TNeuralType, size_t TNeuralCount, size_t TNeuralDataSize = TNeuralType::WeightSize + 1>
 	static void Transform(
 		const _STD vector<FloatingPoint>& input,
 		_Out_ _STD vector<FloatingPoint>& output,
 		const _STD vector<TNeuralType>& neurals)
 	{
 		assert(input.size() >= TNeuralType::WeightSize);
-		auto neuralCount = neurals.size();
-		if (output.size() < neuralCount)
-		{
-			output.resize(neuralCount);
-		}
+		_ResizeOutput(output, TNeuralCount);
 
 		concurrency::array_view<const FloatingPoint, 1> inputView(TNeuralType::WeightSize, input);
+		concurrency::array_view<const TNeuralType, 1> neuralsView(TNeuralCount, neurals);
+		concurrency::array_view<FloatingPoint, 1> outputView(TNeuralCount, output);
+		outputView.discard_data();
 
-		concurrency::array_view<const TNeuralType, 1> neuralsView(neuralCount, neurals);
+		concurrency::extent<2> extent(TNeuralCount, TNeuralDataSize);
 
-		// 中间数据(为了分更多gpu线程)
-		constexpr auto neuralDataSize = TNeuralType::WeightSize + 1;
-		auto allWeightCount = neuralCount * neuralDataSize;
-		_STD vector<FloatingPoint> tmpData(allWeightCount);
-		// 纵表示不同的元，横表示元的权（最后的是阈值）
-		concurrency::array_view<FloatingPoint, 2> tmpDataView(neuralCount, neuralDataSize, tmpData);
-		tmpDataView.discard_data();
-
-		// 算 权重 * 权
-		concurrency::parallel_for_each(tmpDataView.extent, [=](concurrency::index<2> idx) restrict(amp)
+		concurrency::parallel_for_each(
+			extent.tile<TNeuralCount, TNeuralDataSize>(),
+			[=](concurrency::tiled_index<TNeuralCount, TNeuralDataSize> idx) restrict(amp)
 		{
-			auto neuralIndex = idx[0];
-			auto weightIdx = idx[1];
+			auto neuralIndex = idx.global[0];
+			auto weightIdx = idx.global[1];
+			tile_static FloatingPoint tmpData[TNeuralCount][TNeuralDataSize];
+
+			// 算 权重 * 输入
 			if (weightIdx == TNeuralType::WeightSize)
 			{
 				// 一些书里用的是正数
-				tmpDataView[idx] = -neuralsView[neuralIndex].GetThreshold();
+				tmpData[neuralIndex][weightIdx] = -neuralsView[neuralIndex].GetThreshold();
 			}
 			else
 			{
 				auto tmp = neuralsView[neuralIndex].GetWeights()[weightIdx];
 				tmp *= inputView[weightIdx];
-				tmpDataView[idx] = tmp;
+				tmpData[neuralIndex][weightIdx] = tmp;
 			}
-		});
-		tmpDataView.synchronize();
 
-		concurrency::array_view<FloatingPoint, 1> outputView(neuralCount, output);
-		outputView.discard_data();
+			idx.barrier.wait_with_tile_static_memory_fence();
 
-		// 算 净权重并转化输出
-		concurrency::parallel_for_each(outputView.extent, [=](concurrency::index<1> idx) restrict(amp)
-		{
-			auto neuralIndex = idx[0];
-			FloatingPoint netWeight = 0;
-			for (size_t i = 0; i < neuralDataSize; i++)
+			if (weightIdx == 0)
 			{
-				netWeight += tmpDataView(neuralIndex, i);
+				// 算 净权重并转化输出
+				FloatingPoint netWeight = 0;
+				for (size_t i = 0; i < TNeuralDataSize; i++)
+				{
+					netWeight += tmpData[neuralIndex][i];
+				}
+
+				// 净权重转换
+				outputView[neuralIndex] = TNeuralActivationFunction::Convert(netWeight);
 			}
-			// 净权重转换
-			outputView[idx] = TNeuralActivationFunction::Convert(netWeight);
+
 		});
 		outputView.synchronize();
+
 	}
+
 };

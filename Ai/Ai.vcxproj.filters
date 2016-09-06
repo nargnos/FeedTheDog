@@ -91,7 +91,7 @@
       <Filter>Ai\NeuralNetwork\Detail\Policy</Filter>
     </ClInclude>
     <ClInclude Include="ValueLayerBuilder.h">
-      <Filter>头文件</Filter>
+      <Filter>Ai\NeuralNetwork</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

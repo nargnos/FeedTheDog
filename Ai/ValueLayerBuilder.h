@@ -12,7 +12,7 @@ class ValueLayerBuilder :
 public:
 	static_assert(_STD is_base_of<ILayer, TLayer>::value, "TLayer error");
 
-	// { {权, ... , 阈值}, ... }
+	// 输入格式为 { {权, ... , 阈值}, ... }
 	ValueLayerBuilder(const _STD initializer_list<_STD initializer_list<FloatingPoint>> & weights)
 	{
 		using namespace std;

@@ -5,8 +5,8 @@
 #include "TransformPolicy.h"
 #include "SigmoidActivation.h"
 
-template<size_t NeuralCount, size_t InputSize>
-using DefaultHiddenLayer = Layer<NeuralCount, InputSize, TransformPolicy<SigmoidActivation>, TrainPolicy, DefaultInputPolicy>;
+template<size_t TInputSize, size_t TNeuralCount >
+using DefaultHiddenLayer = Layer<TInputSize, TNeuralCount, TransformPolicy<SigmoidActivation>, TrainPolicy, DefaultInputPolicy>;
 
-template<size_t NeuralCount, size_t InputSize>
-using DefaultOutputLayer = Layer<NeuralCount, InputSize, TransformPolicy<SigmoidActivation>, TrainPolicy, DefaultInputPolicy>;
+template<size_t TInputSize, size_t TNeuralCount >
+using DefaultOutputLayer = Layer<TInputSize, TNeuralCount, TransformPolicy<SigmoidActivation>, TrainPolicy, DefaultInputPolicy>;

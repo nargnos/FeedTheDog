@@ -1,17 +1,17 @@
 #pragma once
 #include <array>
 #include "Define.h"
-template<size_t _WeightSize>
+template<size_t TWeightSize>
 class Neural
 {
 public:
-	using TWeight = FloatingPoint[_WeightSize];
+	using TWeight = FloatingPoint[TWeightSize];
 	Neural() = default;
 
 	~Neural() = default;
 	size_t GetWeightSize() const restrict(cpu, amp)
 	{
-		return _WeightSize;
+		return TWeightSize;
 	}
 	TWeight& GetWeights() restrict(cpu, amp)
 	{
@@ -31,7 +31,7 @@ public:
 	{
 		return threshold_;
 	}
-	static constexpr size_t WeightSize = _WeightSize;
+	static constexpr size_t WeightSize = TWeightSize;
 protected:
 	TWeight weights_;
 	FloatingPoint threshold_;
