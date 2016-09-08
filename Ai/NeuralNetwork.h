@@ -52,6 +52,18 @@ public:
 	{
 		return (*layers_.begin())->GetNeuralCount();
 	}
+
+	virtual _STD vector<_STD vector<FloatingPoint>> GetWeights() const override
+	{
+		_STD vector<_STD vector<FloatingPoint>> result;
+		for (auto& val : layers_)
+		{
+			auto bgn = val->_GetRawData();
+			auto end = bgn + val->GetNeuralDataSize() * val->GetNeuralCount();
+			result.emplace_back(bgn, end);
+		}
+		return result;
+	}
 protected:
 	bool IsLayerCanAdd(_STD unique_ptr<ILayer>& layer) const
 	{
@@ -62,5 +74,7 @@ protected:
 		return true;
 	}
 	_STD vector<_STD unique_ptr<ILayer>> layers_;
+
+	
 };
 

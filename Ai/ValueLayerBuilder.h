@@ -19,7 +19,15 @@ public:
 			values_.emplace_back(row);
 		}
 	}
-
+	ValueLayerBuilderBase(const _STD vector<FloatingPoint> & weights, size_t neuralCount, size_t neuralDataSize)
+	{
+		for (size_t i = 0; i < neuralCount; i++)
+		{
+			auto bgn = weights.begin() + i * neuralDataSize;
+			auto end = bgn + neuralDataSize;
+			values_.emplace_back(bgn, end);
+		}
+	}
 	virtual ~ValueLayerBuilderBase() = default;
 
 protected:

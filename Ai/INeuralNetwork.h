@@ -12,4 +12,5 @@ __interface INeuralNetwork
 	_STD vector<FloatingPoint> Transform(const _STD vector<FloatingPoint>& input) const;	
 	size_t GetInputSize() const;
 	size_t GetOutputSize() const;
+	_STD vector<_STD vector<FloatingPoint>> GetWeights() const;
 };
