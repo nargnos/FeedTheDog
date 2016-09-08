@@ -8,4 +8,6 @@ using FloatingPoint = double;
 #define MATH_NAMESPACE concurrency::precise_math::
 #endif // USE_FLOAT
 
+
+
 #define CHECK_ALPHA(alpha) //assert((alpha) >= 0 && (alpha) <= 1.f)

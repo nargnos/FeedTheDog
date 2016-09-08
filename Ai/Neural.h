@@ -1,6 +1,8 @@
 #pragma once
 #include <array>
 #include "Define.h"
+
+// 不要修改它的存储结构和对齐，其它地方要用到
 template<size_t TWeightSize>
 class Neural
 {

@@ -135,13 +135,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="DefaultInputPolicy.h" />
     <ClInclude Include="DefaultLayer.h" />
     <ClInclude Include="Define.h" />
     <ClInclude Include="ILayer.h" />
     <ClInclude Include="ILayerBuilder.h" />
+    <ClInclude Include="INeuralNetwork.h" />
     <ClInclude Include="INeuralProxy.h" />
     <ClInclude Include="ISample.h" />
+    <ClInclude Include="ITrainer.h" />
     <ClInclude Include="Layer.h" />
     <ClInclude Include="LayerBase.h" />
     <ClInclude Include="LinearActivation.h" />
@@ -151,25 +152,24 @@
     <ClInclude Include="Neural.h" />
     <ClInclude Include="NeuralNetwork.h" />
     <ClInclude Include="NeuralProxy.h" />
-    <ClInclude Include="SampleBase.h" />
+    <ClInclude Include="Sample.h" />
     <ClInclude Include="SignActivation.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="BinaryStepActivation.h" />
     <ClInclude Include="TanhActivation.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="TrainPolicy.h" />
-    <ClInclude Include="TransformPolicy.h" />
+    <ClInclude Include="Trainer.h" />
+    <ClInclude Include="TrainerBase.h" />
     <ClInclude Include="ValueLayerBuilder.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="NeuralNetwork.cpp" />
-    <ClCompile Include="RandomLayerBuilder.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Trainer.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

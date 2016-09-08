@@ -9,15 +9,6 @@
       <body>反馈网络没看到，之后可能要添加扩展</body>
     </comment>
     <comment
-      Id="3c2e9fc0-8630-4f45-b162-49a00e1c6f0b">
-      <body>激活函数在TTransformPolicy里</body>
-      <annotatedElements>
-        <redefinableTemplateSignatureMoniker
-          Id="6d1f8d6c-412f-4344-bcbf-a081cbf545c4"
-          LastKnownLocation="NN.uml" />
-      </annotatedElements>
-    </comment>
-    <comment
       Id="970afe31-18c7-4d14-861a-0c3167d22d04">
       <body>用来处理神经元的访问，Neural不方便做接口继承</body>
       <annotatedElements>
@@ -89,6 +80,36 @@ Neural必须无虚
           LastKnownLocation="NN.uml" />
       </annotatedElements>
     </comment>
+    <comment
+      Id="76aa8711-cdd7-4307-a49e-6cd4834a0cc5">
+      <body>需要保证多个网络能串接在一起</body>
+      <annotatedElements>
+        <classMoniker
+          Id="b67c1c78-b046-4487-8eb5-f1f70dc33d88"
+          LastKnownName="NeuralNetwork"
+          LastKnownLocation="NN.uml" />
+      </annotatedElements>
+    </comment>
+    <comment
+      Id="007786db-36b5-4efb-bb2d-1f4205e30f4d">
+      <body>训练结束可以直接丢弃</body>
+      <annotatedElements>
+        <classMoniker
+          Id="4bbedf15-f315-4361-a11a-8e977f7dd6a8"
+          LastKnownName="Trainer"
+          LastKnownLocation="NN.uml" />
+      </annotatedElements>
+    </comment>
+    <comment
+      Id="0472514e-2620-4539-ba37-f9d5365e34c1">
+      <body>如果跟layer解耦，这里取不到跟layer关联的激活函数的导函数，如果用虚函数会无法载入gpu，gpu用的函数必须编译时确定</body>
+      <annotatedElements>
+        <classMoniker
+          Id="4bbedf15-f315-4361-a11a-8e977f7dd6a8"
+          LastKnownName="Trainer"
+          LastKnownLocation="NN.uml" />
+      </annotatedElements>
+    </comment>
   </ownedCommentsInternal>
   <profileInstances>
     <packageHasProfileInstances
@@ -113,13 +134,13 @@ Neural必须无虚
         isLeaf="false"
         isActiveClass="false">
         <suppliersInternal>
-          <dependency
-            Id="f96c137e-1f19-48f7-b3bf-d21206494196">
-            <classMoniker
-              Id="bbfb25fc-a4ba-43c4-ad25-08f63c9be604"
-              LastKnownName="Sample"
+          <interfaceRealization
+            Id="66d418e3-d116-4b96-9c6e-4b68f8b41aaa">
+            <interfaceMoniker
+              Id="7fc277df-890a-491a-b09d-d9662f3bb64d"
+              LastKnownName="INeuralNetwork"
               LastKnownLocation="NN.uml" />
-          </dependency>
+          </interfaceRealization>
           <dependency
             Id="137e25bb-7511-4d72-a51d-a234bb88f47e">
             <interfaceMoniker
@@ -130,20 +151,20 @@ Neural必须无虚
         </suppliersInternal>
         <targetEnds>
           <association
-            Id="f323b067-7fa7-41bf-9f5b-090324d3b41e"
+            Id="238f5e1a-511d-4660-bd56-15a860ca89b4"
             isDerived="false"
             sourceEndRoleName="NeuralNetwork"
-            targetEndRoleName="Layer"
+            targetEndRoleName="ILayer"
             isLeaf="false"
             isAbstract="false">
-            <classMoniker
-              Id="5c596596-fd4b-46af-ab70-17315b6dfc38"
-              LastKnownName="Layer"
+            <interfaceMoniker
+              Id="d30ba40c-d267-4d8b-8059-9063c5c111a6"
+              LastKnownName="ILayer"
               LastKnownLocation="NN.uml" />
             <relationshipOwnedElementsInternal>
               <associationHasOwnedEnds>
                 <memberEnd
-                  Id="ab934025-d7c8-4a7c-9496-ec0a2ffa2595"
+                  Id="f2645df8-4491-4496-b7b8-efd8aed78f28"
                   name="NeuralNetwork"
                   isLeaf="false"
                   isStatic="false"
@@ -152,55 +173,39 @@ Neural必须无虚
                   isDerivedUnion="false"
                   aggregation="Composite"
                   isComposite="false"
-                  isNavigableOwned="false" />
+                  isNavigableOwned="false">
+                  <lowerValueInternal>
+                    <literalString
+                      Id="793ecefc-64c7-47a8-8f42-5ef1bad8de60"
+                      name="Lower"
+                      value="n" />
+                  </lowerValueInternal>
+                  <upperValueInternal>
+                    <literalString
+                      Id="a476ad01-9fb7-4b6e-bb40-1bc357f4f0f3"
+                      name="Upper"
+                      value="n" />
+                  </upperValueInternal>
+                </memberEnd>
               </associationHasOwnedEnds>
               <associationHasOwnedEnds>
                 <memberEnd
-                  Id="100bbc7a-6dec-4f8b-9f42-a247397b50b4"
-                  name="Layer"
+                  Id="36029e40-b052-4a49-bcd9-cb8dfad5bf66"
+                  name="ILayer"
                   isLeaf="false"
                   isStatic="false"
                   isReadOnly="false"
                   isDerived="false"
                   isDerivedUnion="false"
                   aggregation="None"
-                  isComposite="true">
-                  <lowerValueInternal>
-                    <literalString
-                      Id="4f7b993e-d776-4178-917a-3b44378ce237"
-                      name="Lower"
-                      value="n" />
-                  </lowerValueInternal>
-                  <upperValueInternal>
-                    <literalString
-                      Id="68c6c0a4-8be3-4960-9229-9e4adc2efd11"
-                      name="Upper"
-                      value="n" />
-                  </upperValueInternal>
-                </memberEnd>
+                  isComposite="true" />
               </associationHasOwnedEnds>
             </relationshipOwnedElementsInternal>
           </association>
         </targetEnds>
         <ownedOperationsInternal>
           <operation
-            Id="faf6caba-2818-4cb5-92b7-0e9b2b10d77e"
-            name="Transform"
-            isLeaf="false"
-            isStatic="false"
-            isAbstract="false"
-            concurrency="Sequential"
-            isQuery="false" />
-          <operation
-            Id="aedce9eb-005a-4d8f-ae0d-6349abf200e4"
-            name="GetLayer"
-            isLeaf="false"
-            isStatic="false"
-            isAbstract="false"
-            concurrency="Sequential"
-            isQuery="false" />
-          <operation
-            Id="2ac120b0-7b44-40c3-8977-4683fa9f0fbd"
+            Id="7626a85b-9cfe-49a4-b758-b3b844c555cc"
             name="AddLayer"
             isLeaf="false"
             isStatic="false"
@@ -208,8 +213,40 @@ Neural必须无虚
             concurrency="Sequential"
             isQuery="false" />
           <operation
-            Id="c3b0018f-b744-4e35-b8b8-2f480983daf1"
+            Id="1e34d0da-900f-485d-9038-3fed784011cb"
+            name="GetInputSize"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false" />
+          <operation
+            Id="9679d58b-df31-46b5-b90b-1408de28a464"
+            name="GetLayer"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false" />
+          <operation
+            Id="f1133d83-e38e-4f11-8571-777771c12bec"
             name="GetLayerCount"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false" />
+          <operation
+            Id="d347a296-120f-412e-aa04-1eadab14a2bf"
+            name="GetOutputSize"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false" />
+          <operation
+            Id="09b90191-84fa-4cda-bf43-da15e5a671e3"
+            name="Transform"
             isLeaf="false"
             isStatic="false"
             isAbstract="false"
@@ -226,13 +263,6 @@ Neural必须无虚
         isLeaf="false"
         isActiveClass="false">
         <suppliersInternal>
-          <dependency
-            Id="ba19696f-d211-4785-bbae-5e1343c3fd72">
-            <classMoniker
-              Id="bbfb25fc-a4ba-43c4-ad25-08f63c9be604"
-              LastKnownName="Sample"
-              LastKnownLocation="NN.uml" />
-          </dependency>
           <dependency
             Id="3f9384e8-ad02-4760-9848-9ae4bccb36a2">
             <classMoniker
@@ -331,22 +361,10 @@ Neural必须无虚
               </templateParameter>
               <classifierTemplateParameter
                 Id="2e1615e1-455d-48a1-8f22-2c16fdfdf246">
-                <description>激活函数</description>
                 <ownedParameterableElement>
                   <class
                     Id="deb1164c-861b-4e82-b5f3-1a7dd53cf215"
-                    name="TTransformPolicy"
-                    isAbstract="false"
-                    isLeaf="false"
-                    isActiveClass="false" />
-                </ownedParameterableElement>
-              </classifierTemplateParameter>
-              <classifierTemplateParameter
-                Id="f4825835-8fcf-4b7c-b0f5-b77ed95afed1">
-                <ownedParameterableElement>
-                  <class
-                    Id="54f243a7-e180-40d0-9a55-46b36b50a161"
-                    name="TInputPolicy"
+                    name="TNeuralActivationFunction"
                     isAbstract="false"
                     isLeaf="false"
                     isActiveClass="false" />
@@ -563,7 +581,7 @@ Neural必须无虚
       <class
         Id="098bb53b-83db-43b6-9e8e-953ea6bfca57"
         name="LayerBase"
-        isAbstract="false"
+        isAbstract="true"
         isLeaf="false"
         isActiveClass="false">
         <suppliersInternal>
@@ -717,6 +735,143 @@ Neural必须无虚
           <operation
             Id="2ef3feaa-884f-417e-be37-9317365ed8ff"
             name="Build"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="true"
+            concurrency="Sequential"
+            isQuery="false" />
+        </ownedOperations>
+      </Interface>
+    </packageHasNamedElement>
+    <packageHasNamedElement>
+      <Interface
+        Id="f01ba44d-4d5c-4744-89e3-12f8517675bb"
+        name="ITrainer"
+        isAbstract="false"
+        isLeaf="false">
+        <ownedOperations>
+          <operation
+            Id="eeed5e13-814d-458f-af17-aa23d528db6e"
+            name="Train"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="true"
+            concurrency="Sequential"
+            isQuery="false" />
+        </ownedOperations>
+      </Interface>
+    </packageHasNamedElement>
+    <packageHasNamedElement>
+      <class
+        Id="ba970618-4d5d-41f7-9ce1-342083ee21f0"
+        name="TrainerBase"
+        isAbstract="true"
+        isLeaf="false"
+        isActiveClass="false">
+        <suppliersInternal>
+          <interfaceRealization
+            Id="757a88d1-59b4-4dcf-a450-29418408f9b2">
+            <interfaceMoniker
+              Id="f01ba44d-4d5c-4744-89e3-12f8517675bb"
+              LastKnownName="ITrainer"
+              LastKnownLocation="NN.uml" />
+          </interfaceRealization>
+          <dependency
+            Id="20aa924c-9843-4755-98a8-88f6806b4b67">
+            <interfaceMoniker
+              Id="7fc277df-890a-491a-b09d-d9662f3bb64d"
+              LastKnownName="INeuralNetwork"
+              LastKnownLocation="NN.uml" />
+          </dependency>
+          <dependency
+            Id="76cbc520-fa8f-4175-ba1b-6885a5a9c47a">
+            <interfaceMoniker
+              Id="29d7dde1-0602-4895-8728-3ba5ec703298"
+              LastKnownName="ISample"
+              LastKnownLocation="NN.uml" />
+          </dependency>
+        </suppliersInternal>
+        <ownedOperationsInternal>
+          <operation
+            Id="9a179881-c1d2-4678-8d8e-628ce559717f"
+            name="Train"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="false"
+            concurrency="Sequential"
+            isQuery="false" />
+        </ownedOperationsInternal>
+      </class>
+    </packageHasNamedElement>
+    <packageHasNamedElement>
+      <class
+        Id="4bbedf15-f315-4361-a11a-8e977f7dd6a8"
+        name="Trainer"
+        isAbstract="false"
+        isLeaf="false"
+        isActiveClass="false">
+        <generalsInternal>
+          <generalization
+            Id="69b8982d-7a40-454c-919f-7751e29e0790"
+            isSubstitutable="false">
+            <classMoniker
+              Id="ba970618-4d5d-41f7-9ce1-342083ee21f0"
+              LastKnownName="TrainerBase"
+              LastKnownLocation="NN.uml" />
+          </generalization>
+        </generalsInternal>
+      </class>
+    </packageHasNamedElement>
+    <packageHasNamedElement>
+      <Interface
+        Id="7fc277df-890a-491a-b09d-d9662f3bb64d"
+        name="INeuralNetwork"
+        isAbstract="false"
+        isLeaf="false">
+        <ownedOperations>
+          <operation
+            Id="8d9bd855-b7b2-4699-9858-8b21848c4410"
+            name="AddLayer"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="true"
+            concurrency="Sequential"
+            isQuery="false" />
+          <operation
+            Id="6ca3e541-c416-46dd-b9cb-211e8f439135"
+            name="GetInputSize"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="true"
+            concurrency="Sequential"
+            isQuery="false" />
+          <operation
+            Id="fdc4117a-946a-4393-805d-e4e1bd25f669"
+            name="GetLayer"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="true"
+            concurrency="Sequential"
+            isQuery="false" />
+          <operation
+            Id="e76fb01d-5c84-481b-8b5a-c6fe32cab69e"
+            name="GetLayerCount"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="true"
+            concurrency="Sequential"
+            isQuery="false" />
+          <operation
+            Id="c4d77963-4f39-4569-a17b-3581a3341c88"
+            name="GetOutputSize"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="true"
+            concurrency="Sequential"
+            isQuery="false" />
+          <operation
+            Id="6465fd34-1916-4f45-8ca4-ce51848098f9"
+            name="Transform"
             isLeaf="false"
             isStatic="false"
             isAbstract="true"

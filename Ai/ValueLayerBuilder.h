@@ -28,13 +28,12 @@ protected:
 		auto neuralCount = des->GetNeuralCount();
 		concurrency::parallel_for(size_t(0), neuralCount, [&](size_t idx)
 		{
-			auto tmp = des->GetNeural(idx);
 			auto& val = values_[idx];
-			tmp->SetThreshold(val.back());
-			auto weightSize = tmp->GetWeightSize();
+			des->SetThreshold(idx, val.back());
+			auto weightSize = des->GetNeuralWeightSize();
 			for (size_t i = 0; i < weightSize; i++)
 			{
-				tmp->SetWeight(i, val[i]);
+				des->SetWeight(idx, i, val[i]);
 			}
 		});
 	}

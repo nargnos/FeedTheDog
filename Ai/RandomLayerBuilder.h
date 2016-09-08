@@ -9,7 +9,7 @@ class RandomLayerBuilderBase :
 {
 public:
 	RandomLayerBuilderBase(FloatingPoint weightMin, FloatingPoint weightMax) :
-		ng(seed()),
+		ng(_STD random_device()()),
 		ud(weightMin, weightMax)
 	{
 	}
@@ -22,12 +22,11 @@ protected:
 		auto neuralCount = des->GetNeuralCount();
 		concurrency::parallel_for(size_t(0), neuralCount, [&](size_t idx)
 		{
-			auto tmp = des->GetNeural(idx);
-			tmp->SetThreshold(GetRandomWeight());
-			auto weightSize = tmp->GetWeightSize();
+			des->SetThreshold(idx, GetRandomWeight());
+			auto weightSize = des->GetNeuralWeightSize();
 			for (size_t i = 0; i < weightSize; i++)
 			{
-				tmp->SetWeight(i, GetRandomWeight());
+				des->SetWeight(idx, i, GetRandomWeight());
 			}
 		});
 	}
@@ -36,7 +35,6 @@ protected:
 		return ud(ng);
 	}
 private:
-	_STD random_device seed;
 	mutable _STD default_random_engine ng;
 	_STD uniform_real_distribution<FloatingPoint> ud;
 };

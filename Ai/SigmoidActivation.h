@@ -4,13 +4,15 @@
 
 struct SigmoidActivation
 {
+	
+	constexpr static bool IsDerivativeNeedBeforeData = false;
 	static inline FloatingPoint Convert(FloatingPoint x) restrict(amp)
 	{
 		return 1 / (1 + MATH_NAMESPACE exp(-x));
 	}
-	// x的值是Sigmoid的计算结果
-	static inline FloatingPoint DerivativeConvert(FloatingPoint x) restrict(amp)
+
+	static inline FloatingPoint DerivativeConvert(FloatingPoint input, FloatingPoint convert) restrict(amp)
 	{
-		return x - MATH_NAMESPACE pow(x, 2);
+		return convert - MATH_NAMESPACE pow(convert, 2);
 	}
 };

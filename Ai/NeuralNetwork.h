@@ -4,35 +4,37 @@
 #include <cassert>
 #include "ILayer.h"
 #include "ILayerBuilder.h"
+#include "INeuralNetwork.h"
 
-class NeuralNetwork
+class NeuralNetwork:
+	public INeuralNetwork
 {
 public:
 	NeuralNetwork() = default;
 	~NeuralNetwork() = default;
 
-	size_t GetLayerCount() const
+	virtual size_t GetLayerCount() const override
 	{
 		return layers_.size();
 	}
-	void AddLayer(const ILayerBuilder& builder)
+	virtual void AddLayer(const ILayerBuilder& builder)override
 	{
 		auto tmp = builder.Build();
 		assert(IsLayerCanAdd(tmp));
 		layers_.push_back(_STD move(tmp));
 	}
 
-	const ILayer& GetLayer(size_t index) const
+	virtual const ILayer& GetLayer(size_t index) const override
 	{
 		assert(index >= 0 && index < GetLayerCount());
 		return *layers_[index];
 	}
-	ILayer& GetLayer(size_t index)
+	virtual ILayer& GetLayer(size_t index) override
 	{
 		assert(index >= 0 && index < GetLayerCount());
 		return *layers_[index];
 	}
-	_STD vector<FloatingPoint> Transform(const _STD vector<FloatingPoint>& input) const
+	virtual _STD vector<FloatingPoint> Transform(const _STD vector<FloatingPoint>& input) const override
 	{
 		_STD vector<FloatingPoint> result(input);
 		for (auto& ptr : layers_)
@@ -41,6 +43,14 @@ public:
 		}
 		result.resize(layers_.back()->GetNeuralCount());
 		return result;
+	}
+	virtual size_t GetInputSize() const override
+	{
+		return (*layers_.begin())->GetInputSize();
+	}
+	virtual size_t GetOutputSize() const override
+	{
+		return (*layers_.begin())->GetNeuralCount();
 	}
 protected:
 	bool IsLayerCanAdd(_STD unique_ptr<ILayer>& layer) const

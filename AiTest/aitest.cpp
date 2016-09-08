@@ -8,7 +8,9 @@
 #include <Ai\DefaultLayer.h>
 #include <Ai\RandomLayerBuilder.h>
 #include <Ai\ValueLayerBuilder.h>
-
+#include <Ai\BinaryStepActivation.h>
+#include <Ai\Sample.h>
+#include <Ai\Trainer.h>
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace AiTest
@@ -49,7 +51,8 @@ namespace AiTest
 		TEST_METHOD(PerceptronTest)
 		{
 			NeuralNetwork nn;
-			RandomLayerBuilder<StepLayer<2, 1>> builder;
+			using StepLayer = Layer<2, 1, BinaryStepActivation>;
+			RandomLayerBuilder<StepLayer> builder;
 			nn.AddLayer(builder);
 
 
@@ -57,187 +60,55 @@ namespace AiTest
 		TEST_METHOD(NeuralNetworkTest)
 		{
 			using namespace std;
-			NeuralNetwork nn;
-			//RandomLayerBuilder<SigmoidLayer<2, 20>> hiddenLayerBuilder;
-			//RandomLayerBuilder<LinearLayer<20, 1>> outputLayerBuilder;
+			RandomLayerBuilder<SigmoidLayer<2, 2>> hiddenLayerBuilder;
+			RandomLayerBuilder<ReluLayer<2, 1>> outputLayerBuilder;
 
-			using HiddenLayerBuilder = ValueLayerBuilder<SigmoidLayer<2, 2>>;
-			HiddenLayerBuilder hiddenLayerBuilder
-			({
-				{0.5f, 0.4f, 0.8f},
-				{0.9f, 1.f, -0.1f}
-			});
+			// 训练
+			//using HiddenLayerBuilder = ValueLayerBuilder<ReluLayer<2, 2>>;
+			//HiddenLayerBuilder hiddenLayerBuilder
+			//({
+			//	{0.5f, 0.4f, 0.8f},
+			//	{0.9f, 1.f, -0.1f}
+			//});
+			////ReluLayer
+			//using OutputLayerBuilder = ValueLayerBuilder<ReluLayer<2, 1>>;
+			//OutputLayerBuilder outputLayerBuilder
+			//({
+			//	{-1.2f, 1.1f, 0.3f}
+			//});
 
-			using OutputLayerBuilder = ValueLayerBuilder<SigmoidLayer<2, 1>>;
-			OutputLayerBuilder outputLayerBuilder
-			({
-				{-1.2f, 1.1f, 0.3f}
-			});
 
+			_STD shared_ptr<INeuralNetwork> nn = _STD make_shared<NeuralNetwork>();
+			nn->AddLayer(hiddenLayerBuilder);
+			nn->AddLayer(outputLayerBuilder);
 
-			nn.AddLayer(hiddenLayerBuilder);
-			nn.AddLayer(outputLayerBuilder);
+			_STD shared_ptr<ISample> sample00(new Sample({ 0,0 }, { 0 }));
+			_STD shared_ptr<ISample> sample01(new Sample({ 0,1 }, { 1 }));
+			_STD shared_ptr<ISample> sample10(new Sample({ 1,0 }, { 1 }));
+			_STD shared_ptr<ISample> sample11(new Sample({ 1,1 }, { 0 }));
+			Trainer t(nn, 0.1f, 0.2f);
+			t.AddSample(sample00);
+			t.AddSample(sample01);
+			t.AddSample(sample10);
+			t.AddSample(sample11);
 
-			vector<FloatingPoint> input{ 1,1 };
-			auto x = nn.Transform(input);
-			//nn.GetLayer(0).
+			FloatingPoint d = 0;
+			for (size_t i = 0; i < 200; i++)
+			{
+				d = t.Train();
+				if (d < 0.01f)
+				{
+					break;
+				}
+			}
+
+			// 测试结果
+			auto res00 = nn->Transform({ 0,0 });;
+			auto res01 = nn->Transform({ 0,1 });;
+			auto res10 = nn->Transform({ 1,0 });;
+			auto res11 = nn->Transform({ 1,1 });;
+
 		}
 
-
-		// 感知器测试
-		//TEST_METHOD(PerceptronTest)
-		//{
-		//	using namespace std;
-
-		//	// 训练位运算
-		//	constexpr int inputSize = 2;
-		//	constexpr int dataSize = 4;
-
-		//	typedef std::array<int, inputSize> Input;
-
-		//	std::array<Input, dataSize> inputs
-		//	{
-		//		Input{0,0},
-		//		Input{0,1},
-		//		Input{1,0},
-		//		Input{1,1},
-		//	};
-
-		//	// or
-		//	std::array<PerceptronDesire, dataSize> orResults{ 0,1,1,1 };
-
-		//	auto func = [](auto val)
-		//	{
-		//		return val > 0.9;
-		//	};
-
-		//	Perceptron orTest(2);
-		//	for (size_t i = 0; i < 10; i++)
-		//	{
-		//		for (size_t j = 0; j < dataSize; j++)
-		//		{
-		//			orTest.Train(inputs[j], orResults[j], func);
-		//		}
-		//	}
-
-		//	// and
-		//	std::array<PerceptronDesire, dataSize> andResults{ 0,0,0,1 };
-		//	Perceptron andTest(2);
-		//	float rate = 0.9f;
-		//	for (size_t i = 0; i < 10; i++)
-		//	{
-		//		FloatingPoint deviation = 0;
-		//		for (size_t j = 0; j < dataSize; j++)
-		//		{
-		//			deviation += abs(andTest.Train(inputs[j], andResults[j], func, rate));
-		//		}
-		//		if (deviation < 0.0001)
-		//		{
-		//			break;
-		//		}
-		//		if (deviation < 5)
-		//		{
-		//			rate = rate * 0.5f;
-		//			if (rate < 0.01)
-		//			{
-		//				break;
-		//			}
-		//		}
-		//	}
-
-		//	// 验证
-		//	for (auto& val : inputs)
-		//	{
-		//		// or
-		//		Assert::IsTrue((bool)func(orTest.Transform(val)) == (val[0] || val[1]));
-		//		// and
-		//		Assert::IsTrue((bool)func(andTest.Transform(val)) == (val[0] && val[1]));
-		//	}
-
-
-		//	// 输出
-		//	std::ostringstream output;
-
-		//	auto testResult = [&func]
-		//	(std::ostringstream& output, std::array<Input, dataSize>& inputs, Perceptron& p)
-		//	{
-		//		for (auto& input : inputs)
-		//		{
-		//			for (auto val : input)
-		//			{
-		//				output << (bool)val << " ";
-		//			}
-		//			output << "-> " << (bool)func(p.Transform(input)) << std::endl;
-		//		}
-
-		//		output << "权重们: ";
-		//		for (auto val : p.GetWeights())
-		//		{
-		//			output << val << ", ";
-		//		}
-
-		//		output << std::endl;
-		//		output << "阈值: " << p.GetThreshold() << std::endl;
-		//	};
-
-		//	output << "或操作" << endl;
-		//	testResult(output, inputs, orTest);
-		//	output << endl << "与操作" << endl;
-		//	testResult(output, inputs, andTest);
-
-
-		//	Logger::WriteMessage(output.str().c_str());
-
-		//}
-		//TEST_METHOD(NeuralNetworkTest)
-		//{
-		//	// 训练位运算
-		//	constexpr int inputSize = 2;
-		//	constexpr int dataSize = 4;
-
-		//	NeuralNetworkBase nn(2, { 2 }, 1);
-		//	// xor
-		//
-		//	std::vector<NeuralNetworkDesire> xorTrain
-		//	{
-		//		NeuralNetworkDesire({0,0},{0}),
-		//		NeuralNetworkDesire({0,1},{1}),
-		//		NeuralNetworkDesire({1,0},{1}),
-		//		NeuralNetworkDesire({1,1},{0}),
-		//	};
-		//	nn.GetOutputLayer().GetWeights() = { -10.3788f,9.7691f };
-		//	nn.GetOutputLayer().GetThreshold() = { 4.5589f };
-
-		//	nn.GetHiddenLayer()[0].GetWeights() = { 4.7621f,4.7618f,6.3917f,6.3917f };
-		//	nn.GetHiddenLayer()[0].GetThreshold() = { 7.3061f, 2.8441f };
-
-
-		//	auto t = clock();
-		//	FloatingPoint d = 0;
-
-		//	for (size_t i = 0; i < 500; i++)
-		//	{
-		//		d = 0;
-		//		for (auto& val : xorTrain)
-		//		{
-		//			d += nn.Train(val);
-		//		}
-		//		if (d < 0.001)
-		//		{
-		//			break;
-		//		}
-		//	}
-
-		//	t = clock() - t;
-		//	std::ostringstream output;
-		//	output << "最终误差: " << d << "\t" << "训练用时: " << t << std::endl;
-		//	Logger::WriteMessage(output.str().c_str());
-		//	for (auto& val : xorTrain)
-		//	{
-		//		auto res = nn.Transform(val.GetInput());
-		//	}
-
-
-		//}
 	};
 }
