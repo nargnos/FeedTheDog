@@ -113,11 +113,23 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="ValueLayerBuilder.cpp">
+      <Filter>Ai\NeuralNetwork</Filter>
+    </ClCompile>
     <ClCompile Include="Trainer.cpp">
-      <Filter>源文件</Filter>
+      <Filter>Ai\NeuralNetwork</Filter>
+    </ClCompile>
+    <ClCompile Include="RandomLayerBuilder.cpp">
+      <Filter>Ai\NeuralNetwork</Filter>
     </ClCompile>
     <ClCompile Include="NeuralNetwork.cpp">
-      <Filter>源文件</Filter>
+      <Filter>Ai\NeuralNetwork</Filter>
+    </ClCompile>
+    <ClCompile Include="LayerBase.cpp">
+      <Filter>Ai\NeuralNetwork\Detail</Filter>
+    </ClCompile>
+    <ClCompile Include="TrainerBase.cpp">
+      <Filter>Ai\NeuralNetwork\Detail</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

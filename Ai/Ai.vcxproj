@@ -163,7 +163,9 @@
     <ClInclude Include="ValueLayerBuilder.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="LayerBase.cpp" />
     <ClCompile Include="NeuralNetwork.cpp" />
+    <ClCompile Include="RandomLayerBuilder.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -171,6 +173,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Trainer.cpp" />
+    <ClCompile Include="TrainerBase.cpp" />
+    <ClCompile Include="ValueLayerBuilder.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

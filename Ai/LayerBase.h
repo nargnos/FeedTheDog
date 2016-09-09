@@ -10,12 +10,6 @@ public:
 	constexpr static FloatingPoint ThresholdInput = -1;
 	virtual ~LayerBase() = default;
 protected:
-	static void _ResizeOutput(_STD vector<FloatingPoint> & output, size_t neuralCount)
-	{
-		if (output.size() < neuralCount)
-		{
-			output.resize(neuralCount);
-		}
-	}
+	static void _ResizeOutput(_STD vector<FloatingPoint> & output, size_t neuralCount);
 };
 

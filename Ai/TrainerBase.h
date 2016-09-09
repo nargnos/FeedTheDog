@@ -8,21 +8,11 @@ class TrainerBase :
 {
 public:
 
-	TrainerBase(_STD shared_ptr<INeuralNetwork>& network, FloatingPoint trainingRate, FloatingPoint momentum) :
-		network_(network),
-		trainingRate_(trainingRate),
-		momentum_(momentum),
-		delta_(network->GetLayerCount()),
-		lastDeviation_(-1.)
-	{
+	TrainerBase(_STD shared_ptr<INeuralNetwork>& network, FloatingPoint trainingRate, FloatingPoint momentum);
 
-	}
-
+	virtual const _STD vector<_STD shared_ptr<ISample>>& GetSamples() const override;
 	virtual ~TrainerBase() = default;
-	virtual void AddSample(_STD shared_ptr<ISample>& sample) override
-	{
-		samples_.push_back(sample);
-	}
+	virtual void AddSample(_STD shared_ptr<ISample>& sample) override;
 protected:
 	
 	_STD shared_ptr<INeuralNetwork> network_;
@@ -31,5 +21,6 @@ protected:
 	FloatingPoint trainingRate_;
 	FloatingPoint lastDeviation_;
 	FloatingPoint momentum_;
+
 };
 

@@ -4,7 +4,6 @@
 #include "LinearActivation.h"
 #include "ReluActivation.h"
 
-
 template<size_t TInputSize, size_t TNeuralCount>
 using SigmoidLayer = Layer<TInputSize, TNeuralCount, SigmoidActivation>;
 

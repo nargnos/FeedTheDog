@@ -8,32 +8,13 @@ class RandomLayerBuilderBase :
 	public ILayerBuilder
 {
 public:
-	RandomLayerBuilderBase(FloatingPoint weightMin, FloatingPoint weightMax) :
-		ng(_STD random_device()()),
-		ud(weightMin, weightMax)
-	{
-	}
+	RandomLayerBuilderBase(FloatingPoint weightMin, FloatingPoint weightMax);
 
 	virtual ~RandomLayerBuilderBase() = default;
 
 protected:
-	void FillValues(_STD unique_ptr<ILayer>& des) const
-	{
-		auto neuralCount = des->GetNeuralCount();
-		concurrency::parallel_for(size_t(0), neuralCount, [&](size_t idx)
-		{
-			des->SetThreshold(idx, GetRandomWeight());
-			auto weightSize = des->GetNeuralWeightSize();
-			for (size_t i = 0; i < weightSize; i++)
-			{
-				des->SetWeight(idx, i, GetRandomWeight());
-			}
-		});
-	}
-	FloatingPoint GetRandomWeight() const
-	{
-		return ud(ng);
-	}
+	void FillValues(_STD unique_ptr<ILayer>& des) const;
+	FloatingPoint GetRandomWeight() const;
 private:
 	mutable _STD default_random_engine ng;
 	_STD uniform_real_distribution<FloatingPoint> ud;
@@ -46,7 +27,7 @@ class RandomLayerBuilder :
 {
 public:
 	static_assert(_STD is_base_of<ILayer, TLayer>::value, "TLayer error");
-	RandomLayerBuilder(FloatingPoint weightMin = -2.4 * TLayer::NeuralInputSize, FloatingPoint weightMax = 2.4 * TLayer::NeuralInputSize) :
+	RandomLayerBuilder(FloatingPoint weightMin = -2.4 / TLayer::NeuralInputSize, FloatingPoint weightMax = 2.4 / TLayer::NeuralInputSize) :
 		RandomLayerBuilderBase(weightMin, weightMax)
 	{
 	}

@@ -11,6 +11,6 @@ struct BinaryStepActivation
 	// Ã²ËÆ²»¿Éµ¼£¿
 	static inline FloatingPoint DerivativeConvert(FloatingPoint input, FloatingPoint convert) restrict(amp)
 	{
-		return 0.;
+		return input!=0?0.:1;
 	}
 };

@@ -5,5 +5,6 @@
 __interface ITrainer
 {
 	void AddSample(_STD shared_ptr<ISample>& sample);
-	FloatingPoint Train();
+	FloatingPoint Train(bool isRandomShuffle);
+	const _STD vector<_STD shared_ptr<ISample>>& GetSamples() const;
 };
