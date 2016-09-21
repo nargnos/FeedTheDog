@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
 #include <sstream>
+#include <time.h>
 #include <functional>
 #include <Emit\Emit.h>
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
@@ -99,6 +100,39 @@ namespace EmitTest
 			f();
 
 		}
+		TEST_METHOD(TestSwitch)
+		{
+			auto s = [](int val)
+			{
+				return Emit::SwitchDefault(Emit::ConstValue(val), []()
+				{
+					Logger::WriteMessage("default");
+				}, Emit::Case(0, []()
+				{
+					Logger::WriteMessage("case 0");
+				}), Emit::Case<int, 1>([]()
+				{
+					Logger::WriteMessage("case 1");
+				}), Emit::RangeCase([](auto val)
+				{
+					return val >= 2 && val <= 3;
+				}, []()
+				{
+					Logger::WriteMessage("case 2-3");
+				}));
+			};
 
+			for (size_t i = 0; i < 5; i++)
+			{
+				ostringstream out;
+				out << "²âÊÔ£º" << i;
+				Logger::WriteMessage(out.str().c_str());
+				s(i)();
+			}
+
+
+		}
+
+		
 	};
 }
