@@ -99,7 +99,7 @@ public:
 	template<typename... TFunc>
 	static auto Combined(TFunc&&... funcs)
 	{
-		return[funcs...]()
+		return [=]()
 		{
 			// NOTICE: 假设数组赋值是从左到右，不知道规范是否限定，所以这里在某些编译器可能会引发顺序不对的问题，需要注意测试，下同
 			bool ignore[] = { _Invoke(funcs)... };
@@ -113,15 +113,6 @@ public:
 		return []()
 		{
 			bool ignore[] = { _Invoke<TFunc>()... };
-		};
-	}
-	// 类静态函数转函数对象
-	template<typename TFunc>
-	static auto Convert()
-	{
-		return []()
-		{
-			return TFunc::Run();
 		};
 	}
 
@@ -168,6 +159,7 @@ public:
 	{
 		return ValSwitchCase<TCase, TFunc>(_STD forward<TCase>(val), _STD forward<TFunc>(func));
 	}
+	// 不处理冲突情况，对于判断先到先得
 	template<typename TCondition, typename TFunc>
 	static auto RangeCase(TCondition&& con, TFunc&& func)
 	{
@@ -185,7 +177,7 @@ private:
 	template<typename TFunc>
 	static bool _Invoke()
 	{
-		TFunc::Run();
+		TFunc::Do();
 		return true;
 	}
 

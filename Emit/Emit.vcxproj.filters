@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Utils">
+      <UniqueIdentifier>{618a3542-d03c-4c3c-8574-518363669633}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Detail">
+      <UniqueIdentifier>{7ddcf6ec-a3cf-4c4c-af3b-3cee64010098}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -24,9 +30,30 @@
     <ClInclude Include="Emit.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="NonCopyable.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="EmitFunction.h">
+      <Filter>Detail</Filter>
+    </ClInclude>
+    <ClInclude Include="EmitObjectList.h">
+      <Filter>Detail</Filter>
+    </ClInclude>
+    <ClInclude Include="EmitStatus.h">
+      <Filter>Detail</Filter>
+    </ClInclude>
+    <ClInclude Include="IEmitDo.h">
+      <Filter>Detail</Filter>
+    </ClInclude>
+    <ClInclude Include="EmitTask.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="EmitTask.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
