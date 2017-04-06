@@ -10,7 +10,7 @@
 #include "EpollOption.h"
 #include "IFDTask.h"
 #include "ITask.h"
-#include "TaskQueue.h"
+#include "TaskList.h"
 #include "EpollCpp.h"
 
 class FDTaskCtlProxy;
@@ -34,7 +34,7 @@ public:
 	LoopState State() const;
 	const std::thread::id& OwnerTid()const;
 	// 以下非线程安全
-	void QueueTask(std::unique_ptr<ITask>&& ptr);
+	void RegisterTask(std::unique_ptr<ITask>&& ptr);
 private:
 	// 不可重复执行
 	void Start();
@@ -43,7 +43,8 @@ private:
 	void Stop();
 	bool CheckTid() const;
 	EpollCpp& Epoll();
-	TaskQueue taskQueue_;
+
+	TaskList taskList_;
 	EpollCpp epoll_;
 	std::thread::id tid_;
 	int loopID_;

@@ -113,7 +113,7 @@ void TcpConnection::PostCompleteHandler(std::queue<RecPtr>& queue, Error error)
 	assert(!queue.empty());
 	auto& item = queue.front();
 	item->SetError(error);
-	loop_.QueueTask(std::move(item));
+	loop_.RegisterTask(std::move(item));
 	queue.pop();
 }
 
@@ -138,13 +138,13 @@ void TcpConnection::InitTask()
 		readTask_ = MakeTask([self](Loop& loop, std::unique_ptr<ITask>&& task)
 		{
 			assert(std::addressof(loop) == std::addressof(self->GetLoop()));
-			self->ReadTask(std::move(task));
+			return self->ReadTask(std::move(task));
 		});
 
 		writeTask_ = MakeTask([self](Loop& loop, std::unique_ptr<ITask>&& task)
 		{			
 			assert(std::addressof(loop) == std::addressof(self->GetLoop()));
-			self->WriteTask(std::move(task));
+			return self->WriteTask(std::move(task));
 		});
 	}
 }

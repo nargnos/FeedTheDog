@@ -53,8 +53,10 @@ void ReadCb(TcpConnection* self, Buffer&& buf, Error e)
 }
 
 // FIX: 虚拟机有些东西不好跟踪，换实体机再弄
-// FIX: 结构再弄简单点
+// FIX: 结构再弄简单点,
+// 把模拟proactor的跟connection分离（弄得跟iocp一样就好替换）
 // TODO: timer/asyncconnect/resolve
+// TODO: 加一个事件触发的connection
 int main()
 {
 	TRACEPOINT(LogPriority::Info)("Echo test");

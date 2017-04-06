@@ -61,7 +61,7 @@ void TcpAcceptor::DoEvent(Loop & loop, EpollOption op)
 
 	size_t index = 0;
 	// 接够个数发送完再接
-	while (index < accepts_.size())
+	do
 	{
 		auto& item = accepts_[index];
 		item = socket_.Accept();
@@ -81,7 +81,7 @@ void TcpAcceptor::DoEvent(Loop & loop, EpollOption op)
 				TRACEERRNOEXITSTR(LogPriority::Emerg, "Accept Faild");
 			}
 		}
-	}
+	}while (index < accepts_.size());
 	if (index == 0)
 	{
 		return;

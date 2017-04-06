@@ -37,6 +37,8 @@ private:
 		int Fd;
 		ITcpAcceptor* Acceptor;
 	};
+	// FIX: 这个放到loop里就不需要eventfd，但是这样逻辑不对，需要修改
+	// 不过post的时候无法唤醒wait(-1),还是要eventfd；pipe不考虑
 	boost::lockfree::queue<Accepts> acceptFds_;
 	Loop loop_;
 	std::unique_ptr<std::thread> worker_;

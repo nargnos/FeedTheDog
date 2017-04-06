@@ -8,7 +8,6 @@
 #include <errno.h>
 #include "EpollCpp.h"
 #include "Logger.h"
-#include "TaskQueue.h"
 #include "Buffer.h"
 Loop::Loop() :
 	stopfd_(eventfd(1, EFD_CLOEXEC)),
@@ -59,7 +58,7 @@ void Loop::Start()
 	{
 		// 将连续的读写操作分段进行，避免饥饿
 		// 读写到EAGAIN出队
-		if (!taskQueue_.DoOnce(*this))
+		if (!taskList_.DoOnce(*this))
 		{
 			waitMs_ = 0;
 		}
@@ -109,7 +108,7 @@ STOP:
 	state_ = LoopState::Stopped;
 	tid_ = std::thread::id();
 	// 必须清空任务队列，否则有循环引用问题
-	taskQueue_.Clear();
+	taskList_.Clear();
 }
 
 void Loop::PrepareBuffers()
@@ -131,12 +130,9 @@ void Loop::Stop()
 	state_ = LoopState::Stopping;
 }
 
-
-// 以下非线程安全
-
-void Loop::QueueTask(std::unique_ptr<ITask>&& ptr)
+void Loop::RegisterTask(std::unique_ptr<ITask>&& ptr)
 {
-	taskQueue_.Queue(std::move(ptr));
+	taskList_.Register(std::move(ptr));
 }
 
 bool Loop::CheckTid() const

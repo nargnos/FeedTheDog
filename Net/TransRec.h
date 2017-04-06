@@ -72,9 +72,10 @@ public:
 		isTransSome_ = true;
 	}
 	~TransRec() = default;
-	virtual void DoEvent(Loop& loop, std::unique_ptr<ITask>&& self) override
+	virtual bool DoEvent(Loop& loop, std::unique_ptr<ITask>&& self) override
 	{
 		cb_(&*conn_, std::move(buffer_), err_);
+		return true;
 	}
 	void SetError(Error err)
 	{

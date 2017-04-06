@@ -97,7 +97,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="RunProxy.cpp" />
     <ClCompile Include="SocketCpp.cpp" />
-    <ClCompile Include="TaskQueue.cpp" />
+    <ClCompile Include="TaskList.cpp" />
     <ClCompile Include="TcpAcceptor.cpp" />
     <ClCompile Include="TcpConnection.cpp" />
     <ClCompile Include="TransRec.cpp" />
@@ -127,7 +127,7 @@
     <ClInclude Include="RunProxy.h" />
     <ClInclude Include="SocketCpp.h" />
     <ClInclude Include="Task.h" />
-    <ClInclude Include="TaskQueue.h" />
+    <ClInclude Include="TaskList.h" />
     <ClInclude Include="TcpAcceptor.h" />
     <ClInclude Include="TcpConnection.h" />
     <ClInclude Include="TransRec.h" />

@@ -71,7 +71,7 @@ protected:
 		// 如果有注册完成回调，就向loop推送io task
 		if (readTask_ && Self()->IsReadyToRead())
 		{
-			QueueIOTask(std::move(readTask_));
+			RegisterIOTask(std::move(readTask_));
 		}
 	}
 	void WriteReady()
@@ -80,7 +80,7 @@ protected:
 		canWrite_ = true;
 		if (writeTask_ && Self()->IsReadyToWrite())
 		{
-			QueueIOTask(std::move(writeTask_));
+			RegisterIOTask(std::move(writeTask_));
 		}
 	}
 	void OnClose()
@@ -132,18 +132,18 @@ protected:
 		isRegisted_ = false;
 		FDTaskCtlProxy::Del(loop_, this);
 	}
-	void QueueIOTask(std::unique_ptr<ITask>&& task)
+	void RegisterIOTask(std::unique_ptr<ITask>&& task)
 	{
-		loop_.QueueTask(std::move(task));
+		loop_.RegisterTask(std::move(task));
 	}
 	// FIX: 冗余
-	void ReadTask(std::unique_ptr<ITask>&& task)
+	bool ReadTask(std::unique_ptr<ITask>&& task)
 	{
 		assert(task);
 		if (!IsActive())
 		{
 			// 丢弃task
-			return;
+			return true;
 		}
 		assert(!HasError() && !IsClosed());
 		assert(Self()->IsReadyToRead());
@@ -151,9 +151,8 @@ protected:
 		switch (s)
 		{
 		case Status::Again:
-			// 重新提交task
-			QueueIOTask(std::move(task));
-			return;
+			// 重新提交task			
+			return false;
 		case Status::Pause:
 			// 当EAGAIN时
 			canRead_ = false;
@@ -163,24 +162,25 @@ protected:
 			break;
 		case Status::Close:
 			OnClose();
-			return;
+			return true;
 		case Status::Error:
 			OnError();
-			return;
+			return true;
 		default:
 			__builtin_unreachable();
 			break;
 		}
 		// 保存，等待下次使用
 		readTask_ = std::move(task);
+		return true;
 	}
-	void WriteTask(std::unique_ptr<ITask>&& task)
+	bool WriteTask(std::unique_ptr<ITask>&& task)
 	{
 		assert(task);
 		if (!IsActive())
 		{
 			// 丢弃task
-			return;
+			return true;
 		}
 		assert(!HasError() && !IsClosed());
 		assert(Self()->IsReadyToWrite());
@@ -189,8 +189,7 @@ protected:
 		{
 		case Status::Again:
 			// 重新提交task
-			QueueIOTask(std::move(task));
-			return;
+			return false;
 		case Status::Pause:
 			// 当EAGAIN时
 			canWrite_ = false;
@@ -200,10 +199,10 @@ protected:
 			break;
 		case Status::Close:
 			OnClose();
-			return;
+			return true;
 		case Status::Error:
 			OnError();
-			return;
+			return true;
 		default:
 			__builtin_unreachable();
 			break;
@@ -211,6 +210,7 @@ protected:
 		// 保存，等待下次使用
 
 		writeTask_ = std::move(task);
+		return true;
 	}
 	void DestoryTask()
 	{

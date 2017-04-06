@@ -2,6 +2,8 @@
 #include "Worker.h"
 #include "RunProxy.h"
 #include "Loop.h"
+// FIX: 电脑只有2核，其它没测试；asio单线程 vbox cpu0 1200 cpu1 300+，cpu1怎么慢这么多
+// 这里用1core：1thread 可以上1900+, 但是用其它比例巨慢（包括交换acc和conn亲和性）；还是要在实体机测才行
 const float CoreScale = 1.;
 
 class StopWorkerProxy

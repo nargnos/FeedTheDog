@@ -15,9 +15,9 @@ public:
 	explicit Task(TFunc&& func) :func_(std::move(func))
 	{
 	}
-	virtual void DoEvent(Loop& loop, ITaskPtr&& self)  override
+	virtual bool DoEvent(Loop& loop, ITaskPtr&& self)  override
 	{
-		func_(loop, std::move(self));
+		return func_(loop, std::move(self));
 	}
 	~Task() = default;
 private:

@@ -1,4 +1,5 @@
 #include "Worker.h"
+#include <sys/socket.h>
 #include <sys/epoll.h>
 #include "Loop.h"
 #include "RunProxy.h"
@@ -8,7 +9,8 @@
 #include "ITcpAcceptor.h"
 Worker::Worker(unsigned int core) :
 	EventTaskBase(0, EventFdFlags(EventFdFlags::CloseOnExec |
-		EventFdFlags::Nonblock))
+		EventFdFlags::Nonblock)),
+	acceptFds_(0)
 {
 	static int ID = 0;
 	workerID_ = ID++;
@@ -38,17 +40,21 @@ void Worker::Stop()
 void Worker::DoEvent(Loop & loop, EpollOption op)
 {
 	assert(op.Flags.Err == false);
-
+	int count = 0;
 	Accepts tmp;
-	while (!acceptFds_.empty())
+	DecEvent();
+	while (acceptFds_.pop(tmp))
 	{
-		if (acceptFds_.pop(tmp))
+		// 创建conn，回调acceptor，accept的错误cb不在这调用
+		tmp.Acceptor->DoAccept(loop, tmp.Fd);
+		if (++count > SOMAXCONN * 4)
 		{
-			// 创建conn，回调acceptor，accept的错误cb不在这调用
-			tmp.Acceptor->DoAccept(loop, tmp.Fd);
+			// 给其它事件执行机会
+			IncEvent();
+			TRACEPOINT(LogPriority::Emerg)(__FILE__);
+			return;
 		}
 	}
-	DecEvent();
 }
 
 int Worker::ID() const
