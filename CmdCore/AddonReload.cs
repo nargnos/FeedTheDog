@@ -19,16 +19,16 @@ namespace CmdCore
         {
             return this;
         }
-        public Result Do(params string[] args)
+        public Result Do(CommandManager mng, params string[] args)
         {
             bool res = true;
             if (args.Length == 0)
             {
-                res = CommandManager.Reload(string.Empty);
+                res = mng.Reload(string.Empty);
             }
             else
             {
-                res = CommandManager.Reload(string.Join(" ", args));
+                res = mng.Reload(string.Join(" ", args));
             }
             return new Result(res, res ? string.Empty : "载入失败");
         }

@@ -11,40 +11,53 @@ namespace CmdTest
         [TestMethod]
         public void TestHelp()
         {
-            var res = CommandManager.DoCommand("?");
+            var mng = new CommandManager();
+            var res = mng.DoCommand("?");
             Assert.IsTrue(res.IsSucceed);
             Debug.WriteLine(res.Message);
-            res = CommandManager.DoCommand("? ?");
+            res = mng.DoCommand("? ?");
             Assert.IsTrue(res.IsSucceed);
-            res = CommandManager.DoCommand("? ver");
+            res = mng.DoCommand("? ver");
             Assert.IsTrue(res.IsSucceed);
             Assert.AreEqual(res.Message, int.MaxValue.ToString());
-            res = CommandManager.DoCommand("? what");
+            res = mng.DoCommand("? what");
             Assert.IsTrue(res.IsSucceed);
-            res = CommandManager.DoCommand(string.Empty);
+            res = mng.DoCommand(string.Empty);
             Assert.IsTrue(res.IsSucceed);
-            res = CommandManager.DoCommand("??");
+            res = mng.DoCommand("??");
             Assert.IsFalse(res.IsSucceed);
-            
+
 
         }
         [TestMethod]
         public void TestReload()
         {
-            var res = CommandManager.DoCommand("reload");
+            var mng = new CommandManager();
+            var res = mng.DoCommand("reload");
             Assert.IsTrue(res.IsSucceed);
-            res = CommandManager.DoCommand("reload ./");
+            res = mng.DoCommand("reload ./");
             Assert.IsTrue(res.IsSucceed);
-            res = CommandManager.DoCommand("reload ?");
+            res = mng.DoCommand("reload ?");
             Assert.IsTrue(res.IsSucceed);
-            res = CommandManager.DoCommand("reload ver");
+            res = mng.DoCommand("reload ver");
             Assert.IsTrue(res.IsSucceed);
         }
         [TestMethod]
-        public void TestLoadAddons()
+        public void TestLoadAddonFile()
         {
-            var res = CommandManager.DoCommand("test");
+            var mng = new CommandManager();
+            var res = mng.DoCommand("test");
             Assert.IsTrue(res.IsSucceed);
+        }
+        [TestMethod]
+        public void TestDomain()
+        {
+            var dm = AppDomain.CreateDomain(Guid.NewGuid().ToString());
+            var cur = Environment.CurrentDirectory;
+            // 需要先编译出文件
+            dm.ExecuteAssembly(@"..\..\..\MailShell\bin\Debug\MailShell.exe");
+            AppDomain.Unload(dm);
+
         }
     }
 }

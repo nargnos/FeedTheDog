@@ -58,7 +58,7 @@
       <Project>{1d0006c9-0129-401b-b96d-e52023e32ab4}</Project>
       <Name>CmdAddons</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Cmd\CmdCore.csproj">
+    <ProjectReference Include="..\CmdCore\CmdCore.csproj">
       <Project>{bf750da4-6fc5-427e-a7b8-c305078c5d4c}</Project>
       <Name>CmdCore</Name>
     </ProjectReference>

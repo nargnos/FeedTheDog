@@ -15,12 +15,11 @@ namespace CmdCore
     // 这里只保留基本控制功能，其它用类库扩展，pi如果不支持mef可能要修改
     // TODO: update（热更新，需要下载邮件附件）\实时交互(估计邮件方式比较不好处理)模式\卸除插件\下载文件（邮件提交任务下载）
     // TODO: 添加对其它程序调用的功能（弄个shell，另一个模块）
-    public static class CommandManager
+    public class CommandManager
     {
         private const string path_ = @".\";
-        static CommandManager()
+        public CommandManager()
         {
-            cmdLock_ = new Mutex();
             nativeArgCmd_ = new Dictionary<string, Func<ICommand, Result>>()
             {
                 { "?", (cmd)=>new Result(true, cmd.Help) },
@@ -35,7 +34,7 @@ namespace CmdCore
             }
         }
 
-        private static void UpdateCmdList()
+        private void UpdateCmdList()
         {
             if (cmds_ == null)
             {
@@ -46,7 +45,7 @@ namespace CmdCore
             allCmds_ = string.Join(Environment.NewLine, result);
         }
 
-        public static bool Reload(string path)
+        public bool Reload(string path)
         {
             var ac = new AggregateCatalog();
             ac.Catalogs.Add(new AssemblyCatalog(Assembly.GetExecutingAssembly()));
@@ -64,45 +63,35 @@ namespace CmdCore
                        select new { Name = grp.Key, Addon = grp.First() };
             try
             {
-                cmdLock_.WaitOne();
                 cmds_ = exps.ToDictionary((item) => item.Name, (item) => item.Addon);
             }
             catch
             {
                 return false;
             }
-            finally
-            {
-                cmdLock_.ReleaseMutex();
-            }
             OnReload_?.Invoke();
             return true;
         }
-        public static string Cmds
+        public string Cmds
         {
             get
             {
                 return allCmds_;
             }
         }
-        private static ICommand GetCommand(string name)
+        private ICommand GetCommand(string name)
         {
             try
             {
-                cmdLock_.WaitOne();
                 return cmds_[name].Clone();
             }
             catch
             {
                 return null;
             }
-            finally
-            {
-                cmdLock_.ReleaseMutex();
-            }
         }
 
-        public static Result DoCommand(string line)
+        public Result DoCommand(string line)
         {
             line = line.Trim();
             // 忽略掉空白命令
@@ -125,7 +114,7 @@ namespace CmdCore
 
             try
             {
-                return cmd.Do(args.Skip(1).ToArray());
+                return cmd.Do(this, args.Skip(1).ToArray());
             }
             catch (Exception e)
             {
@@ -134,11 +123,10 @@ namespace CmdCore
         }
 
 
-        private static Dictionary<string, Func<ICommand, Result>> nativeArgCmd_;
+        private Dictionary<string, Func<ICommand, Result>> nativeArgCmd_;
 
-        private static Mutex cmdLock_;
-        private static string allCmds_;
-        private static event Action OnReload_;
-        private static Dictionary<string, ICommand> cmds_;
+        private string allCmds_;
+        private event Action OnReload_;
+        private Dictionary<string, ICommand> cmds_;
     }
 }

@@ -168,6 +168,18 @@ size_t Buffer::Size(const Buffer & buf)
 	return result;
 }
 
+bool Buffer::HasReadOnlyBlock() const
+{
+	for (auto& i : list_)
+	{
+		if (i->IsReadOnly())
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 
 void Buffer::EmplaceBackTotal(size_t size)
 {

@@ -259,6 +259,7 @@ std::shared_ptr<TcpConnection> TcpConnection::Create(Loop & loop, int fd)
 void TcpConnection::AsyncRead(Buffer&& buffer, size_t begin, CompleteHandler && h)
 {
 	assert(std::this_thread::get_id() == loop_.OwnerTid());
+	assert(!buffer.HasReadOnlyBlock());
 	if (!IsClosed())
 	{
 		InitTask();
@@ -275,6 +276,7 @@ void TcpConnection::AsyncRead(Buffer&& buffer, size_t begin, CompleteHandler && 
 void TcpConnection::AsyncReadSome(Buffer&& buffer, size_t begin, CompleteHandler && h)
 {
 	assert(std::this_thread::get_id() == loop_.OwnerTid());
+	assert(!buffer.HasReadOnlyBlock());
 	if (!IsClosed())
 	{
 		InitTask();

@@ -19,9 +19,9 @@ namespace CmdCore
         {
             return this;
         }
-        public Result Do(params string[] args)
+        public Result Do(CommandManager mng, params string[] args)
         {
-            return new Result(true, CommandManager.Cmds);
+            return new Result(true, mng.Cmds);
         }
     }
 }

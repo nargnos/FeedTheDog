@@ -1,7 +1,7 @@
 #include "Block.h"
 
 BigBlock::BigBlock(size_t size) :
-	Block(Malloc(Max), Max, size)
+	Block(Malloc(Max), Max, size, false)
 {
 	assert(size <= Max);
 }
@@ -19,7 +19,7 @@ BigBlock::~BigBlock()
 }
 
 SmallBlock::SmallBlock(size_t size) :
-	Block(Malloc(Max), Max, size)
+	Block(Malloc(Max), Max, size, false)
 {
 	assert(size <= Max);
 }
@@ -43,10 +43,11 @@ Block::const_reference Block::operator[](int index) const
 	assert(index < size_);
 	return begin()[index];
 }
-Block::Block(void * ptr, size_t max, size_t size) :
+Block::Block(void * ptr, size_t max, size_t size, bool isReadOnly) :
 	ptr_(static_cast<char*>(ptr)),
 	max_(max),
-	size_(size)
+	size_(size),
+	isReadOnly_(isReadOnly)
 {
 	assert(ptr_);
 }
@@ -106,6 +107,11 @@ void Block::ResizeToMax()
 	size_ = max_;
 }
 
+bool Block::IsReadOnly() const
+{
+	return isReadOnly_;
+}
+
 void * Block::Malloc(size_t size)
 {
 	return aligned_alloc(Align, size);
@@ -117,18 +123,18 @@ void Block::Free(void * ptr)
 }
 
 VectorBlock::VectorBlock(const std::shared_ptr<std::vector<char>>& vec) :
-	Block(vec->data(), vec->size(), vec->size()),
+	Block(vec->data(), vec->size(), vec->size(), true),
 	vec_(vec)
 {
 }
 
 StringBlock::StringBlock(const std::shared_ptr<std::string>& str) :
-	Block(const_cast<char*>(str->c_str()), str->length(), str->length()),
+	Block(const_cast<char*>(str->c_str()), str->length(), str->length(), true),
 	str_(str)
 {
 }
 
 CharBlock::CharBlock(const char * str, size_t len) :
-	Block(const_cast<char*>(str), len, len)
+	Block(const_cast<char*>(str), len, len, true)
 {
 }

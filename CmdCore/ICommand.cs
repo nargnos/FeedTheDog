@@ -17,6 +17,6 @@ namespace CmdCore
         string Description { get; }
         string Help { get; }
         // 是否成功, 错误或结果字符串
-        Result Do(params string[] args);
+        Result Do(CommandManager mng, params string[] args);
     }
 }

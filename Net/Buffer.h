@@ -19,7 +19,7 @@ public:
 
 	~Buffer() = default;
 	bool IsEmpty() const;
-	
+
 	const BlockPtr& EmplaceBack(size_t size);
 	const BlockPtr& EmplaceFront(size_t size);
 	void PushBack(const BlockPtr& buf);
@@ -35,6 +35,7 @@ public:
 	static BlockPool& BufferPool();
 	static size_t Size(const std::vector<iovec>& iov);
 	static size_t Size(const Buffer& buf);
+	bool HasReadOnlyBlock() const;
 private:
 	// ×ÜÌî³äsize
 	void EmplaceBackTotal(size_t size);

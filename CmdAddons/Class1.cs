@@ -32,7 +32,7 @@ namespace CmdAddons
         {
             msg_ = msg;
         }
-        public Result Do(params string[] args)
+        public Result Do(CommandManager mng, params string[] args)
         {
             return new Result(true, msg_);
         }
