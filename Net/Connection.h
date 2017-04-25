@@ -21,6 +21,67 @@
 //virtual Status DoRead() = 0;
 //virtual Status DoWrite() = 0;
 
+// TODO: 测试新的结构
+// 可以封装起状态，不用enum
+//enum class TestS
+//{
+//	A,
+//	B,
+//	C
+//};
+//enum class TestCon
+//{
+//	X,Y,Z
+//};
+//class TestC
+//{
+//public:
+//
+//	typedef bool(*FFF)(TestC*);
+//	TestC()
+//	{
+//	}
+//
+//	~TestC()
+//	{
+//	}
+//	// 用重载或者直接分多个函数，这样不行；这里在提交io操作时使用
+//	void OnCondition(TestCon st)
+//	{
+//		status_ = NextStatus(status_,st);
+//		f_ = Func(status_);
+//	}
+//
+//	bool Do()
+//	{
+//		return f_(this);
+//		// 由loop执行，执行时this会切换自身状态
+//		// 返回bool表示是否要移出tasklist
+// // 或者f_返回status，赋值更新函数，这里判断是否结束，f_不应该管理this的状态但是好像会执行到注册的回调从而状态被修改
+//	}
+// // 非查表实现就需要虚函数（更直观），每次执行都要查一次虚表，这里如果状态不换就能省一些开销
+//	static constexpr TestS m[16][16]{ TestS::A,TestS::B,TestS::C,.... };
+//	// 这个在编译期就可确定
+//	static constexpr TestS NextStatus(TestS status, TestCon s)
+//	{		
+// // 可能需要分层，发生在io不能一次完成时的reg，如果跟其它状态并在一起就要判断，判断吧，分层有开销
+//		return m[static_cast<int>(status)][static_cast<int>(s)];
+//	}
+//	// 这个也是
+//	static constexpr FFF Func(TestS s)
+//	{
+//		// 返回对应的函数指针
+//		// 
+//		return nullptr;
+//	}
+//
+//private:
+//	FFF f_;
+//	TestS status_;
+//};
+////////////////////////////////////////////
+
+
 
 enum class Status :char
 {
@@ -65,6 +126,11 @@ protected:
 	bool CanRead()const { return canRead_; }
 	bool IsActive()const { return isRegisted_; }
 	bool CanWrite()const { return canWrite_; }
+	// TODO: 这里是否可以替换成状态机，保存一个处理当前状态的函数（返回值是下个状态）指针，
+	// 当发生io时注册io task，loop中调用状态指针，省掉重复判断
+	// 这样当几个状态同时出现的时候（需要处理好调用到相关函数），taskList对于每个连接都只存一个task(可直接存连接，没有io任务就移出)，也不会频繁push pop，相对有一些优势
+	// 当前状态enum要保存，查表获得新的状态函数
+	// 缺点是状态划分过小会影响执行，编译器也不能对函数指针优化
 	void ReadReady()
 	{
 		assert(!IsClosed() && !HasError());

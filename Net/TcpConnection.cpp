@@ -131,7 +131,7 @@ void TcpConnection::PostCompleteHandler(std::queue<RecPtr>& queue, Error error)
 	loop_.RegisterTask(std::move(item));
 	queue.pop();
 }
-
+// 完成时必须post，后面修改要注意不要改没了
 void TcpConnection::OnReadSuccess()
 {
 	PostReadCompleteHandler(Error::Success);

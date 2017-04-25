@@ -25,6 +25,8 @@ public:
 	virtual ~Worker();
 	int ID()const;
 	void Wait();
+	// TODO: 这个不应该在这里, 要把这个封装成类，再注册到worker作为线程安全的投递，注册acc的同时注册投递任务
+	// 不过这样会对每个acc产生n个eventfd，它应该和worker数相同，先封装，这里提供线程安全的任务投递
 	void PostTcpFd(const int* begin, size_t size, ITcpAcceptor* acceptor);
 private:
 	// 会导致未完成任务被丢弃

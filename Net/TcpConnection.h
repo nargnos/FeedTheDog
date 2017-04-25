@@ -20,7 +20,7 @@ public:
 	virtual ~TcpConnection();
 
 	virtual int FD() const;
-
+	// FIX: 这里不提供给用户
 	static std::shared_ptr<TcpConnection> Attach(Loop& loop, int fd);
 	// TODO: static std::shared_ptr<TcpConnection> Create(Loop& loop);
 

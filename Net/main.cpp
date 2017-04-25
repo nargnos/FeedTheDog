@@ -60,13 +60,14 @@ void ReadCb(TcpConnection* self, Buffer&& buf, Error e)
 // TODO: timer/asyncconnect/resolve
 // TODO: 加一个事件触发的connection
 // TODO: vs项目这边加了一些文件，附带的eclipse项目文件未更新，用eclipse载入时刷新下就好了
+
 int main()
 {
 	TRACEPOINT(LogPriority::Info)("Echo test");
 	auto ios = IoService::Instance();
 	auto act = TcpAcceptor::Create(ios, MakeSockaddr(INADDR_ANY, 8989));
 	act->SetOnAccept([](TcpAcceptor::ConnectionPtr conn) {
-
+		
 		Buffer buf(0);
 		conn->AsyncReadSome(std::move(buf), 0, ReadCb);
 	});

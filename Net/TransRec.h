@@ -17,6 +17,7 @@ enum class Error :char
 struct TransSome
 { };
 // 这里用接口可以省掉function
+// TODO: CompleteHandler 应该用模板，function好像不能被优化
 template<typename TConnection>
 class TransRec :
 	public ITask,
