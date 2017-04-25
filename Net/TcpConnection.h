@@ -21,13 +21,18 @@ public:
 
 	virtual int FD() const;
 
-	static std::shared_ptr<TcpConnection> Create(Loop& loop, int fd);
-	
+	static std::shared_ptr<TcpConnection> Attach(Loop& loop, int fd);
+	// TODO: static std::shared_ptr<TcpConnection> Create(Loop& loop);
+
 	void AsyncRead(Buffer&& buffer, size_t begin, CompleteHandler&& h);
 	void AsyncReadSome(Buffer&& buffer, size_t begin, CompleteHandler&& h);
 	void AsyncWrite(Buffer&& buffer, size_t begin, CompleteHandler&& h);
+
+	// TODO: void AsyncConnect 地址直接用还是封装一个？
+
 protected:
 	TcpConnection(Loop& loop, int fd);
+	explicit TcpConnection(Loop& loop);
 	TcpSocket& Socket();
 	const TcpSocket& Socket() const;
 	void DispatchReadIoStatus(Status s);

@@ -15,12 +15,14 @@ cpp简单封装lua，之后打算直接传lua字节码到pi去执行
 与c交互的部分写了个控制栈的函数  
   
 Net  
+未完成，雏形  
 网络部分，要弄台vps中转到pi，打算把它弄成代理看世界，所以自己写看世界的类库玩  
 linux olpt accept-lt connection-et 模拟proactor, 结构参考了asio  
 设置cpu关联，避开锁，分发连接用了boost的lockfree queue
 程序结构待优化，性能方面vbox下perf只能跟踪cpu-clock，其它cache-misses、branch-misses什么的not supported，所以等哪天回家搬台破笔记本回来装好系统再优化
 
 命令控制
+未完成  
 连不上的时候可用邮件控制pi，不过会有一定的延时  
 邮件部分看了一下协议文档长度...还是用现成的吧...
 刚写命令部分，pi应该支持mef，用插件方式扩展功能  

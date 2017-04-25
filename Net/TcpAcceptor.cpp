@@ -41,7 +41,7 @@ void TcpAcceptor::DoAccept(Loop & loop, int fd)
 {
 	assert(fd != -1);
 	// 不处理（维持connect生存期，执行rw）将会关闭并丢弃连接
-	auto sock = TcpConnection::Create(loop, fd);
+	auto sock = TcpConnection::Attach(loop, fd);
 	assert(onAccept_);
 	onAccept_(sock.get());
 }

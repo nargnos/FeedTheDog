@@ -19,6 +19,21 @@ TcpConnection::TcpConnection(Loop& loop, int fd) :
 }
 
 
+TcpConnection::TcpConnection(Loop & loop) :
+	Connection<TcpConnection>(loop)
+{
+	if (!socket_)
+	{
+		TRACEERRNOEXIT(LogPriority::Emerg);
+	}
+	// FIX: ศ฿ำเ
+	if (!socket_.SetNonBlocking())
+	{
+		TRACEPOINT(LogPriority::Warning)("tcpsocket setnonblocking faild");
+	}
+}
+
+
 void TcpConnection::DispatchReadIoStatus(Status s)
 {
 	switch (s)
@@ -250,7 +265,7 @@ int TcpConnection::FD() const
 	return socket_.FD();
 }
 
-std::shared_ptr<TcpConnection> TcpConnection::Create(Loop & loop, int fd)
+std::shared_ptr<TcpConnection> TcpConnection::Attach(Loop & loop, int fd)
 {
 	return std::shared_ptr<TcpConnection>(new TcpConnection(loop, fd));
 }

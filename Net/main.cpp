@@ -51,11 +51,12 @@ void ReadCb(TcpConnection* self, Buffer&& buf, Error e)
 	self->AsyncWrite(std::move(buf), 0, WriteCb);
 
 }
-
+// 未完成
 // FIX: 虚拟机有些东西不好跟踪，换实体机再弄
-// FIX: 结构再弄简单点,
+// FIX: 结构再弄简单点, 有些不需要的判断函数需要删除
 // FIX: 为什么交换线程亲和性会导致性能下降，虚拟机perf跟踪时在某halt函数消耗，需要换实体机跟踪看看
 // 把模拟proactor的跟connection分离（弄得跟iocp一样就好替换）
+// TODO: close/connect 等连接，关于地址的部分是否直接用sockaddr_in比较好
 // TODO: timer/asyncconnect/resolve
 // TODO: 加一个事件触发的connection
 // TODO: vs项目这边加了一些文件，附带的eclipse项目文件未更新，用eclipse载入时刷新下就好了

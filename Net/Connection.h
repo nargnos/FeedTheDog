@@ -50,6 +50,7 @@ public:
 	{
 
 	}
+	// FIX: 这里可能有问题
 	void Close()
 	{
 		OnClose();
@@ -90,7 +91,7 @@ protected:
 			isClosed_ = true;
 			canWrite_ = false;
 			canRead_ = false;
-			//Unregister();
+			Unregister();
 			NotifyFaild(Error::Close);
 			DestoryTask();
 		}
@@ -103,7 +104,7 @@ protected:
 			isClosed_ = true;
 			canWrite_ = false;
 			canRead_ = false;
-			//Unregister();
+			Unregister();
 			NotifyFaild(Error::Error);
 			DestoryTask();
 		}
