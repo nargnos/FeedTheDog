@@ -12,12 +12,13 @@
 #include "ITask.h"
 #include "TaskList.h"
 #include "EpollCpp.h"
-
+#include "EventTaskBase.h"
 class FDTaskCtlProxy;
 class RunProxy;
 class ConnectionRegisterProxy;
 // 只对自身注册的任务暴露自身非线程安全的接口
-class Loop final :public Noncopyable
+class Loop final :
+	public EventTaskBase
 {
 public:
 	enum LoopState
@@ -38,6 +39,7 @@ public:
 private:
 	// 不可重复执行
 	void Start();
+	void DoLoop();
 	void PrepareBuffers();
 	// 会导致未完成任务被丢弃
 	void Stop();
@@ -48,10 +50,11 @@ private:
 	EpollCpp epoll_;
 	std::thread::id tid_;
 	int loopID_;
-	int stopfd_;
 	int waitMs_;
 	LoopState state_;
 	static const int Infinite = -1;
+
+	virtual void DoEvent(Loop & loop, EpollOption op) override;
 
 };
 
