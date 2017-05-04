@@ -8,6 +8,7 @@ struct EpollOption
 {
 	EpollOption(uint32_t event);
 	EpollOption();
+	operator uint32_t() const;
 	union
 	{
 		uint32_t Value;

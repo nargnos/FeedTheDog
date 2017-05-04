@@ -1,22 +1,17 @@
 #include "TaskList.h"
 
-void TaskList::Register(std::unique_ptr<ITask>&& ptr)
+void TaskList::Register(std::shared_ptr<ITask>&& ptr)
 {
-	taskList_.push_back(std::move(ptr));
+	taskList_.emplace_back(std::move(ptr));
 }
 
 bool TaskList::DoOnce(Loop & loop)
 {
-	if (taskList_.empty())
-	{
-		return true;
-	}
 	auto it = taskList_.begin();
 	auto end = taskList_.end();
 	while (it != end)
 	{
-		auto& task = *it;
-		if (task->DoEvent(loop, std::move(task)))
+		if (__glibc_unlikely((*it)->DoEvent(loop)))
 		{
 			it = taskList_.erase(it);
 		}

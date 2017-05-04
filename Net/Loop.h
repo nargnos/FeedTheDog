@@ -13,9 +13,8 @@
 #include "TaskList.h"
 #include "EpollCpp.h"
 #include "EventTaskBase.h"
-class FDTaskCtlProxy;
-class RunProxy;
-class ConnectionRegisterProxy;
+class FDTaskCtlAttorney;
+class RunAttorney;
 // 只对自身注册的任务暴露自身非线程安全的接口
 class Loop final :
 	public EventTaskBase
@@ -27,15 +26,14 @@ public:
 		Stopping,
 		Stopped
 	};
-	friend FDTaskCtlProxy;
-	friend RunProxy;
-	friend ConnectionRegisterProxy;
+	friend FDTaskCtlAttorney;
+	friend RunAttorney;
 	Loop();
 	~Loop();
 	LoopState State() const;
 	const std::thread::id& OwnerTid()const;
 	// 以下非线程安全
-	void RegisterTask(std::unique_ptr<ITask>&& ptr);
+	void RegisterTask(std::shared_ptr<ITask>&& ptr);
 private:
 	// 不可重复执行
 	void Start();

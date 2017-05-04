@@ -10,7 +10,7 @@ public:
 	ITask() = default;
 	virtual ~ITask() = default;
 	// 执行完毕返回true，否则返回false等待下次执行
-	virtual bool DoEvent(Loop& loop, std::unique_ptr<ITask>&& self)  = 0;
+	virtual bool DoEvent(Loop& loop)  = 0;
 };
 
 

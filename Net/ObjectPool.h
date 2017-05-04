@@ -92,7 +92,7 @@ public:
 private:
 	void DeleteAll()
 	{
-		while (objs_.empty())
+		while (!objs_.empty())
 		{
 			alloc_.Delete(objs_.top());
 			objs_.pop();
@@ -133,7 +133,7 @@ private:
 		}
 		return false;
 	}
-	inline TObj * PopObj()
+	TObj * PopObj()
 	{
 		auto result = objs_.top();
 		objs_.pop();

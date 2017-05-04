@@ -1,7 +1,7 @@
 #include "Block.h"
 
 BigBlock::BigBlock(size_t size) :
-	Block(Malloc(Max), Max, size, false)
+	Block(&buf_, Max, size, false)
 {
 	assert(size <= Max);
 }
@@ -11,15 +11,10 @@ BigBlock::BigBlock() :BigBlock(Max)
 
 }
 
-BigBlock::~BigBlock()
-{
-	assert(ptr_);
-	Free(ptr_);
-	ptr_ = nullptr;
-}
+BigBlock::~BigBlock() = default;
 
 SmallBlock::SmallBlock(size_t size) :
-	Block(Malloc(Max), Max, size, false)
+	Block(&buf_, Max, size, false)
 {
 	assert(size <= Max);
 }
@@ -27,20 +22,15 @@ SmallBlock::SmallBlock() : SmallBlock(Max)
 {
 
 }
-SmallBlock::~SmallBlock()
-{
-	assert(ptr_);
-	Free(ptr_);
-	ptr_ = nullptr;
-}
+SmallBlock::~SmallBlock() = default;
 Block::reference Block::operator[](int index)
 {
-	assert(index < size_);
+	assert(index > 0 && index < size_);
 	return begin()[index];
 }
 Block::const_reference Block::operator[](int index) const
 {
-	assert(index < size_);
+	assert(index > 0 && index < size_);
 	return begin()[index];
 }
 Block::Block(void * ptr, size_t max, size_t size, bool isReadOnly) :
@@ -112,15 +102,6 @@ bool Block::IsReadOnly() const
 	return isReadOnly_;
 }
 
-void * Block::Malloc(size_t size)
-{
-	return aligned_alloc(Align, size);
-}
-
-void Block::Free(void * ptr)
-{
-	free(ptr);
-}
 
 VectorBlock::VectorBlock(const std::shared_ptr<std::vector<char>>& vec) :
 	Block(vec->data(), vec->size(), vec->size(), true),

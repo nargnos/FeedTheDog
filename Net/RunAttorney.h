@@ -1,19 +1,19 @@
-#ifndef RUNPROXY_H_
-#define RUNPROXY_H_
+#ifndef RUNATTORNEY_H_
+#define RUNATTORNEY_H_
 
 
 class Loop;
-class RunProxy
+class RunAttorney
 {
 public:
 	static void Start(Loop& loop);
 	static void Stop(Loop& loop);
 	static void PrepareBuffers(Loop& loop);
 private:
-	RunProxy() = delete;
-	~RunProxy() = delete;
+	RunAttorney() = delete;
+	~RunAttorney() = delete;
 };
 
 
-#endif // RUNPROXY_H_
+#endif // RUNATTORNEY_H_
 

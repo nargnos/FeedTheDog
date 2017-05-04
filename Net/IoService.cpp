@@ -1,12 +1,19 @@
 #include "IoService.h"
 #include "Worker.h"
-#include "RunProxy.h"
+#include "RunAttorney.h"
 #include "Loop.h"
-// FIX: 电脑只有2核，其它没测试；asio单线程 vbox cpu0 1200 cpu1 300+，cpu1怎么慢这么多
-// 这里用1core：1thread 可以上1900+, 但是用其它比例巨慢（包括交换acc和conn亲和性）；还是要在实体机测才行
-const float CoreScale = 1.;
+// FIX: 电脑只有2核*2超线程；vbox cpu0速度为什么比cpu1的速度快5倍...
+// vbox用cpu0可以上1900+, 带cpu1巨慢；还是要在实体机测才行
+// 因为这两个核速度不同，测试数据有大幅波动（因为交换accept线程），先暂时设置成单核
 
-class StopWorkerProxy
+// 结构还是不够好，Buffer的处理可改进
+
+// NOTICE: 参数
+const float CoreScale = 0.5;
+// 尝试按快慢比例分配任务也无法提升，不是a+b的关系而是(a+b)/2的关系
+
+
+class StopWorkerAttorney
 {
 public:
 	static void Stop(Worker& worker)
@@ -14,47 +21,38 @@ public:
 		worker.Stop();
 	}
 private:
-	StopWorkerProxy() = delete;
-	~StopWorkerProxy() = delete;
+	StopWorkerAttorney() = delete;
+	~StopWorkerAttorney() = delete;
 };
 
 
 IoService::IoService() :
-	loop_(std::make_unique<Loop>()),
 	selectID_(0)
 {
-	master_ = std::make_unique<std::thread>([this]() {
-		RunProxy::Start(*loop_);
-	});
 	auto cores = std::thread::hardware_concurrency();
 	if (cores == 0)
 	{
 		cores = 1;
 	}
 
-	// 线程数,减掉前面创建的线程
+
 	workerSize_ = static_cast<size_t>(cores * CoreScale);
-	workerSize_ = workerSize_ <= 1 ? 1 : workerSize_ - 1;
+	assert(workerSize_ > 0);
 	size_t i = 0;
 	// 优先把工作线程关联cpu0
 	for (; i < workerSize_; i++)
 	{
 		workers_.emplace_back(new Worker(static_cast<unsigned int>(i % cores)));
 	}
-	SetAffinity(master_->native_handle(), i % cores);
-	// 主线程cpu关联
-	SetAffinity(pthread_self(), i % cores);
 }
 
 IoService::~IoService() = default;
 
 void IoService::Shutdown()
 {
-	RunProxy::Stop(*loop_);
-
 	for (auto& i : workers_)
 	{
-		StopWorkerProxy::Stop(*i);
+		StopWorkerAttorney::Stop(*i);
 	}
 }
 
@@ -64,16 +62,21 @@ std::shared_ptr<IoService> IoService::Instance()
 	return result;
 }
 
-const std::unique_ptr<Worker>& IoService::SelectWorker() const
+const std::unique_ptr<Worker>& IoService::SelectWorker()
 {
-	auto& result = workers_[selectID_];
-	selectID_ = (selectID_ + 1) % workerSize_;
-	return result;
+	do
+	{
+		std::int_fast16_t old = selectID_.load(std::memory_order_acquire);
+		std::int_fast16_t newVal = (old + 1) % workerSize_;
+		if (selectID_.compare_exchange_weak(old, newVal, std::memory_order_release))
+		{
+			return workers_[old];
+		}
+	} while (true);
 }
 
 void IoService::Wait()
 {
-	master_->join();
 	for (auto& i : workers_)
 	{
 		i->Wait();

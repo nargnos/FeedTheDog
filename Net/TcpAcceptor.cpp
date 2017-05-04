@@ -1,16 +1,17 @@
 #include "TcpAcceptor.h"
-#include <boost/lockfree/queue.hpp>
+#include <array>
 #include "Loop.h"
 #include "IoService.h"
 #include "Worker.h"
-#include "AcceptorRegister.h"
-#include "TcpConnection.h"
-#include "FDTaskCtlProxy.h"
+#include "FDTaskCtlAttorney.h"
 #include "Task.h"
+#include "GetLoopAttorney.h"
 TcpAcceptor::TcpAcceptor(const std::shared_ptr<IoService>& ios,
 	const sockaddr_in& bind) :
 	ios_(ios),
-	isCanceled_(false)
+	count_(0),
+	isCanceled_(false),
+	needReregister_(true)
 {
 	assert(ios);
 	if (!socket_)
@@ -34,8 +35,25 @@ TcpAcceptor::TcpAcceptor(const std::shared_ptr<IoService>& ios,
 	{
 		TRACEERRNOEXITSTR(LogPriority::Emerg, "Listen Socket Faild");
 	}
-	AcceptorRegister::Register(*ios, *this);
+	needReregister_ = ios->WorkerCount() != 1;
+	RegListen();
 }
+
+void TcpAcceptor::RegListen()
+{
+	// 选择worker注册
+	auto newLoop = &GetLoopAttorney::GetLoop(*ios_->SelectWorker());
+	assert(newLoop != nullptr);
+
+	FDTaskCtlAttorney::Add(*newLoop, EPOLLIN, this);
+}
+
+void TcpAcceptor::UnRegListen(Loop& loop)
+{
+	// 只在自身线程使用
+	FDTaskCtlAttorney::Del(loop, this);
+}
+
 
 void TcpAcceptor::DoAccept(Loop & loop, int fd)
 {
@@ -45,34 +63,30 @@ void TcpAcceptor::DoAccept(Loop & loop, int fd)
 	assert(onAccept_);
 	onAccept_(sock.get());
 }
-// 这里如果出错先析构会导致doaccept引用错误
+
 void TcpAcceptor::DoEvent(Loop & loop, EpollOption op)
 {
 	if (op.Flags.Err)
 	{
+		UnRegListen(loop);
 		OnFaild();
 		assert(false);
 		return;
 	}
 	assert(op.Flags.In);
-
-	auto& ios = *ios_;
-
-
-	size_t index = 0;
-	// 接够个数发送完再接
+	size_t i = 0;
 	do
 	{
-		auto& item = accepts_[index];
-		item = socket_.Accept();
-		if (item != -1)
+		auto fd = socket_.Accept();
+		if (__glibc_likely(fd != -1))
 		{
-			++index;
+			++i;
+			DoAccept(loop, fd);
 		}
 		else
 		{
 			auto err = errno;
-			if (err == EAGAIN || err == EWOULDBLOCK || err == EINTR)
+			if (__glibc_likely(err == EAGAIN || err == EWOULDBLOCK || err == EINTR))
 			{
 				break;
 			}
@@ -81,33 +95,19 @@ void TcpAcceptor::DoEvent(Loop & loop, EpollOption op)
 				TRACEERRNOEXITSTR(LogPriority::Emerg, "Accept Faild");
 			}
 		}
-	}while (index < accepts_.size());
-	if (index == 0)
-	{
-		return;
-	}
-	// 此处index为个数
-	auto& count = index;
-	auto workerCount = ios.WorkerCount();
-	auto avg = count <= workerCount ? 1 : count / workerCount;
-	auto cur = accepts_.begin();
-	auto end = cur + count;
-	while (true)
-	{
-		ios.SelectWorker()->PostTcpFd(cur, avg, this);
+	} while (i < SOMAXCONN);
 
-		cur += avg;
-		auto dt = std::distance(cur, end);
-		if (dt <= 0)
-		{
-			break;
-		}
-		else if (dt < avg)
-		{
-			avg = dt;
-		}
+	// 数字并不需要准确
+	
+	if (needReregister_ && count_.fetch_add(i, std::memory_order_acquire) > (SOMAXCONN << 4))
+	{
+		count_.store(0, std::memory_order_release);
+		UnRegListen(loop);
+		RegListen();
 	}
+
 }
+
 
 int TcpAcceptor::FD() const
 {
@@ -123,14 +123,17 @@ void TcpAcceptor::OnFaild()
 	TRACEPOINT_LINE(LogPriority::Debug);
 	TRACEERRNOEXIT(LogPriority::Emerg);
 }
+
+
 // 有可能在其它线程关闭
 void TcpAcceptor::Cancel()
 {
-	if (!isCanceled_.test_and_set(std::memory_order_acquire))
+	auto f = false;
+	if (isCanceled_.compare_exchange_strong(f, true, std::memory_order_release))
 	{
-		AcceptorRegister::UnRegister(*ios_, *this);
+		// TODO: 这里有些问题
+		//UnRegListen();
 		socket_.Close();
-		Detach();
 	}
 }
 
@@ -155,7 +158,6 @@ std::shared_ptr<TcpAcceptor> TcpAcceptor::Create(const std::shared_ptr<IoService
 	const sockaddr_in& bind)
 {
 	std::shared_ptr<TcpAcceptor> result(new TcpAcceptor(ios, bind));
-	result->SetPos(Store::Attach(result));
 	return result;
 }
 

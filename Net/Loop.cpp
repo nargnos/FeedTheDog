@@ -56,7 +56,7 @@ void Loop::Start()
 
 void Loop::DoLoop()
 {
-	std::aligned_storage_t<sizeof(EpollCpp::Events), 64> ev;	
+	std::aligned_storage_t<sizeof(EpollCpp::Events), 64> ev;
 	EpollCpp::Events& events = reinterpret_cast<EpollCpp::Events&>(ev);
 	try
 	{
@@ -125,7 +125,7 @@ void Loop::Stop()
 	state_ = LoopState::Stopping;
 }
 
-void Loop::RegisterTask(std::unique_ptr<ITask>&& ptr)
+void Loop::RegisterTask(std::shared_ptr<ITask>&& ptr)
 {
 	taskList_.Register(std::move(ptr));
 }

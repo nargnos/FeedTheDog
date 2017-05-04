@@ -4,7 +4,7 @@
 #include <memory>
 #include "ITask.h"
 #include "Noncopyable.h"
-using ITaskPtr = std::unique_ptr<ITask>;
+using ITaskPtr = std::shared_ptr<ITask>;
 template<typename TFunc>
 class Task :
 	public Noncopyable,
@@ -15,9 +15,9 @@ public:
 	explicit Task(TFunc&& func) :func_(std::move(func))
 	{
 	}
-	virtual bool DoEvent(Loop& loop, ITaskPtr&& self)  override
+	virtual bool DoEvent(Loop& loop)  override
 	{
-		return func_(loop, std::move(self));
+		return func_(loop);
 	}
 	~Task() = default;
 private:

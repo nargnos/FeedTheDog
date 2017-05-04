@@ -2,24 +2,19 @@
 #include <sys/socket.h>
 #include <sys/epoll.h>
 #include "Loop.h"
-#include "RunProxy.h"
-#include "FDTaskCtlProxy.h"
+#include "RunAttorney.h"
+#include "FDTaskCtlAttorney.h"
 #include "Task.h"
 #include "Logger.h"
 #include "ITcpAcceptor.h"
-Worker::Worker(unsigned int core) :
-	EventTaskBase(0, EventFdFlags(EventFdFlags::CloseOnExec |
-		EventFdFlags::Nonblock)),
-	acceptFds_(0)
+Worker::Worker(unsigned int core)
 {
 	static int ID = 0;
 	workerID_ = ID++;
 
-
-	FDTaskCtlProxy::Add(loop_, EPOLLIN, this);
 	worker_ = std::make_unique<std::thread>([this]() {
-		RunProxy::PrepareBuffers(loop_);
-		RunProxy::Start(loop_);
+		RunAttorney::PrepareBuffers(loop_);
+		RunAttorney::Start(loop_);
 	});
 	SetAffinity(worker_->native_handle(), core);
 }
@@ -34,27 +29,7 @@ Worker::~Worker()
 
 void Worker::Stop()
 {
-	RunProxy::Stop(loop_);
-}
-
-void Worker::DoEvent(Loop & loop, EpollOption op)
-{
-	assert(op.Flags.Err == false);
-	int count = 0;
-	Accepts tmp;
-	DecEvent();
-	while (acceptFds_.pop(tmp))
-	{
-		// 创建conn，回调acceptor，accept的错误cb不在这调用
-		tmp.Acceptor->DoAccept(loop, tmp.Fd);
-		if (++count > SOMAXCONN * 4)
-		{
-			// 给其它事件执行机会
-			IncEvent();
-			TRACEPOINT(LogPriority::Emerg)(__FILE__);
-			return;
-		}
-	}
+	RunAttorney::Stop(loop_);
 }
 
 int Worker::ID() const
@@ -66,31 +41,15 @@ void Worker::Wait()
 {
 	worker_->join();
 }
-// TODO: 有没有比这更好的方法
-void Worker::PostTcpFd(const int * begin, size_t size, ITcpAcceptor * acceptor)
+
+std::thread::id Worker::Tid() const
 {
-	assert(acceptor != nullptr);
-	Accepts act;
-	act.Acceptor = acceptor;
-	for (size_t i = 0; i < size; i++)
-	{
-		assert(*begin != -1);
-		act.Fd = *begin;
-		while (!acceptFds_.push(act)) {}
-		++begin;
-	}
-	IncEvent();
+	return worker_->get_id();
 }
 
-void Worker::IncEvent()
+Loop & Worker::GetLoop()
 {
-	fd_.Write(1);
-}
-
-void Worker::DecEvent()
-{
-	eventfd_t ignore;
-	fd_.Read(&ignore);
+	return loop_;
 }
 
 void SetAffinity(pthread_t t, unsigned int core)

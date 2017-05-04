@@ -2,7 +2,7 @@
 #include <numeric>
 Buffer::Buffer(size_t size)
 {
-	list_.push_front(Buffer::BufferPool().New());
+	list_.push_front(Buffer::BufferPool().New(size));
 }
 
 Buffer::Buffer(const BlockPtr & vec)
@@ -11,13 +11,10 @@ Buffer::Buffer(const BlockPtr & vec)
 	PushBack(vec);
 }
 
-Buffer::Buffer(Buffer && val)
+Buffer::Buffer(Buffer && val) :
+	list_(std::move(val.list_))
 {
-	if (this == &val)
-	{
-		return;
-	}
-	list_ = std::move(val.list_);
+	// list有自身判断
 }
 
 bool Buffer::IsEmpty() const
@@ -69,6 +66,10 @@ void Buffer::Resize(size_t size)
 {
 	// 等于0的buffer没有意义
 	assert(size > 0);
+	if (size == 0)
+	{
+		return;
+	}
 	auto it = list_.begin();
 	auto end = list_.end();
 
@@ -77,7 +78,7 @@ void Buffer::Resize(size_t size)
 	{
 		auto& v = *it;
 		auto tmp = v->size();
-		if (size > tmp)
+		if (__glibc_unlikely(size > tmp))
 		{
 			size -= tmp;
 		}

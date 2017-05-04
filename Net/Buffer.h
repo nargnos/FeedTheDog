@@ -13,6 +13,7 @@ public:
 	using BlockList = std::list<BlockPtr>;
 	explicit Buffer(size_t size);
 	explicit Buffer(const BlockPtr& vec);
+	// 注意此时未分配空间
 	Buffer() = default;
 
 	Buffer(Buffer&& val);

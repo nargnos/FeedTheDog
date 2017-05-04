@@ -1,9 +1,9 @@
-#ifndef FDTASKCTLPROXY_H_
-#define FDTASKCTLPROXY_H_
+#ifndef FDTASKCTLATTORNEY_H_
+#define FDTASKCTLATTORNEY_H_
 #include "EpollOption.h"
 #include "IFDTask.h"
 class Loop;
-class FDTaskCtlProxy
+class FDTaskCtlAttorney
 {
 public:
 	static void Add(Loop& loop, EpollOption op, IFDTask* obj);
@@ -11,9 +11,9 @@ public:
 	static void Del(Loop& loop, IFDTask* obj);
 
 private:
-	FDTaskCtlProxy() = delete;
-	~FDTaskCtlProxy() = delete;
+	FDTaskCtlAttorney() = delete;
+	~FDTaskCtlAttorney() = delete;
 };
 
-#endif // FDTASKCTLPROXY_H_
+#endif // FDTASKCTLATTORNEY_H_
 

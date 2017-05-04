@@ -8,25 +8,22 @@
 class Worker;
 class Loop;
 
-class AcceptorRegister;
-class IoService :public Noncopyable
+class IoService :
+	public Noncopyable
 {
 public:
 	~IoService();
-	friend AcceptorRegister;
 	// 终止后不能重新开始
 	void Shutdown();
 	static std::shared_ptr<IoService> Instance();
-	const std::unique_ptr<Worker>& SelectWorker() const;
+	const std::unique_ptr<Worker>& SelectWorker();
 	void Wait();
 	size_t WorkerCount() const;
 private:
 	IoService();
 	std::vector<std::unique_ptr<Worker>> workers_;
-	std::unique_ptr<std::thread> master_;
-	std::unique_ptr<Loop> loop_;
 	size_t workerSize_;
-	mutable size_t selectID_;
+	std::atomic_int_fast16_t selectID_;
 };
 
 

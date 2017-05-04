@@ -63,74 +63,62 @@
   <ImportGroup Label="Shared" />
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
-    <IncludePath>$(SolutionDir)..\boost;$(IncludePath)</IncludePath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
-    <IncludePath>$(SolutionDir)..\boost;$(IncludePath)</IncludePath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)..\boost;$(IncludePath)</IncludePath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)..\boost;$(IncludePath)</IncludePath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
-    <IncludePath>$(SolutionDir)..\boost;$(IncludePath)</IncludePath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
-    <IncludePath>$(SolutionDir)..\boost;$(IncludePath)</IncludePath>
-  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'" />
   <ItemGroup>
-    <ClCompile Include="AcceptorRegister.cpp" />
     <ClCompile Include="Block.cpp" />
     <ClCompile Include="Buffer.cpp" />
-    <ClCompile Include="Connection.cpp" />
     <ClCompile Include="EpollCpp.cpp" />
     <ClCompile Include="EpollOption.cpp" />
     <ClCompile Include="EventFd.cpp" />
     <ClCompile Include="EventTaskBase.cpp" />
-    <ClCompile Include="FDTaskCtlProxy.cpp" />
+    <ClCompile Include="FDTaskCtlAttorney.cpp" />
+    <ClCompile Include="GetLoopAttorney.cpp" />
     <ClCompile Include="IoService.cpp" />
+    <ClCompile Include="IoState.cpp" />
     <ClCompile Include="LoggerConfig.cpp" />
     <ClCompile Include="Loop.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="RunProxy.cpp" />
+    <ClCompile Include="RunAttorneycpp" />
     <ClCompile Include="SocketCpp.cpp" />
+    <ClCompile Include="ProactorConnection.cpp" />
     <ClCompile Include="TaskList.cpp" />
     <ClCompile Include="TcpAcceptor.cpp" />
-    <ClCompile Include="TcpConnection.cpp" />
-    <ClCompile Include="TransRec.cpp" />
+    <ClCompile Include="TcpProactorConnection.cpp" />
     <ClCompile Include="BlockPool.cpp" />
     <ClCompile Include="Worker.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AcceptorRegister.h" />
     <ClInclude Include="Block.h" />
     <ClInclude Include="Buffer.h" />
-    <ClInclude Include="Connection.h" />
+    <ClInclude Include="BufferRecord.h" />
     <ClInclude Include="EpollCpp.h" />
     <ClInclude Include="EpollOption.h" />
     <ClInclude Include="EventFd.h" />
     <ClInclude Include="EventTaskBase.h" />
-    <ClInclude Include="FDTaskCtlProxy.h" />
+    <ClInclude Include="FDTaskCtlAttorney.h" />
+    <ClInclude Include="GetLoopAttorney.h" />
     <ClInclude Include="IFDTask.h" />
     <ClInclude Include="IoService.h" />
+    <ClInclude Include="IoState.h" />
     <ClInclude Include="ITask.h" />
-    <ClInclude Include="ITcpAcceptor.h" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="LoggerConfig.h" />
     <ClInclude Include="Loop.h" />
     <ClInclude Include="Noncopyable.h" />
     <ClInclude Include="ObjectPool.h" />
     <ClInclude Include="ObjStore.h" />
-    <ClInclude Include="RunProxy.h" />
+    <ClInclude Include="RunAttorney.h" />
     <ClInclude Include="SocketCpp.h" />
+    <ClInclude Include="ProactorConnection.h" />
     <ClInclude Include="Task.h" />
     <ClInclude Include="TaskList.h" />
     <ClInclude Include="TcpAcceptor.h" />
-    <ClInclude Include="TcpConnection.h" />
-    <ClInclude Include="TransRec.h" />
+    <ClInclude Include="TcpProactorConnection.h" />
     <ClInclude Include="BlockPool.h" />
     <ClInclude Include="Worker.h" />
   </ItemGroup>

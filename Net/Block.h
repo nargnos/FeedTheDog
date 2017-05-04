@@ -23,7 +23,7 @@ public:
 	typedef size_t size_type;
 	typedef std::ptrdiff_t difference_type;
 
-	Block(void* ptr, size_t max, size_t size,bool isReadOnly);
+	Block(void* ptr, size_t max, size_t size, bool isReadOnly);
 	virtual ~Block();
 	iterator begin();
 	iterator end();
@@ -39,8 +39,6 @@ public:
 	void ResizeToMax();
 	bool IsReadOnly() const;
 protected:
-	static void* Malloc(size_t size);
-	static void Free(void* ptr);
 	char* ptr_;
 	size_t max_;
 	size_t size_;
@@ -54,6 +52,8 @@ public:
 	SmallBlock(size_t size);
 	SmallBlock();
 	virtual ~SmallBlock();
+private:
+	std::aligned_storage_t<Max, Align> buf_;
 };
 
 class BigBlock :public Block
@@ -62,7 +62,9 @@ public:
 	constexpr static size_t Max = 1 << 18;
 	BigBlock(size_t size);
 	BigBlock();
-	virtual ~BigBlock();;
+	virtual ~BigBlock();
+private:
+	std::aligned_storage_t<Max, Align> buf_;
 };
 
 // 做一个封装，方便组合

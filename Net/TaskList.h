@@ -13,12 +13,12 @@ public:
 
 	~TaskList() = default;
 	// 返回true的task会从列表中移除
-	void Register(std::unique_ptr<ITask>&& ptr);
+	void Register(std::shared_ptr<ITask>&& ptr);
 	// 如果没有可执行的任务就返回true
 	bool DoOnce(Loop& loop);
 	void Clear();
 private:
-	std::list<std::unique_ptr<ITask>> taskList_;
+	std::list<std::shared_ptr<ITask>> taskList_;
 };
 
 

@@ -1,0 +1,96 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Block.cpp" />
+    <ClCompile Include="Buffer.cpp" />
+    <ClCompile Include="EventTaskBase.cpp" />
+    <ClCompile Include="IoService.cpp" />
+    <ClCompile Include="LoggerConfig.cpp" />
+    <ClCompile Include="Loop.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="TaskList.cpp" />
+    <ClCompile Include="TcpAcceptor.cpp" />
+    <ClCompile Include="BlockPool.cpp" />
+    <ClCompile Include="Worker.cpp" />
+    <ClCompile Include="IoState.cpp" />
+    <ClCompile Include="ProactorConnection.cpp" />
+    <ClCompile Include="TcpProactorConnection.cpp" />
+    <ClCompile Include="FDTaskCtlAttorney.cpp">
+      <Filter>Attorney</Filter>
+    </ClCompile>
+    <ClCompile Include="RunAttorneycpp">
+      <Filter>Attorney</Filter>
+    </ClCompile>
+    <ClCompile Include="GetLoopAttorney.cpp">
+      <Filter>Attorney</Filter>
+    </ClCompile>
+    <ClCompile Include="EpollCpp.cpp">
+      <Filter>Sys</Filter>
+    </ClCompile>
+    <ClCompile Include="SocketCpp.cpp">
+      <Filter>Sys</Filter>
+    </ClCompile>
+    <ClCompile Include="EventFd.cpp">
+      <Filter>Sys</Filter>
+    </ClCompile>
+    <ClCompile Include="EpollOption.cpp">
+      <Filter>Sys</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Block.h" />
+    <ClInclude Include="Buffer.h" />
+    <ClInclude Include="EventTaskBase.h" />
+    <ClInclude Include="IFDTask.h" />
+    <ClInclude Include="IoService.h" />
+    <ClInclude Include="ITask.h" />
+    <ClInclude Include="Logger.h" />
+    <ClInclude Include="LoggerConfig.h" />
+    <ClInclude Include="Loop.h" />
+    <ClInclude Include="Noncopyable.h" />
+    <ClInclude Include="ObjectPool.h" />
+    <ClInclude Include="ObjStore.h" />
+    <ClInclude Include="Task.h" />
+    <ClInclude Include="TaskList.h" />
+    <ClInclude Include="TcpAcceptor.h" />
+    <ClInclude Include="BlockPool.h" />
+    <ClInclude Include="Worker.h" />
+    <ClInclude Include="IoState.h" />
+    <ClInclude Include="BufferRecord.h" />
+    <ClInclude Include="ProactorConnection.h" />
+    <ClInclude Include="TcpProactorConnection.h" />
+    <ClInclude Include="FDTaskCtlAttorney.h">
+      <Filter>Attorney</Filter>
+    </ClInclude>
+    <ClInclude Include="RunAttorney.h">
+      <Filter>Attorney</Filter>
+    </ClInclude>
+    <ClInclude Include="GetLoopAttorney.h">
+      <Filter>Attorney</Filter>
+    </ClInclude>
+    <ClInclude Include="EpollCpp.h">
+      <Filter>Sys</Filter>
+    </ClInclude>
+    <ClInclude Include="SocketCpp.h">
+      <Filter>Sys</Filter>
+    </ClInclude>
+    <ClInclude Include="EventFd.h">
+      <Filter>Sys</Filter>
+    </ClInclude>
+    <ClInclude Include="EpollOption.h">
+      <Filter>Sys</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include=".cproject" />
+    <None Include=".project" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Attorney">
+      <UniqueIdentifier>{5f626532-101d-43a0-b50d-e2290070f433}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sys">
+      <UniqueIdentifier>{146b3ea2-e43b-47e3-b8e4-6fb39b3bf1f5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
