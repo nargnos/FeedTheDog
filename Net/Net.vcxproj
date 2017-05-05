@@ -78,6 +78,7 @@
     <ClCompile Include="EventTaskBase.cpp" />
     <ClCompile Include="FDTaskCtlAttorney.cpp" />
     <ClCompile Include="GetLoopAttorney.cpp" />
+    <ClCompile Include="GetWorkersAttorney.cpp" />
     <ClCompile Include="IoService.cpp" />
     <ClCompile Include="IoState.cpp" />
     <ClCompile Include="LoggerConfig.cpp" />
@@ -102,6 +103,7 @@
     <ClInclude Include="EventTaskBase.h" />
     <ClInclude Include="FDTaskCtlAttorney.h" />
     <ClInclude Include="GetLoopAttorney.h" />
+    <ClInclude Include="GetWorkersAttorney.h" />
     <ClInclude Include="IFDTask.h" />
     <ClInclude Include="IoService.h" />
     <ClInclude Include="IoState.h" />

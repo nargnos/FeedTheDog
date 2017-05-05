@@ -130,6 +130,11 @@ void Loop::RegisterTask(std::shared_ptr<ITask>&& ptr)
 	taskList_.Register(std::move(ptr));
 }
 
+int Loop::TaskCount() const
+{
+	return taskList_.Count();
+}
+
 bool Loop::CheckTid() const
 {
 	return tid_ == std::this_thread::get_id();

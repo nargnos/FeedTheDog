@@ -6,7 +6,6 @@
 #include "FDTaskCtlAttorney.h"
 #include "Task.h"
 #include "Logger.h"
-#include "ITcpAcceptor.h"
 Worker::Worker(unsigned int core)
 {
 	static int ID = 0;

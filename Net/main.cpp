@@ -59,6 +59,7 @@ void ReadCb(TcpConnection* self, Buffer&& buf, Error e)
 // TODO: timer/asyncconnect/resolve
 // TODO: 加一个事件触发的connection
 // TODO: vs项目这边加了一些文件，附带的eclipse项目文件未更新，用eclipse载入时刷新下就好了
+// vbox 的cpu0 cpu1速度有大幅差距，平均被cpu1拉得太多了，要上实体机测试才行
 void TestBuffer()
 {
 	int loop = 100000;

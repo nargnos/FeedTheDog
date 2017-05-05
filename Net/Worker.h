@@ -8,7 +8,6 @@
 #include <tuple>
 #include <vector>
 #include <cassert>
-#include <boost/lockfree/queue.hpp>
 #include "Noncopyable.h"
 #include "EventTaskBase.h"
 #include "Loop.h"

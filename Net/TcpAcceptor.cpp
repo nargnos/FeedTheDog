@@ -6,14 +6,15 @@
 #include "FDTaskCtlAttorney.h"
 #include "Task.h"
 #include "GetLoopAttorney.h"
+#include "GetWorkersAttorney.h"
 TcpAcceptor::TcpAcceptor(const std::shared_ptr<IoService>& ios,
 	const sockaddr_in& bind) :
 	ios_(ios),
-	count_(0),
 	isCanceled_(false),
-	needReregister_(true)
+	needReregister_(false)
 {
 	assert(ios);
+	assert(ios->WorkerCount() > 0);
 	if (!socket_)
 	{
 		TRACEERRNOEXITSTR(LogPriority::Emerg, "Create Socket Faild");
@@ -35,19 +36,21 @@ TcpAcceptor::TcpAcceptor(const std::shared_ptr<IoService>& ios,
 	{
 		TRACEERRNOEXITSTR(LogPriority::Emerg, "Listen Socket Faild");
 	}
-	needReregister_ = ios->WorkerCount() != 1;
+	needReregister_ = ios->WorkerCount() > 1;
 	RegListen();
 }
 
 void TcpAcceptor::RegListen()
 {
 	// 选择worker注册
-	auto newLoop = &GetLoopAttorney::GetLoop(*ios_->SelectWorker());
-	assert(newLoop != nullptr);
+	auto& newLoop = GetLoopAttorney::GetLoop(*GetWorkersAttorney::Workers(*ios_).front());
+	RegListen(newLoop);
 
-	FDTaskCtlAttorney::Add(*newLoop, EPOLLIN, this);
 }
-
+void TcpAcceptor::RegListen(Loop& loop)
+{
+	FDTaskCtlAttorney::Add(loop, EPOLLIN, this);
+}
 void TcpAcceptor::UnRegListen(Loop& loop)
 {
 	// 只在自身线程使用
@@ -60,8 +63,11 @@ void TcpAcceptor::DoAccept(Loop & loop, int fd)
 	assert(fd != -1);
 	// 不处理（维持connect生存期，执行rw）将会关闭并丢弃连接
 	auto sock = TcpConnection::Attach(loop, fd);
-	assert(onAccept_);
-	onAccept_(sock.get());
+	// 此时如果在设置cb的间隙就有连接过来则丢弃
+	if (onAccept_)
+	{
+		onAccept_(sock.get());
+	}
 }
 
 void TcpAcceptor::DoEvent(Loop & loop, EpollOption op)
@@ -96,16 +102,48 @@ void TcpAcceptor::DoEvent(Loop & loop, EpollOption op)
 			}
 		}
 	} while (i < SOMAXCONN);
-
-	// 数字并不需要准确
-	
-	if (needReregister_ && count_.fetch_add(i, std::memory_order_acquire) > (SOMAXCONN << 4))
+	if (!needReregister_)
 	{
-		count_.store(0, std::memory_order_release);
-		UnRegListen(loop);
-		RegListen();
+		return;
 	}
+	// 取总数，如果忙就找个最小的注册
+	// 并不需要准确
+	auto selfCount = loop.TaskCount();
+	int sum = 0;
+	int minCount = INT32_MAX;
+	Loop* minLoop = nullptr;
+	auto& workers = GetWorkers();
+	for (auto& item : workers)
+	{
+		auto& tmpLoop = GetLoopAttorney::GetLoop(*item);
+		auto tmpCount = tmpLoop.TaskCount();
+		sum += tmpCount;
+		if (tmpCount < minCount)
+		{
+			minCount = tmpCount;
+			minLoop = &tmpLoop;
+		}
+	}
+	if (IsBusy(selfCount, sum))
+	{
+		// 忙，切换接收权
+		// FIX: 这里是否会产生交接频繁问题，如何均衡又减少交接次数？
+		
+		UnRegListen(loop);
+		RegListen(*minLoop);
+	}
+}
 
+const std::vector<std::unique_ptr<Worker>> & TcpAcceptor::GetWorkers()
+{
+	return GetWorkersAttorney::Workers(*ios_);
+}
+
+bool TcpAcceptor::IsBusy(int selfCount, int sum)
+{
+	// NOTICE: 参数: 忙判定
+	constexpr int rsh = 3;
+	return selfCount >= (sum - (sum >> rsh));
 }
 
 

@@ -7,23 +7,23 @@
 #include "Noncopyable.h"
 class Worker;
 class Loop;
-
+class GetWorkersAttorney;
 class IoService :
 	public Noncopyable
 {
 public:
+	friend GetWorkersAttorney;
 	~IoService();
 	// 终止后不能重新开始
 	void Shutdown();
 	static std::shared_ptr<IoService> Instance();
-	const std::unique_ptr<Worker>& SelectWorker();
 	void Wait();
 	size_t WorkerCount() const;
 private:
 	IoService();
+	const std::vector<std::unique_ptr<Worker>>& Workers() const;
 	std::vector<std::unique_ptr<Worker>> workers_;
 	size_t workerSize_;
-	std::atomic_int_fast16_t selectID_;
 };
 
 

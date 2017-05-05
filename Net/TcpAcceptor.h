@@ -5,7 +5,6 @@
 #include <atomic>
 #include <functional>
 #include <array>
-#include "ITcpAcceptor.h"
 #include "SocketCpp.h"
 #include "ObjStore.h"
 #include "Logger.h"
@@ -36,17 +35,19 @@ private:
 	TcpAcceptor(const std::shared_ptr<IoService>& ios,
 		const sockaddr_in& bind);
 	void RegListen();
+	void RegListen(Loop & loop);
 	void UnRegListen(Loop& loop);
 	void DoAccept(Loop & loop, int fd);
 	// 会在多个线程被调用，但一次只有一个线程能访问
 	virtual void DoEvent(Loop& loop, EpollOption op);
+	const std::vector<std::unique_ptr<Worker>> & GetWorkers();
+	bool IsBusy(int selfCount, int sum);
 	void OnFaild();
 
 	FaildHandler onFaild_;
 	std::shared_ptr<IoService> ios_;
 	TcpSocket socket_;
 	AcceptHandler onAccept_;
-	std::atomic_int_fast16_t count_;
 	std::atomic_bool isCanceled_;
 	bool needReregister_;
 };

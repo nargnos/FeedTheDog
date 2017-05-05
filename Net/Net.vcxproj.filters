@@ -36,6 +36,9 @@
     <ClCompile Include="EpollOption.cpp">
       <Filter>Sys</Filter>
     </ClCompile>
+    <ClCompile Include="GetWorkersAttorney.cpp">
+      <Filter>Attorney</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Block.h" />
@@ -79,6 +82,9 @@
     </ClInclude>
     <ClInclude Include="EpollOption.h">
       <Filter>Sys</Filter>
+    </ClInclude>
+    <ClInclude Include="GetWorkersAttorney.h">
+      <Filter>Attorney</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -32,6 +32,8 @@ public:
 	~Loop();
 	LoopState State() const;
 	const std::thread::id& OwnerTid()const;
+	// 取任务数快照
+	int TaskCount() const;
 	// 以下非线程安全
 	void RegisterTask(std::shared_ptr<ITask>&& ptr);
 private:
