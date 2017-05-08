@@ -15,6 +15,7 @@
 #include "EventTaskBase.h"
 class FDTaskCtlAttorney;
 class RunAttorney;
+class RegisterTaskAttorney;
 // 只对自身注册的任务暴露自身非线程安全的接口
 class Loop final :
 	public EventTaskBase
@@ -28,15 +29,16 @@ public:
 	};
 	friend FDTaskCtlAttorney;
 	friend RunAttorney;
+	friend RegisterTaskAttorney;
 	Loop();
 	~Loop();
 	LoopState State() const;
 	const std::thread::id& OwnerTid()const;
 	// 取任务数快照
 	int TaskCount() const;
-	// 以下非线程安全
-	void RegisterTask(std::shared_ptr<ITask>&& ptr);
 private:
+	// 非线程安全
+	void RegisterTask(std::shared_ptr<ITask>&& ptr);
 	// 不可重复执行
 	void Start();
 	void DoLoop();

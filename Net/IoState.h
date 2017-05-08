@@ -17,7 +17,10 @@ public:
 		DoIo = BufReady | IoReady,
 	};
 	// 默认IO已准备好
-	IoState();
+	IoState(IoStatus stat) :
+		current_(stat)
+	{
+	}
 	explicit IoState(char val);
 	explicit operator char() const;
 	char Value() const;

@@ -17,7 +17,7 @@ public:
 	// 如果没有可执行的任务就返回true
 	bool DoOnce(Loop& loop);
 	void Clear();
-	int Count() const;
+	size_t Count() const;
 
 private:
 	std::list<std::shared_ptr<ITask>> taskList_;

@@ -14,7 +14,6 @@ class IoService;
 class TcpAcceptor :
 	public std::enable_shared_from_this<TcpAcceptor>,
 	public IFDTask,
-	//public ITask,
 	public Noncopyable
 {
 public:
@@ -40,8 +39,7 @@ private:
 	void DoAccept(Loop & loop, int fd);
 	// 会在多个线程被调用，但一次只有一个线程能访问
 	virtual void DoEvent(Loop& loop, EpollOption op);
-	const std::vector<std::unique_ptr<Worker>> & GetWorkers();
-	bool IsBusy(int selfCount, int sum);
+	bool IsTooBusy(int selfCount, int sum);
 	void OnFaild();
 
 	FaildHandler onFaild_;

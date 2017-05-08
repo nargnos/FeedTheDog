@@ -3,11 +3,6 @@
 
 // 默认IO已准备好
 
-IoState::IoState() :
-	current_(IoStatus::IoReady)
-{
-}
-
 IoState::IoState(char val) :
 	val_(val)
 {}

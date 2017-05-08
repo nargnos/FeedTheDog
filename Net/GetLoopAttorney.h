@@ -8,6 +8,12 @@ public:
 	{
 		return obj.GetLoop();
 	}
+	template<typename T>
+	static const Loop& GetLoop(const T& obj)
+	{
+		return obj.GetLoop();
+	}
+
 private:
 	GetLoopAttorney() = delete;
 	~GetLoopAttorney() = delete;

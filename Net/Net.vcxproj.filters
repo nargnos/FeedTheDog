@@ -1,8 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="Block.cpp" />
-    <ClCompile Include="Buffer.cpp" />
     <ClCompile Include="EventTaskBase.cpp" />
     <ClCompile Include="IoService.cpp" />
     <ClCompile Include="LoggerConfig.cpp" />
@@ -10,7 +8,6 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="TaskList.cpp" />
     <ClCompile Include="TcpAcceptor.cpp" />
-    <ClCompile Include="BlockPool.cpp" />
     <ClCompile Include="Worker.cpp" />
     <ClCompile Include="IoState.cpp" />
     <ClCompile Include="ProactorConnection.cpp" />
@@ -36,13 +33,26 @@
     <ClCompile Include="EpollOption.cpp">
       <Filter>Sys</Filter>
     </ClCompile>
+    <ClCompile Include="Block.cpp">
+      <Filter>Buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="BlockPool.cpp">
+      <Filter>Buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="Buffer.cpp">
+      <Filter>Buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="TcpAttachAttorney.cpp">
+      <Filter>Attorney</Filter>
+    </ClCompile>
+    <ClCompile Include="RegisterTaskAttorney.cpp">
+      <Filter>Attorney</Filter>
+    </ClCompile>
     <ClCompile Include="GetWorkersAttorney.cpp">
       <Filter>Attorney</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Block.h" />
-    <ClInclude Include="Buffer.h" />
     <ClInclude Include="EventTaskBase.h" />
     <ClInclude Include="IFDTask.h" />
     <ClInclude Include="IoService.h" />
@@ -56,10 +66,8 @@
     <ClInclude Include="Task.h" />
     <ClInclude Include="TaskList.h" />
     <ClInclude Include="TcpAcceptor.h" />
-    <ClInclude Include="BlockPool.h" />
     <ClInclude Include="Worker.h" />
     <ClInclude Include="IoState.h" />
-    <ClInclude Include="BufferRecord.h" />
     <ClInclude Include="ProactorConnection.h" />
     <ClInclude Include="TcpProactorConnection.h" />
     <ClInclude Include="FDTaskCtlAttorney.h">
@@ -83,6 +91,27 @@
     <ClInclude Include="EpollOption.h">
       <Filter>Sys</Filter>
     </ClInclude>
+    <ClInclude Include="Block.h">
+      <Filter>Buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="BlockPool.h">
+      <Filter>Buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="Buffer.h">
+      <Filter>Buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="BufferRecord.h">
+      <Filter>Buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="TransferProgress.h">
+      <Filter>Buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="TcpAttachAttorney.h">
+      <Filter>Attorney</Filter>
+    </ClInclude>
+    <ClInclude Include="RegisterTaskAttorney.h">
+      <Filter>Attorney</Filter>
+    </ClInclude>
     <ClInclude Include="GetWorkersAttorney.h">
       <Filter>Attorney</Filter>
     </ClInclude>
@@ -97,6 +126,9 @@
     </Filter>
     <Filter Include="Sys">
       <UniqueIdentifier>{146b3ea2-e43b-47e3-b8e4-6fb39b3bf1f5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Buffer">
+      <UniqueIdentifier>{60525365-0910-4156-a0be-594334b33948}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

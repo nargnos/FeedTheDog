@@ -84,11 +84,13 @@
     <ClCompile Include="LoggerConfig.cpp" />
     <ClCompile Include="Loop.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="RegisterTaskAttorney.cpp" />
     <ClCompile Include="RunAttorneycpp" />
     <ClCompile Include="SocketCpp.cpp" />
     <ClCompile Include="ProactorConnection.cpp" />
     <ClCompile Include="TaskList.cpp" />
     <ClCompile Include="TcpAcceptor.cpp" />
+    <ClCompile Include="TcpAttachAttorney.cpp" />
     <ClCompile Include="TcpProactorConnection.cpp" />
     <ClCompile Include="BlockPool.cpp" />
     <ClCompile Include="Worker.cpp" />
@@ -114,14 +116,17 @@
     <ClInclude Include="Noncopyable.h" />
     <ClInclude Include="ObjectPool.h" />
     <ClInclude Include="ObjStore.h" />
+    <ClInclude Include="RegisterTaskAttorney.h" />
     <ClInclude Include="RunAttorney.h" />
     <ClInclude Include="SocketCpp.h" />
     <ClInclude Include="ProactorConnection.h" />
     <ClInclude Include="Task.h" />
     <ClInclude Include="TaskList.h" />
     <ClInclude Include="TcpAcceptor.h" />
+    <ClInclude Include="TcpAttachAttorney.h" />
     <ClInclude Include="TcpProactorConnection.h" />
     <ClInclude Include="BlockPool.h" />
+    <ClInclude Include="TransferProgress.h" />
     <ClInclude Include="Worker.h" />
   </ItemGroup>
   <ItemGroup>

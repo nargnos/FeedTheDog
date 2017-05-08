@@ -3,6 +3,7 @@
 #include <stddef.h>
 #include <utility>
 #include <memory>
+#include <unistd.h>
 #include <syslog.h>
 #include <errno.h>
 #include <string.h>
@@ -47,8 +48,8 @@ struct WriteLog :public Noncopyable
 
 #define TRACEPOINT_CODE(Priority) if(CanLog<Priority>::value) {
 #define TRACEPOINT_ENDCODE }
-
-#define _EXIT exit(EXIT_FAILURE);\
+#define EXIT_FAILURE 1
+#define _EXIT _exit(EXIT_FAILURE);\
 __builtin_unreachable(); 
 
 #define TRACEERRNOEXIT(Priority) TRACEERRNO(Priority);\

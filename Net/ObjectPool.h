@@ -30,7 +30,7 @@ public:
 };
 
 
-// 非线程安全，生成的智能指针对象析构时也非线程安全
+// TODO: 需要验证线程安全
 template<typename TObj, typename TObjAllocator = ObjAllocator<TObj>>
 class ObjectPool :
 	public std::enable_shared_from_this<ObjectPool<TObj, TObjAllocator>>,
@@ -43,15 +43,11 @@ public:
 	using TObjPtr = std::shared_ptr<TObj>;
 	struct UniPtrDel :public std::default_delete<TObj>
 	{
-		UniPtrDel(const TPollWeakPtr& weak) :weak_(weak)
-		{
-
-		}
+		UniPtrDel() = default;
 		void operator()(TObj* obj)
 		{
-			ObjectPool::Recycle(weak_, obj);
+			ObjectPool::Recycle(Weak(), obj);
 		}
-		TPollWeakPtr weak_;
 	};
 
 	using TObjUniPtr = std::unique_ptr<TObj, UniPtrDel>;
@@ -65,24 +61,23 @@ public:
 	TObjPtr New(TArgs&&... args)
 	{
 		auto result = GetObj(std::forward<TArgs>(args)...);
-		return TObjPtr(result, [pool = self_](TObj* obj) mutable {
-			Recycle(pool, obj);
+		return TObjPtr(result, [](TObj* obj) mutable {
+			Recycle(Weak(), obj);
 		});
 	}
 	template<typename... TArgs>
 	TObjUniPtr NewUnique(TArgs&&... args)
 	{
 		auto result = GetObj(std::forward<TArgs>(args)...);
-		return TObjUniPtr(result, UniPtrDel(self_));
+		return TObjUniPtr(result, UniPtrDel());
 	}
 
-	// maxCount 等于0表示不限制保存对象个数（存储的个数不是总共能建立的个数）
-	static std::shared_ptr<ObjectPool> Create(size_t maxCount = 0, TObjAllocator&& alloc = TObjAllocator())
+	static const std::shared_ptr<ObjectPool>& Instance()
 	{
-		auto result = std::shared_ptr<ObjectPool>(new ObjectPool(maxCount, std::move(alloc)));
-		result->InitTask();
-		return result;
+		static thread_local std::shared_ptr<ObjectPool> instance = Create();
+		return instance;
 	}
+
 	// 回收所有内存
 	void Clear()
 	{
@@ -90,54 +85,53 @@ public:
 	}
 
 private:
+
+
+	static const std::weak_ptr<ObjectPool>& Weak()
+	{
+		return instanceWeak;
+	}
 	void DeleteAll()
 	{
 		while (!objs_.empty())
 		{
 			alloc_.Delete(objs_.top());
 			objs_.pop();
-			DecCount();
 		}
 	}
-	ObjectPool(size_t maxCount, TObjAllocator&&  alloc) :
-		alloc_(std::move(alloc)),
-		maxCount_(maxCount)
+	ObjectPool(TObjAllocator&&  alloc) :
+		alloc_(std::move(alloc))
 	{
-	}
-	void InitTask()
-	{
-		self_ = this->shared_from_this();
 	}
 
-	static void Recycle(std::weak_ptr<ObjectPool>& pool, TObj* obj)
+
+	static std::shared_ptr<ObjectPool> Create(TObjAllocator&& alloc = TObjAllocator())
+	{
+		auto result = std::shared_ptr<ObjectPool>(new ObjectPool(std::move(alloc)));
+		instanceWeak = result;
+		return result;
+	}
+	static void Recycle(const std::weak_ptr<ObjectPool>& pool, TObj* obj)
 	{
 		if (!pool.expired())
 		{
 			auto poolObj = pool.lock();
-			if (poolObj->PushObj(obj))
-			{
-				poolObj->alloc_.Clear(obj);
-				return;
-			}
+			poolObj->PushObj(obj);
+			poolObj->alloc_.Clear(obj);
+			return;
 		}
 		delete obj;
 	}
-	bool PushObj(TObj* obj)
+	void PushObj(TObj* obj)
 	{
 		// assert(!IsExist(obj));
-		if (maxCount_ == 0 || Count() < maxCount_)
-		{
-			objs_.push(obj);
-			IncCount();
-			return true;
-		}
-		return false;
+
+		objs_.push(obj);
 	}
 	TObj * PopObj()
 	{
 		auto result = objs_.top();
 		objs_.pop();
-		DecCount();
 		return result;
 	}
 	bool IsExist(TObj* obj)
@@ -161,25 +155,15 @@ private:
 		return result;
 	}
 
-	inline void IncCount()
-	{
-		++count_;
-	}
-	inline void DecCount()
-	{
-		--count_;
-	}
-	inline size_t Count() const
-	{
-		return count_;
-	}
 	std::stack<TObj*> objs_;
 	TObjAllocator alloc_;
-	TPollWeakPtr self_;
-	size_t maxCount_;
-	size_t count_;
+
+
+	static thread_local std::weak_ptr<ObjectPool> instanceWeak;
+
 };
+
+
+template<typename TObj, typename TObjAllocator>
+thread_local std::weak_ptr<ObjectPool<TObj, TObjAllocator>> ObjectPool<TObj, TObjAllocator>::instanceWeak;
 #endif // OBJECTPOOL_H_
-
-
-

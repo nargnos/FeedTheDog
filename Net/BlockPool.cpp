@@ -1,8 +1,8 @@
 #include "BlockPool.h"
 
 BlockPool::BlockPool() :
-	bBuff_(ObjectPool<BigBlock>::Create(0, {})),
-	sBuff_(ObjectPool<SmallBlock>::Create(0, {}))
+	bBuff_(ObjectPool<BigBlock>::Instance()),
+	sBuff_(ObjectPool<SmallBlock>::Instance())
 {
 
 }

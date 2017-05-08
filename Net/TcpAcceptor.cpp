@@ -6,6 +6,7 @@
 #include "FDTaskCtlAttorney.h"
 #include "Task.h"
 #include "GetLoopAttorney.h"
+#include "TcpAttachAttorney.h"
 #include "GetWorkersAttorney.h"
 TcpAcceptor::TcpAcceptor(const std::shared_ptr<IoService>& ios,
 	const sockaddr_in& bind) :
@@ -43,7 +44,9 @@ TcpAcceptor::TcpAcceptor(const std::shared_ptr<IoService>& ios,
 void TcpAcceptor::RegListen()
 {
 	// 选择worker注册
-	auto& newLoop = GetLoopAttorney::GetLoop(*GetWorkersAttorney::Workers(*ios_).front());
+	auto& workers = GetWorkersAttorney::Workers(*ios_);
+	auto& worker = *workers.front();
+	auto& newLoop = GetLoopAttorney::GetLoop(worker);
 	RegListen(newLoop);
 
 }
@@ -62,7 +65,7 @@ void TcpAcceptor::DoAccept(Loop & loop, int fd)
 {
 	assert(fd != -1);
 	// 不处理（维持connect生存期，执行rw）将会关闭并丢弃连接
-	auto sock = TcpConnection::Attach(loop, fd);
+	auto sock = TcpAttachAttorney::Attach(loop, fd);
 	// 此时如果在设置cb的间隙就有连接过来则丢弃
 	if (onAccept_)
 	{
@@ -108,38 +111,20 @@ void TcpAcceptor::DoEvent(Loop & loop, EpollOption op)
 	}
 	// 取总数，如果忙就找个最小的注册
 	// 并不需要准确
-	auto selfCount = loop.TaskCount();
-	int sum = 0;
-	int minCount = INT32_MAX;
-	Loop* minLoop = nullptr;
-	auto& workers = GetWorkers();
-	for (auto& item : workers)
+
+	auto perf = ios_->PerformanceSnapshot();
+
+	if (&perf.BusyLoop == &loop && IsTooBusy(perf.BusyCount, perf.TaskCount))
 	{
-		auto& tmpLoop = GetLoopAttorney::GetLoop(*item);
-		auto tmpCount = tmpLoop.TaskCount();
-		sum += tmpCount;
-		if (tmpCount < minCount)
-		{
-			minCount = tmpCount;
-			minLoop = &tmpLoop;
-		}
-	}
-	if (IsBusy(selfCount, sum))
-	{
-		// 忙，切换接收权
+		// 过忙，切换接收权
 		// FIX: 这里是否会产生交接频繁问题，如何均衡又减少交接次数？
-		
+		// TODO: 如果跟踪loop执行前后的任务数，可以得到增长或者减少的速率，这个可能有用
 		UnRegListen(loop);
-		RegListen(*minLoop);
+		RegListen(perf.IdleLoop);
 	}
 }
 
-const std::vector<std::unique_ptr<Worker>> & TcpAcceptor::GetWorkers()
-{
-	return GetWorkersAttorney::Workers(*ios_);
-}
-
-bool TcpAcceptor::IsBusy(int selfCount, int sum)
+bool TcpAcceptor::IsTooBusy(int selfCount, int sum)
 {
 	// NOTICE: 参数: 忙判定
 	constexpr int rsh = 3;

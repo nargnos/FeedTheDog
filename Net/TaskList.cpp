@@ -28,7 +28,7 @@ void TaskList::Clear()
 	taskList_.clear();
 }
 
-int TaskList::Count() const
+size_t TaskList::Count() const
 {
 	return taskList_.size();
 }

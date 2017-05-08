@@ -19,6 +19,7 @@ Buffer::Buffer(Buffer && val) :
 
 bool Buffer::IsEmpty() const
 {
+
 	return list_.empty();
 }
 

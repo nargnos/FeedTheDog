@@ -13,15 +13,16 @@
 #include "Loop.h"
 #include "Logger.h"
 #include "ObjStore.h"
-
-
+#include "RegisterTaskAttorney.h"
+// FIX: 有点乱，再整一整
+// TODO: 重构
 
 class ProactorConnectionBase :
 	public IFDTask,
 	public Noncopyable
 {
 public:
-	explicit ProactorConnectionBase(Loop& loop);
+	ProactorConnectionBase(Loop& loop, IoState::IoStatus readStat, IoState::IoStatus writeStat);
 
 	bool HasError() const;
 	bool IsClosed() const;
@@ -32,33 +33,14 @@ protected:
 	IoState& ReadState();
 	IoState& WriteState();
 	// io过程中调用, 出现这个必注册epoll等待io可处理
-	void OnCantIo(IoState& s)
-	{
-		assert(s.IsDoIo());
-		s.SetIoReady(false);
-		assert(!s.IsIoReady());
-
-		/*RegisterSocket();
-		StoreObj();*/
-	}
+	void OnCantIo(IoState& s);
 	// 事件完成时调用
-	void OnNoBuff(IoState & s)
-	{
-		s.SetBuffReady(false);
-	}
+	void OnNoBuff(IoState & s);
 	// 返回true表示当前可io
 	// post事件时调用
-	bool OnBuffReady(IoState& s)
-	{
-		s.SetBuffReady(true);
-		return s.IsDoIo();
-	}
+	bool OnBuffReady(IoState& s);
 	// ep的cb中调用
-	bool OnIoReady(IoState& s)
-	{
-		s.SetIoReady(true);
-		return s.IsDoIo();
-	}
+	bool OnIoReady(IoState& s);
 
 
 	void OnFailState() const;
@@ -73,21 +55,23 @@ protected:
 };
 
 
-template<typename TChild, typename TRecord>
+template<typename TChild>
 class ProactorConnection :
 	public ProactorConnectionBase,
 	public ITask
 {
 public:
-	explicit ProactorConnection(Loop& loop) :
-		ProactorConnectionBase(loop),
+	using TRecord = ProgressRecord<TChild>;
+	explicit ProactorConnection(Loop& loop, IoState::IoStatus readStat, IoState::IoStatus writeStat) :
+		ProactorConnectionBase(loop, readStat, writeStat),
 		store_(nullptr)
 	{
 
 	}
 
 protected:
-	using TQueue = std::queue<TRecord>;
+	using TRecordPtr = std::unique_ptr<TRecord>;
+	using TQueue = std::queue<TRecordPtr>;
 
 	TQueue& GetReadRecord()
 	{
@@ -114,11 +98,26 @@ protected:
 			return;
 		}
 		isTaskRegistered_ = true;
-		loop_.RegisterTask(Self()->shared_from_this());
+		RegisterTaskAttorney::RegisterTask(loop_, Self()->shared_from_this());
+	}
+	void SetError()
+	{
+		readState_.SetError();
+		writeState_.SetError();
 	}
 
+	// 自身存储引用，保护不被析构
+	// TODO: 有隐患，要对各种情况测试
+	void StoreObj()
+	{
+		if (store_)
+		{
+			return;
+		}
+		// 提升引用计数
+		store_ = Self()->shared_from_this();
+	}
 private:
-
 
 	// 处理epoll事件
 	virtual void DoEvent(Loop& loop, EpollOption op)  override
@@ -145,36 +144,6 @@ private:
 		{
 			OnRegTask();
 		}
-
-		//if (op.Flags.Err)
-		//{
-		//	// 处理过程中出错
-		//	OnError();
-		//	return;
-		//}
-		//if (!op.Flags.In && op.Flags.Hup)
-		//{
-		//	// 发生hup且没有in, 如果有in读完后会自己进入error
-		//	// 对方断开
-		//	OnError();
-		//	return;
-		//}
-		//if (op.Flags.In || op.Flags.RdHup)
-		//{
-		//	// close
-		//	// 读关闭但缓冲区有东西没读
-		//	// 正常读请求
-
-		//	// 读到0就close
-		//	OnIoReady(ReadState());
-		//}
-
-		//if (op.Flags.Out && !op.Flags.Hup)
-		//{
-		//	// 写操作就绪
-		//	OnIoReady(WriteState());
-		//}
-		//OnRegisterTask();
 	}
 	// 处理task事件，只执行IO，发生完成、关闭或错误事件时就地处理并注销
 	// 不进epoll的连接在执行cb的时候设置状态, 如果空闲而没相关引用，自己就析构掉
@@ -193,7 +162,7 @@ private:
 		}
 		auto val = readState_.Value() * writeState_.Value();
 		assert(val != 0);
-
+		// 牺牲掉可读性
 		switch (val)
 		{
 		case 3:
@@ -245,8 +214,7 @@ private:
 		{
 			return;
 		}
-		readState_.SetError();
-		writeState_.SetError();
+		SetError();
 		assert(readState_.HasError());
 		assert(writeState_.HasError());
 		OnFail(GetReadRecord(), Error::Error);
@@ -262,17 +230,6 @@ private:
 			return;
 		}
 		store_ = nullptr;
-	}
-	// 自身存储引用，保护不被析构
-	// TODO: 有隐患，要对各种情况测试
-	void StoreObj()
-	{
-		if (store_)
-		{
-			return;
-		}
-		// 提升引用计数
-		store_ = Self()->shared_from_this();
 	}
 
 
@@ -293,10 +250,40 @@ private:
 	}
 	void OnRead()
 	{
-		assert(ReadState().IsDoIo());
 		auto& recQueue = GetReadRecord();
-		auto& rec = recQueue.front();
-		auto& bufRec = rec;
+		assert(!recQueue.empty());
+		auto& f = *recQueue.front();
+		if (f.Do(Self(), &ProactorConnection::DoRead))
+		{
+			PopRecord(recQueue, ReadState());
+		}
+
+	}
+	void OnWrite()
+	{
+		auto& recQueue = GetWriteRecord();
+		assert(!recQueue.empty());
+		auto& f = *recQueue.front();
+		if (f.Do(Self(), &ProactorConnection::DoWrite))
+		{
+			PopRecord(recQueue, WriteState());
+		}
+	}
+	void PopRecord(TQueue& queue, IoState& s)
+	{
+		queue.pop();
+		if (queue.empty())
+		{
+			OnNoBuff(s);
+			assert(!s.IsBuffReady());
+			return;
+		}
+	}
+	// 返回true表示要清理队首
+	bool DoRead(TRecord& rec, TransferProgress& progress)
+	{
+		assert(ReadState().IsDoIo());
+		auto& bufRec = progress;
 		auto trans = Self()->Read(bufRec);
 
 		switch (trans)
@@ -306,17 +293,17 @@ private:
 			if (bufRec.IsTransSome())
 			{
 				bufRec.GetBuffer().Resize(bufRec.Trans() + trans);
-				OnComplete(recQueue, rec, ReadState());
-				return;
+				RunCompleteHandler(rec, Error::Success);
+				return true;
 			}
 
 			bufRec.AddTrans(trans);
 			if (!bufRec.IsComplete())
 			{
-				return;
+				return false;
 			}
-			OnComplete(recQueue, rec, ReadState());
-			return;
+			RunCompleteHandler(rec, Error::Success);
+			return true;
 		case -1:
 		{
 			auto err = errno;
@@ -324,7 +311,7 @@ private:
 			{
 				OnCantIo(ReadState());
 				assert(!ReadState().IsIoReady());
-				return;
+				return false;
 			}
 			TRACEPOINT(LogPriority::Debug)("%d fd:%s", FD(), LOGSTR_ERRNO);
 		}
@@ -332,28 +319,31 @@ private:
 		case 0:
 			OnClose();
 			assert(ReadState().IsClose());
-			return;
+			// 队列已在onclose中清理
+			assert(GetReadRecord().empty());
+			return false;
 		}
 		OnError();
 		assert(ReadState().HasError());
+		// 同上
+		assert(GetReadRecord().empty());
+		return false;
 	}
 
-	void OnWrite()
+	bool DoWrite(TRecord& rec, TransferProgress& progress)
 	{
 		assert(WriteState().IsDoIo());
-		auto& recQueue = GetWriteRecord();
-		auto& rec = recQueue.front();
-		auto& bufRec = rec;
+		auto& bufRec = progress;
 		auto trans = Self()->Write(bufRec);
 		if (__glibc_likely(trans > 0))
 		{
 			bufRec.AddTrans(trans);
 			if (!bufRec.IsComplete())
 			{
-				return;
+				return false;
 			}
-			OnComplete(recQueue, rec, WriteState());
-			return;
+			RunCompleteHandler(rec, Error::Success);
+			return true;
 		}
 		else
 		{
@@ -362,51 +352,34 @@ private:
 			{
 				OnCantIo(WriteState());
 				assert(!WriteState().IsIoReady());
-				return;
+				assert(GetWriteRecord().empty());
+				return false;
 			}
 		}
 		OnError();
 		assert(WriteState().HasError());
+		assert(GetWriteRecord().empty());
+		return false;
 	}
-
-	void OnComplete(TQueue& recQueue, TRecord & rec, IoState& s)
-	{
-		assert(s.IsDoIo());
-		RunCompleteHandler(rec, Error::Success);
-		recQueue.pop();
-		if (recQueue.empty())
-		{
-			OnNoBuff(s);
-			assert(!s.IsBuffReady());
-			return;
-		}
-		assert(s.IsDoIo());
-	}
-
 
 	void RunCompleteHandler(TRecord& rec, Error e)
 	{
-		rec.Call(Self(), std::move(rec.GetBuffer()), e);
+		rec.Complete(Self(), e);
 	}
 
 	void OnFail(TQueue& queue, Error e)
 	{
 		while (!queue.empty())
 		{
-			auto& rec = queue.front();
+			auto& rec = *queue.front();
 			// 如果此时有数据在内，要处理就自己读，这里不处理
-			//auto tr = rec.BR.Trans();
-			//if (tr != 0)
-			//{
-			//	auto& buff = rec.BR.GetBuffer();
-			//	buff.Resize(tr);
-			//}
 			RunCompleteHandler(rec, e);
 			queue.pop();
 		}
 	}
-	std::queue<TRecord> readRecord_;
-	std::queue<TRecord> writeRecord_;
+
+	TQueue readRecord_;
+	TQueue writeRecord_;
 	std::shared_ptr<ProactorConnectionBase> store_;
 
 };

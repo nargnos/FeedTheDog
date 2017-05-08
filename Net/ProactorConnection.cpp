@@ -1,15 +1,17 @@
 #include "ProactorConnection.h"
 
-ProactorConnectionBase::ProactorConnectionBase(Loop & loop) :
-	loop_(loop),
-	isTaskRegistered_(false),
-	isSocketRegistered_(false)
-{
-}
-
 bool ProactorConnectionBase::IsClosed() const
 {
 	return readState_.IsClose();
+}
+
+ProactorConnectionBase::ProactorConnectionBase(Loop & loop, IoState::IoStatus readStat, IoState::IoStatus writeStat) :
+	loop_(loop),
+	readState_(readStat),
+	writeState_(writeStat),
+	isTaskRegistered_(false),
+	isSocketRegistered_(false)
+{
 }
 
 bool ProactorConnectionBase::HasError() const
@@ -29,6 +31,19 @@ Loop & ProactorConnectionBase::GetLoop() const
 	return loop_;
 }
 
+
+bool ProactorConnectionBase::OnBuffReady(IoState & s)
+{
+	s.SetBuffReady(true);
+	return s.IsDoIo();
+}
+
+bool ProactorConnectionBase::OnIoReady(IoState & s)
+{
+	s.SetIoReady(true);
+	return s.IsDoIo();
+}
+
 void ProactorConnectionBase::OnFailState() const
 {
 	assert(false);
@@ -43,6 +58,22 @@ IoState & ProactorConnectionBase::ReadState()
 IoState & ProactorConnectionBase::WriteState()
 {
 	return writeState_;
+}
+
+// io过程中调用, 出现这个必注册epoll等待io可处理
+
+void ProactorConnectionBase::OnCantIo(IoState & s)
+{
+	assert(s.IsDoIo());
+	s.SetIoReady(false);
+	assert(!s.IsIoReady());
+}
+
+// 事件完成时调用
+
+void ProactorConnectionBase::OnNoBuff(IoState & s)
+{
+	s.SetBuffReady(false);
 }
 
 void ProactorConnectionBase::UnregisterSocket()
