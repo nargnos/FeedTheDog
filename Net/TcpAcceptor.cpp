@@ -18,24 +18,24 @@ TcpAcceptor::TcpAcceptor(const std::shared_ptr<IoService>& ios,
 	assert(ios->WorkerCount() > 0);
 	if (!socket_)
 	{
-		TRACEERRNOEXITSTR(LogPriority::Emerg, "Create Socket Faild");
+		TRACEERRNOEXITSTR(LogPriority::Emerg, "Create Socket Failed");
 	}
 	if (!socket_.SetNonBlocking())
 	{
-		TRACEPOINT(LogPriority::Emerg)("Set NonBlocking Faild");
+		TRACEPOINT(LogPriority::Emerg)("Set NonBlocking Failed");
 		_EXIT;
 	}
 	if (!socket_.SetReusePort(true))
 	{
-		TRACEPOINT(LogPriority::Notice)("Set Reuse Port Faild");
+		TRACEPOINT(LogPriority::Notice)("Set Reuse Port Failed");
 	}
 	if (!socket_.Bind(bind))
 	{
-		TRACEERRNOEXITSTR(LogPriority::Emerg, "Bind Socket Faild");
+		TRACEERRNOEXITSTR(LogPriority::Emerg, "Bind Socket Failed");
 	}
 	if (!socket_.Listen())
 	{
-		TRACEERRNOEXITSTR(LogPriority::Emerg, "Listen Socket Faild");
+		TRACEERRNOEXITSTR(LogPriority::Emerg, "Listen Socket Failed");
 	}
 	needReregister_ = ios->WorkerCount() > 1;
 	RegListen();
@@ -78,7 +78,7 @@ void TcpAcceptor::DoEvent(Loop & loop, EpollOption op)
 	if (op.Flags.Err)
 	{
 		UnRegListen(loop);
-		OnFaild();
+		OnFailed();
 		assert(false);
 		return;
 	}
@@ -101,7 +101,7 @@ void TcpAcceptor::DoEvent(Loop & loop, EpollOption op)
 			}
 			else
 			{
-				TRACEERRNOEXITSTR(LogPriority::Emerg, "Accept Faild");
+				TRACEERRNOEXITSTR(LogPriority::Emerg, "Accept Failed");
 			}
 		}
 	} while (i < SOMAXCONN);
@@ -137,11 +137,11 @@ int TcpAcceptor::FD() const
 	return socket_.FD();
 }
 
-void TcpAcceptor::OnFaild()
+void TcpAcceptor::OnFailed()
 {
-	if (onFaild_)
+	if (onFailed_)
 	{
-		onFaild_();
+		onFailed_();
 	}
 	TRACEPOINT_LINE(LogPriority::Debug);
 	TRACEERRNOEXIT(LogPriority::Emerg);
@@ -171,10 +171,10 @@ void TcpAcceptor::SetOnAccept(AcceptHandler && h)
 	onAccept_ = std::move(h);
 }
 
-void TcpAcceptor::SetOnFaild(FaildHandler&& h)
+void TcpAcceptor::SetOnFailed(FailedHandler&& h)
 {
-	assert(!onFaild_);
-	onFaild_ = std::move(h);
+	assert(!onFailed_);
+	onFailed_ = std::move(h);
 }
 
 std::shared_ptr<TcpAcceptor> TcpAcceptor::Create(const std::shared_ptr<IoService>& ios,

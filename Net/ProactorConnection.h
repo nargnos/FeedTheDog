@@ -62,7 +62,8 @@ class ProactorConnection :
 {
 public:
 	using TRecord = ProgressRecord<TChild>;
-	explicit ProactorConnection(Loop& loop, IoState::IoStatus readStat, IoState::IoStatus writeStat) :
+	explicit ProactorConnection(
+		Loop& loop, IoState::IoStatus readStat, IoState::IoStatus writeStat) :
 		ProactorConnectionBase(loop, readStat, writeStat),
 		store_(nullptr)
 	{

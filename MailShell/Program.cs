@@ -22,8 +22,8 @@ namespace MailShell
             }
             else
             {
-                Console.WriteLine("Faild");
-                Debug.WriteLine("Faild");
+                Console.WriteLine("Failed");
+                Debug.WriteLine("Failed");
             }
         }
     }

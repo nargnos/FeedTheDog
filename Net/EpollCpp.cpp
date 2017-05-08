@@ -13,7 +13,7 @@ EpollCpp::EpollCpp() :
 	if (epfd_ == -1)
 	{
 		assert(errno != EINVAL);
-		TRACEPOINT_LINE(LogPriority::Debug)("Create Epoll Faild");
+		TRACEPOINT_LINE(LogPriority::Debug)("Create Epoll Failed");
 		TRACEERRNOEXIT(LogPriority::Emerg);
 	}
 }
@@ -54,7 +54,7 @@ size_t EpollCpp::Wait(Events& e, int ms)
 			{
 				continue;
 			}
-			TRACEPOINT(LogPriority::Alert)("Loop Faild");
+			TRACEPOINT(LogPriority::Alert)("Loop Failed");
 			TRACEERRNOEXIT(LogPriority::Alert);
 		}
 		break;

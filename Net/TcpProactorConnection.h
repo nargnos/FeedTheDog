@@ -55,7 +55,8 @@ public:
 		assert(!buffer.HasReadOnlyBlock());
 		if (IsGood())
 		{
-			GetReadRecord().push(MakeRecord<TcpProactorConnection>(std::move(buffer), begin, std::forward<THandler>(cb)));
+			GetReadRecord().push(
+				MakeRecord<TcpProactorConnection>(std::move(buffer), begin, std::forward<THandler>(cb)));
 			// 有可能socket一直不进epoll
 			// 因为完成时立即执行cb，如果这里预读可能会卡在某个连接上，所以要先入task
 			if (OnBuffReady(ReadState()))
@@ -119,7 +120,8 @@ public:
 		assert(!buffer.HasReadOnlyBlock());
 		if (IsGood())
 		{
-			GetReadRecord().push(MakeRecord<TcpProactorConnection>(std::move(buffer), begin, std::forward<THandler>(cb), true));
+			GetReadRecord().push(
+				MakeRecord<TcpProactorConnection>(std::move(buffer), begin, std::forward<THandler>(cb), true));
 			if (OnBuffReady(ReadState()))
 			{
 				OnRegTask();
@@ -138,7 +140,8 @@ public:
 		assert(std::this_thread::get_id() == GetLoop().OwnerTid());
 		if (IsGood())
 		{
-			GetWriteRecord().push(MakeRecord<TcpProactorConnection>(std::move(buffer), begin, std::forward<THandler>(cb)));
+			GetWriteRecord().push(
+				MakeRecord<TcpProactorConnection>(std::move(buffer), begin, std::forward<THandler>(cb)));
 			if (OnBuffReady(WriteState()))
 			{
 				OnRegTask();
@@ -161,7 +164,8 @@ public:
 	static TcpProactorConnectionProxy Create()
 	{
 		auto info = IoService::Instance()->PerformanceSnapshot();
-		return TcpProactorConnectionProxy(std::shared_ptr<TcpProactorConnection>(new TcpProactorConnection(info.IdleLoop)));
+		return TcpProactorConnectionProxy(
+			std::shared_ptr<TcpProactorConnection>(new TcpProactorConnection(info.IdleLoop)));
 	}
 protected:
 	// fd 为已连接
@@ -191,7 +195,7 @@ protected:
 	{
 		if (!socket_.SetNonBlocking())
 		{
-			TRACEPOINT(LogPriority::Warning)("tcpsocket setnonblocking faild");
+			TRACEPOINT(LogPriority::Warning)("tcpsocket setnonblocking failed");
 		}
 	}
 

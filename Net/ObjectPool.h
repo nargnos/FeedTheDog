@@ -165,5 +165,6 @@ private:
 
 
 template<typename TObj, typename TObjAllocator>
-thread_local std::weak_ptr<ObjectPool<TObj, TObjAllocator>> ObjectPool<TObj, TObjAllocator>::instanceWeak;
+thread_local std::weak_ptr<ObjectPool<TObj, TObjAllocator>>
+ObjectPool<TObj, TObjAllocator>::instanceWeak;
 #endif // OBJECTPOOL_H_
