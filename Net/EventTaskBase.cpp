@@ -1,11 +1,16 @@
 #include "EventTaskBase.h"
-
-EventTaskBase::EventTaskBase(unsigned int count, EventFdFlags flags) :
-	fd_(count, flags)
+#include <utility>
+namespace Detail
 {
-}
 
-int EventTaskBase::FD() const
-{
-	return fd_.FD();
-}
+	EventTaskBase::EventTaskBase(unsigned int count, EventFdFlags flags) :
+		fd_(count, flags)
+	{
+	}
+
+	int EventTaskBase::FD() const
+	{
+		return fd_.FD();
+	}
+	
+}  // namespace Detail

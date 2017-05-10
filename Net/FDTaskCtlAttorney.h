@@ -2,18 +2,22 @@
 #define FDTASKCTLATTORNEY_H_
 #include "EpollOption.h"
 #include "IFDTask.h"
-class Loop;
-class FDTaskCtlAttorney
-{
-public:
-	static void Add(Loop& loop, EpollOption op, IFDTask* obj);
-	static void Mod(Loop& loop, EpollOption op, IFDTask* obj);
-	static void Del(Loop& loop, IFDTask* obj);
 
-private:
-	FDTaskCtlAttorney() = delete;
-	~FDTaskCtlAttorney() = delete;
-};
+namespace Detail
+{
+	class Loop;
+	class FDTaskCtlAttorney
+	{
+	public:
+		static void Add(const Loop& loop, EpollOption op, const IFDTask* obj);
+		static void Mod(const Loop& loop, EpollOption op, const IFDTask* obj);
+		static void Del(const Loop& loop, const IFDTask* obj);
+
+	private:
+		FDTaskCtlAttorney() = delete;
+		~FDTaskCtlAttorney() = delete;
+	};
+}  // namespace Detail
 
 #endif // FDTASKCTLATTORNEY_H_
 

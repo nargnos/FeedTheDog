@@ -17,7 +17,8 @@ enum LogPriority :int
 #define PRIORITY_LEVEL LogPriority::Warning
 #define APP_NAME "-hello world-"
 
-class LoggerConfig :public Noncopyable
+class LoggerConfig :
+	public Noncopyable
 {
 public:
 	LoggerConfig();

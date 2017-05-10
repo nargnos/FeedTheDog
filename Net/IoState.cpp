@@ -1,75 +1,82 @@
 #include "IoState.h"
 #include <cassert>
-
-// 默认IO已准备好
-
-IoState::IoState(char val) :
-	val_(val)
-{}
-
-IoState::operator char() const
+namespace Detail
 {
-	return val_;
-}
 
-char IoState::Value() const
-{
-	return val_;
-}
+	IoState::IoState(IoStatus stat) :
+		current_(stat)
+	{
+	}
 
-IoState::IoStatus IoState::State() const
-{
-	return current_;
-}
+	IoState::IoState(char val) :
+		val_(val)
+	{}
 
-bool IoState::HasError() const
-{
-	return current_ >= IoStatus::Error;
-}
+	IoState::operator char() const
+	{
+		return val_;
+	}
 
-bool IoState::IsClose() const
-{
-	return  current_ >= IoStatus::Close;
-}
+	char IoState::Value() const
+	{
+		return val_;
+	}
 
-bool IoState::IsGood() const
-{
-	// 见前面的表
-	assert(current_ != IoStatus::None);
-	return current_ <= IoStatus::DoIo;
-}
+	IoState::IoStatus IoState::State() const
+	{
+		return current_;
+	}
 
-void IoState::SetIoReady(bool val)
-{
-	val_ = (val_ & ~IoStatus::IoReady) | val;
-}
+	bool IoState::HasError() const
+	{
+		return current_ >= IoStatus::Error;
+	}
 
-void IoState::SetBuffReady(bool val)
-{
-	val_ = (val_ & ~IoStatus::BufReady) | (val << 1);
-}
+	bool IoState::IsClose() const
+	{
+		return  current_ >= IoStatus::Close;
+	}
 
-void IoState::SetClose()
-{
-	val_ |= IoStatus::Close;
-}
+	bool IoState::IsGood() const
+	{
+		// 见前面的表
+		assert(current_ != IoStatus::None);
+		return current_ <= IoStatus::DoIo;
+	}
 
-void IoState::SetError()
-{
-	current_ = IoStatus::Error;
-}
+	void IoState::SetIoReady(bool val)
+	{
+		val_ = (val_ & ~IoStatus::IoReady) | val;
+	}
 
-bool IoState::IsIoReady() const
-{
-	return (val_ & (IoStatus::IoReady | IoStatus::Close | IoStatus::Error)) == IoStatus::IoReady;
-}
+	void IoState::SetBuffReady(bool val)
+	{
+		val_ = (val_ & ~IoStatus::BufReady) | (val << 1);
+	}
 
-bool IoState::IsBuffReady() const
-{
-	return  (val_ & (IoStatus::BufReady | IoStatus::Close | IoStatus::Error)) == IoStatus::BufReady;
-}
+	void IoState::SetClose()
+	{
+		val_ |= IoStatus::Close;
+	}
 
-bool IoState::IsDoIo() const
-{
-	return (val_ & (IoStatus::DoIo | IoStatus::Close | IoStatus::Error)) == IoStatus::DoIo;
-}
+	void IoState::SetError()
+	{
+		current_ = IoStatus::Error;
+	}
+
+	bool IoState::IsIoReady() const
+	{
+		return (val_ & (IoStatus::IoReady | IoStatus::Close | IoStatus::Error)) == IoStatus::IoReady;
+	}
+
+	bool IoState::IsBuffReady() const
+	{
+		return  (val_ & (IoStatus::BufReady | IoStatus::Close | IoStatus::Error)) == IoStatus::BufReady;
+	}
+
+	bool IoState::IsDoIo() const
+	{
+		return (val_ & (IoStatus::DoIo | IoStatus::Close | IoStatus::Error)) == IoStatus::DoIo;
+	}
+
+}  // namespace Detail

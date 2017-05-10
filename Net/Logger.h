@@ -7,12 +7,14 @@
 #include <syslog.h>
 #include <errno.h>
 #include <string.h>
+#include <cassert>
 #include "LoggerConfig.h"
 #include "Noncopyable.h"
 
 #define LOGSTR_ERRNO strerror(errno)
 template<int Priority>
-struct CanLog :public std::integral_constant<bool, Priority >= 0 && PRIORITY_LEVEL >= Priority>
+struct CanLog :
+	public std::integral_constant<bool, Priority >= 0 && PRIORITY_LEVEL >= Priority>
 {
 
 };
@@ -21,7 +23,8 @@ struct CanLog :public std::integral_constant<bool, Priority >= 0 && PRIORITY_LEV
 // 可连写，但是分次记录，只共享优先级
 // 使用如：TRACEPOINT(LogPriority::Debug)("%d hello", 1)("%d world", 2)("test");
 template<int Priority>
-struct WriteLog :public Noncopyable
+struct WriteLog :
+	public Noncopyable
 {
 	constexpr WriteLog() = default;
 	template<typename... TArgs>

@@ -5,13 +5,13 @@
 #include <memory>
 #include <vector>
 #include <valarray>
-//#include 
 #include <cassert>
 #include <iostream>
+#include <string>
 #include "IoService.h"
 #include "TcpAcceptor.h"
 #include "Task.h"
-
+#include "Util.h"
 
 using namespace std;
 
@@ -27,8 +27,8 @@ BlockPtr GetResponseEnd()
 	static BlockPtr result(new CharBlock(str, strlen(str)));
 	return result;
 }
-void ReadCb(TcpConnection* self, Buffer&& buf, Error e);
-void WriteCb(TcpConnection* self, Buffer&& buf, Error e)
+void ReadCb(TcpConnection& self, Buffer&& buf, Error e);
+void WriteCb(TcpConnection& self, Buffer&& buf, Error e)
 {
 
 	if (e != Error::Success)
@@ -38,9 +38,9 @@ void WriteCb(TcpConnection* self, Buffer&& buf, Error e)
 	//buf.PopBack();
 	//buf.PopFront();
 	buf.StretchTo();
-	self->AsyncReadSome(std::move(buf), 0, ReadCb);
+	self.AsyncReadSome(std::move(buf), 0, ReadCb);
 }
-void ReadCb(TcpConnection* self, Buffer&& buf, Error e)
+void ReadCb(TcpConnection& self, Buffer&& buf, Error e)
 {
 	if (e != Error::Success)
 	{
@@ -49,7 +49,7 @@ void ReadCb(TcpConnection* self, Buffer&& buf, Error e)
 	//buf.PushFront(GetResponseHead());
 	//buf.PushBack(GetResponseEnd());
 
-	self->AsyncWrite(std::move(buf), 0, WriteCb);
+	self.AsyncWrite(std::move(buf), 0, WriteCb);
 
 }
 // 未完成，使用这个结构是因为想只用epoll的线程安全机制和atomic实现整个结构线程安全；用作实验，没什么可用性
@@ -61,17 +61,18 @@ void ReadCb(TcpConnection* self, Buffer&& buf, Error e)
 // TODO: timer/asyncconnect/resolve
 // TODO: 加一个事件触发的connection
 // TODO: vs项目这边加了一些文件，附带的eclipse项目文件未更新，用eclipse载入时刷新下就好了
-// vbox 的cpu0 cpu1速度有大幅差距，平均被cpu1拉得太多了，要上实体机测试才行
 // TODO: buffer的写入不够方便，添加组合不够方便
 // TODO: connect可能要添加一个类来处理，看看能不能平衡连接数，但是这样会导致在做转发时跨线程使用连接
 // TODO: 需要添加明确的禁止跨线程使用conn
-
+// TODO: 编译时对传入类型检查，否则提示不准确提升查错难度
+// TODO: 错误信息不够详细
+// TODO: 泄露待查
 void TestBuffer()
 {
 	{
 		auto b = Buffer::BufferPool().New(0);
 	}
-	int loop = 100000;
+	int loop = 10;
 	for (int i = 0; i < loop; i++)
 	{
 		Buffer buf(0);
@@ -82,29 +83,56 @@ void TestBuffer()
 void TestTask()
 {
 	int loop = 100000;
-	TaskList t;
-	Loop* ignore = nullptr;
+	Detail::TaskList t;
+	Detail::Loop* ignore = nullptr;
 	for (int i = 0; i < loop; i++)
 	{
-		t.Register(MakeTask([](Loop&) {return true; }));
+		t.Register(Detail::MakeTask([](Detail::Loop&) {return true; }));
 		t.DoOnce(*ignore);
 	}
 }
+void TestCpuSpeed()
+{
+	SetAffinity(pthread_self(), 0);
+	sleep(1);
+	size_t loop = 5000000000;
+	volatile size_t sum = 0;
+	double t1 = clock();
+	for (size_t i = 0; i < loop; i++)
+	{
+		sum += i;
+	}
+	t1 = clock() - t1;
+
+	SetAffinity(pthread_self(), 1);
+	sleep(1);
+	sum = 0;
+	double t2 = clock();
+	for (size_t i = 0; i < loop; i++)
+	{
+		sum += i;
+	}
+	t2 = clock() - t2;
+	std::cout << t1 / CLOCKS_PER_SEC << "-" << t2 / CLOCKS_PER_SEC << std::endl;
+
+}
+
 int main()
 {
+	// TestCpuSpeed();
 	// TestBuffer();
 	// TestTask();
 	// return 0;
 
 	TRACEPOINT(LogPriority::Info)("Echo test");
 	auto ios = IoService::Instance();
-	auto act = TcpAcceptor::Create(ios, MakeSockaddr(INADDR_ANY, 8989));
+	auto act = TcpAcceptor::Create(MakeSockaddr(INADDR_ANY, 8989));
 	act->SetOnAccept([](TcpAcceptor::ConnectionPtr conn) {
 
 		Buffer buf(0);
 		conn->AsyncReadSome(std::move(buf), 0, ReadCb);
 		/*auto clo = conn->Clone();
-		clo->AsyncConnect(MakeSockaddr("127.0.0.1", 7777), [](TcpConnection* c, Error e)
+		clo->AsyncConnect(MakeSockaddr("127.0.0.1", 7777), [](TcpConnection& c, Error e)
 		{
 			if (e == Error::Success)
 			{
@@ -119,24 +147,23 @@ int main()
 		});*/
 	});
 
-	TcpConnection::Create().AsyncConnect(MakeSockaddr("127.0.0.1", 7777), [](TcpConnection* c, Error e)
-	{
-		if (e == Error::Success)
-		{
-			auto str = "hello world";
-			auto block = std::make_shared<CharBlock>(str, strlen(str));
-			Buffer b;
-			b.PushBack(block);
-			c->AsyncWrite(std::move(b), 0, [](TcpConnection* c, Buffer&&, Error e)
-			{
-				std::cout << "连接-写 成功" << std::endl;
-			});
-		}
-		else
-		{
-			std::cout << "连接失败" << std::endl;
-		}
-	});
+	//TcpConnection::Create().AsyncConnect(MakeSockaddr("127.0.0.1", 7777), [](TcpConnection& c, Error e)
+	//{
+	//	if (e == Error::Success)
+	//	{
+	//		auto block = std::make_shared<StringBlock>("hello world");
+	//		Buffer b;
+	//		b.PushBack(std::move(block));
+	//		c.AsyncWrite(std::move(b), 0, [](TcpConnection& c, Buffer&&, Error e)
+	//		{
+	//			std::cout << "连接-写 成功" << std::endl;
+	//		});
+	//	}
+	//	else
+	//	{
+	//		std::cout << "连接失败: " <<std::endl;
+	//	}
+	//});
 
 	ios->Wait();
 	return 0;

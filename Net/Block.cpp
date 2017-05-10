@@ -1,121 +1,149 @@
 #include "Block.h"
-
-BigBlock::BigBlock(size_t size) :
-	Block(&buf_, Max, size, false)
-{
-	assert(size <= Max);
-}
-
-BigBlock::BigBlock() :BigBlock(Max)
+namespace Detail
 {
 
-}
-
-BigBlock::~BigBlock() = default;
-
-SmallBlock::SmallBlock(size_t size) :
-	Block(&buf_, Max, size, false)
-{
-	assert(size <= Max);
-}
-SmallBlock::SmallBlock() : SmallBlock(Max)
-{
-
-}
-SmallBlock::~SmallBlock() = default;
-Block::reference Block::operator[](int index)
-{
-	assert(index > 0 && index < size_);
-	return begin()[index];
-}
-Block::const_reference Block::operator[](int index) const
-{
-	assert(index > 0 && index < size_);
-	return begin()[index];
-}
-Block::Block(void * ptr, size_t max, size_t size, bool isReadOnly) :
-	ptr_(static_cast<char*>(ptr)),
-	max_(max),
-	size_(size),
-	isReadOnly_(isReadOnly)
-{
-	assert(ptr_);
-}
-
-Block::~Block() = default;
-
-Block::iterator Block::begin()
-{
-	assert(ptr_);
-	return ptr_;
-}
-
-Block::iterator Block::end()
-{
-	return begin() + size_;
-}
-
-Block::iterator Block::data()
-{
-	return ptr_;
-}
-
-Block::const_iterator Block::data() const
-{
-	return ptr_;
-}
-
-Block::const_iterator Block::begin() const
-{
-	assert(ptr_);
-	return ptr_;
-}
-
-Block::const_iterator Block::end() const
-{
-	return begin() + size_;
-}
-
-size_t Block::size() const
-{
-	return size_;
-}
-
-size_t Block::max_size() const
-{
-	return max_;
-}
-
-void Block::resize(size_t newsize)
-{
-	assert(newsize <= max_);
-	size_ = newsize;
-}
-
-void Block::ResizeToMax()
-{
-	size_ = max_;
-}
-
-bool Block::IsReadOnly() const
-{
-	return isReadOnly_;
-}
+	Block::reference Block::operator[](int index)
+	{
+		assert(index > 0 && index < size());
+		return begin()[index];
+	}
+	Block::const_reference Block::operator[](int index) const
+	{
+		assert(index > 0 && index < size());
+		return begin()[index];
+	}
+	Block::Block(void * ptr, size_t max, size_t size, bool isReadOnly) :
+		iov_{ ptr,size },
+		max_(max),
+		isReadOnly_(isReadOnly)
+	{
+		assert(ptr);
+	}
 
 
-VectorBlock::VectorBlock(const std::shared_ptr<std::vector<char>>& vec) :
-	Block(vec->data(), vec->size(), vec->size(), true),
-	vec_(vec)
-{
-}
+	Block::~Block() = default;
 
-StringBlock::StringBlock(const std::shared_ptr<std::string>& str) :
-	Block(const_cast<char*>(str->c_str()), str->length(), str->length(), true),
-	str_(str)
-{
-}
+	Block::iterator Block::begin()
+	{
+		assert(iov_.iov_base);
+		return static_cast<char*>(iov_.iov_base);
+	}
 
-CharBlock::CharBlock(const char * str, size_t len) :
-	Block(const_cast<char*>(str), len, len, true)
-{
-}
+	Block::iterator Block::end()
+	{
+		return begin() + size();
+	}
+
+	Block::iterator Block::data()
+	{
+		return begin();
+	}
+
+	Block::const_iterator Block::data() const
+	{
+		return begin();
+	}
+
+	Block::const_iterator Block::begin() const
+	{
+		assert(iov_.iov_base);
+		return static_cast<char*>(iov_.iov_base);
+	}
+
+	Block::const_iterator Block::end() const
+	{
+		return begin() + size();
+	}
+
+	size_t Block::size() const
+	{
+		return iov_.iov_len;
+	}
+
+	size_t Block::max_size() const
+	{
+		return max_;
+	}
+
+	void Block::resize(size_t newsize)
+	{
+		assert(newsize <= max_);
+		iov_.iov_len = newsize;
+	}
+
+	void Block::ResizeToMax()
+	{
+		iov_.iov_len = max_;
+	}
+
+	bool Block::IsReadOnly() const
+	{
+		return isReadOnly_;
+	}
+
+	const iovec& Block::GetIOV() const
+	{
+		return iov_;
+	}
+
+
+	BigBlock::BigBlock(size_t size) :
+		Block(&buf_, Max, size, false)
+	{
+		assert(size <= Max);
+	}
+
+
+	BigBlock::~BigBlock() = default;
+
+	SmallBlock::SmallBlock(size_t size) :
+		Block(&buf_, Max, size, false)
+	{
+		assert(size <= Max);
+	}
+	SmallBlock::~SmallBlock() = default;
+
+	VectorBlock::VectorBlock(const std::vector<char>& vec) :
+		VectorBlock::Member(vec),
+		Block(VectorBlock::Member::Member().data(),
+			VectorBlock::Member::Member().size(),
+			VectorBlock::Member::Member().size(),
+			true)
+	{
+	}
+
+	VectorBlock::VectorBlock(std::vector<char>&& vec) :
+		VectorBlock::Member(std::move(vec)),
+		Block(VectorBlock::Member::Member().data(),
+			VectorBlock::Member::Member().size(),
+			VectorBlock::Member::Member().size(),
+			true)
+	{
+
+	}
+
+	StringBlock::StringBlock(const std::string& str) :
+		StringBlock::Member(str),
+		Block(const_cast<char*>(StringBlock::Member::Member().data()),
+			StringBlock::Member::Member().length(),
+			StringBlock::Member::Member().length(),
+			true)
+	{
+	}
+	StringBlock::StringBlock(std::string && str) :
+		StringBlock::Member(std::move(str)),
+		Block(const_cast<char*>(StringBlock::Member::Member().data()),
+			StringBlock::Member::Member().length(),
+			StringBlock::Member::Member().length(),
+			true)
+	{
+		
+	}
+
+	CharBlock::CharBlock(const char * str, size_t len) :
+		Block(const_cast<char*>(str), len, len, true)
+	{
+	}
+
+
+}  // namespace Detail

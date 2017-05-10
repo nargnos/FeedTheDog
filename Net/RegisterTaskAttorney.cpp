@@ -1,6 +1,10 @@
 #include "RegisterTaskAttorney.h"
 #include "Loop.h"
-void RegisterTaskAttorney::RegisterTask(Loop & loop, std::shared_ptr<ITask>&& ptr)
+namespace Detail
 {
-	loop.RegisterTask(std::move(ptr));
-}
+	void RegisterTaskAttorney::RegisterTask(Loop & loop, std::shared_ptr<ITask>&& ptr)
+	{
+		loop.RegisterTask(std::move(ptr));
+	}
+
+}  // namespace Detail

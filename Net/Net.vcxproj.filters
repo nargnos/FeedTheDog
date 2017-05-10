@@ -1,21 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="EventTaskBase.cpp" />
-    <ClCompile Include="IoService.cpp" />
-    <ClCompile Include="LoggerConfig.cpp" />
-    <ClCompile Include="Loop.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="TaskList.cpp" />
-    <ClCompile Include="TcpAcceptor.cpp" />
-    <ClCompile Include="Worker.cpp" />
-    <ClCompile Include="IoState.cpp" />
-    <ClCompile Include="ProactorConnection.cpp" />
-    <ClCompile Include="TcpProactorConnection.cpp" />
     <ClCompile Include="FDTaskCtlAttorney.cpp">
-      <Filter>Attorney</Filter>
-    </ClCompile>
-    <ClCompile Include="RunAttorneycpp">
       <Filter>Attorney</Filter>
     </ClCompile>
     <ClCompile Include="GetLoopAttorney.cpp">
@@ -51,25 +38,44 @@
     <ClCompile Include="GetWorkersAttorney.cpp">
       <Filter>Attorney</Filter>
     </ClCompile>
+    <ClCompile Include="EventTaskBase.cpp">
+      <Filter>Task</Filter>
+    </ClCompile>
+    <ClCompile Include="LoggerConfig.cpp">
+      <Filter>Log</Filter>
+    </ClCompile>
+    <ClCompile Include="ProactorConnection.cpp">
+      <Filter>Conn</Filter>
+    </ClCompile>
+    <ClCompile Include="TcpProactorConnection.cpp">
+      <Filter>Conn</Filter>
+    </ClCompile>
+    <ClCompile Include="TcpAcceptor.cpp">
+      <Filter>Conn</Filter>
+    </ClCompile>
+    <ClCompile Include="Worker.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Loop.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="IoState.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="IoService.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="RunAttorney.cpp">
+      <Filter>Attorney</Filter>
+    </ClCompile>
+    <ClCompile Include="TaskList.cpp">
+      <Filter>Task</Filter>
+    </ClCompile>
+    <ClCompile Include="Util.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="EventTaskBase.h" />
-    <ClInclude Include="IFDTask.h" />
-    <ClInclude Include="IoService.h" />
-    <ClInclude Include="ITask.h" />
-    <ClInclude Include="Logger.h" />
-    <ClInclude Include="LoggerConfig.h" />
-    <ClInclude Include="Loop.h" />
-    <ClInclude Include="Noncopyable.h" />
-    <ClInclude Include="ObjectPool.h" />
-    <ClInclude Include="ObjStore.h" />
-    <ClInclude Include="Task.h" />
-    <ClInclude Include="TaskList.h" />
-    <ClInclude Include="TcpAcceptor.h" />
-    <ClInclude Include="Worker.h" />
-    <ClInclude Include="IoState.h" />
-    <ClInclude Include="ProactorConnection.h" />
-    <ClInclude Include="TcpProactorConnection.h" />
     <ClInclude Include="FDTaskCtlAttorney.h">
       <Filter>Attorney</Filter>
     </ClInclude>
@@ -115,6 +121,60 @@
     <ClInclude Include="GetWorkersAttorney.h">
       <Filter>Attorney</Filter>
     </ClInclude>
+    <ClInclude Include="ITask.h">
+      <Filter>Task</Filter>
+    </ClInclude>
+    <ClInclude Include="IFDTask.h">
+      <Filter>Task</Filter>
+    </ClInclude>
+    <ClInclude Include="EventTaskBase.h">
+      <Filter>Task</Filter>
+    </ClInclude>
+    <ClInclude Include="Task.h">
+      <Filter>Task</Filter>
+    </ClInclude>
+    <ClInclude Include="LoggerConfig.h">
+      <Filter>Log</Filter>
+    </ClInclude>
+    <ClInclude Include="Logger.h">
+      <Filter>Log</Filter>
+    </ClInclude>
+    <ClInclude Include="Noncopyable.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="ProactorConnection.h">
+      <Filter>Conn</Filter>
+    </ClInclude>
+    <ClInclude Include="TcpProactorConnection.h">
+      <Filter>Conn</Filter>
+    </ClInclude>
+    <ClInclude Include="TcpAcceptor.h">
+      <Filter>Conn</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectPool.h">
+      <Filter>Buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="Worker.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Loop.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="IoState.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="IoService.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="TaskList.h">
+      <Filter>Task</Filter>
+    </ClInclude>
+    <ClInclude Include="Util.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseFromMember.h">
+      <Filter>Util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include=".cproject" />
@@ -129,6 +189,21 @@
     </Filter>
     <Filter Include="Buffer">
       <UniqueIdentifier>{60525365-0910-4156-a0be-594334b33948}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Task">
+      <UniqueIdentifier>{461342a8-2455-4c59-927b-ef040208d725}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Log">
+      <UniqueIdentifier>{ccb273b0-3396-4d75-afe1-9deab039568b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Util">
+      <UniqueIdentifier>{710a1bbc-aa55-4528-bb8b-472f89448534}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Conn">
+      <UniqueIdentifier>{d84fdf11-3828-4f9b-a6e5-ec48cc343f70}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core">
+      <UniqueIdentifier>{b2bac3b6-d160-4bb7-98dd-4d13f60b2ba1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

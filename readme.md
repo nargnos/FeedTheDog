@@ -18,8 +18,7 @@ Net
 未完成，雏形  
 网络部分，要弄台vps中转到pi，打算把它弄成代理看世界，所以自己写看世界的类库玩  
 linux olpt accept-lt connection-et 模拟proactor, 结构参考了asio  
-设置cpu关联，避开锁，分发连接用了boost的lockfree queue
-程序结构待优化，性能方面vbox下perf只能跟踪cpu-clock，其它cache-misses、branch-misses什么的not supported，所以等哪天回家搬台破笔记本回来装好系统再优化
+还有很多未完成
 
 命令控制
 未完成  

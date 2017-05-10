@@ -1,6 +1,11 @@
 #include "TcpAttachAttorney.h"
 #include "TcpProactorConnection.h"
-std::shared_ptr<TcpProactorConnection> TcpAttachAttorney::Attach(Loop & loop, int fd)
+namespace Detail
 {
-	return TcpProactorConnection::Attach(loop, fd);
-}
+	std::shared_ptr<TcpProactorConnection> TcpAttachAttorney::Attach(Loop & loop, int fd)
+	{
+		assert(fd != -1);
+		return TcpProactorConnection::Attach(loop, fd);
+	}
+
+}  // namespace Detail

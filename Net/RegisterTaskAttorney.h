@@ -2,16 +2,19 @@
 #define REGISTERTASKATTORNEY_H_
 #include <memory>
 #include "ITask.h"
-class Loop;
-class RegisterTaskAttorney
+namespace Detail
 {
-public:
-	static void RegisterTask(Loop& loop, std::shared_ptr<ITask>&& ptr);
-private:
-	RegisterTaskAttorney() = delete;
-	~RegisterTaskAttorney() = delete;
-};
+	class Loop;
+	class RegisterTaskAttorney
+	{
+	public:
+		static void RegisterTask(Loop& loop, std::shared_ptr<ITask>&& ptr);
+	private:
+		RegisterTaskAttorney() = delete;
+		~RegisterTaskAttorney() = delete;
+	};
 
+}  // namespace Detail
 
 #endif // REGISTERTASKATTORNEY_H_
 
