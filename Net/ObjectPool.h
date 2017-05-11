@@ -110,6 +110,7 @@ namespace Detail
 		static std::shared_ptr<ObjectPool> Create(TObjAllocator&& alloc = TObjAllocator())
 		{
 			auto result = std::shared_ptr<ObjectPool>(new ObjectPool(std::move(alloc)));
+			assert(instanceWeak.expired());
 			instanceWeak = result;
 			return result;
 		}

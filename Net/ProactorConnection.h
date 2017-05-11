@@ -36,7 +36,7 @@ namespace Detail
 		// io过程中调用, 出现这个必注册epoll等待io可处理
 		void OnCantIo(IoState& s);
 		// 事件完成时调用
-		void OnNoBuff(IoState & s);
+		void OnNoBuff(IoState& s);
 		// 返回true表示当前可io
 		// post事件时调用
 		bool OnBuffReady(IoState& s);

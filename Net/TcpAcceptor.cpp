@@ -105,8 +105,8 @@ namespace Detail
 		} while (true);
 
 		// NOTICE: 参数: 堆积数超过这个就考虑交出权利
-		// 数值越大波动越大，到某个值越小越慢		
-		constexpr int limit = 16;
+		// 数值越大波动越大，到某个值越小越慢，门槛过高会让各cpu不平均	
+		constexpr int limit = 8;
 		if (!needReregister_ || loop.TaskCount() < limit)
 		{
 			return;
@@ -116,8 +116,8 @@ namespace Detail
 		// 并不需要准确
 		// TODO: 切换的消耗应该能被抵消掉
 		auto& perf = ios_->PerformanceSnapshot();
-
-		if (perf.BusyLoop == &loop && IsTooBusy(perf.BusyCount, perf.TaskCount))
+		// TODO: 算法不太对，有点不平均；等完成所有再处理这里
+		if (perf.IdleCount == 0 || (perf.BusyLoop == &loop && IsTooBusy(perf.BusyCount, perf.TaskCount)))
 		{
 			TRACEPOINT(LogPriority::Debug)("Switch! self: %d  max: %d  idle: %d",
 				perf.BusyCount, perf.TaskCount, perf.IdleCount);

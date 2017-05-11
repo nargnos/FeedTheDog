@@ -61,7 +61,7 @@ namespace Detail
 	{
 		std::aligned_storage_t<sizeof(EpollCpp::Events), 64> ev;
 		EpollCpp::Events& events = reinterpret_cast<EpollCpp::Events&>(ev);
-		int waitMs;
+		int waitMs = 0;
 		try
 		{
 			while (true)

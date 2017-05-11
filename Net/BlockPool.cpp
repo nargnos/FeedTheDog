@@ -9,24 +9,6 @@ namespace Detail
 
 	}
 
-	BlockPool::UniPtr BlockPool::NewUnique(size_t size)
-	{
-		UniPtr result;
-		if (__glibc_likely(size == 0))
-		{
-			result = bBuff_->NewUnique();
-		}
-		else if (__glibc_likely(size > SmallBlock::Max))
-		{
-			result = bBuff_->NewUnique(size);
-		}
-		else
-		{
-			result = sBuff_->NewUnique(size);
-		}
-		return result;
-	}
-
 	BlockPool::Ptr BlockPool::New(size_t size)
 	{
 		Ptr result;
@@ -43,11 +25,6 @@ namespace Detail
 			result = sBuff_->New(size);
 		}
 		return result;
-	}
-
-	BlockPool::UniPtr BlockPool::NewUnique()
-	{
-		return bBuff_->NewUnique();
 	}
 
 	BlockPool::Ptr BlockPool::New()

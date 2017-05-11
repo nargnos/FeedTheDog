@@ -55,19 +55,16 @@ namespace Detail
 	};
 
 
-	// 感觉其实没什么用
+	// 感觉其实没什么用	
 	class BlockPool :
 		public Noncopyable
 	{
 	public:
 		using Ptr = std::shared_ptr<Block>;
-		using UniPtr = std::unique_ptr<Block>;
 		BlockPool();
 		~BlockPool() = default;
 		// 填0分配默认大小
-		UniPtr NewUnique(size_t size);
 		Ptr New(size_t size);
-		UniPtr NewUnique();
 		Ptr New();
 	private:
 		std::shared_ptr<ObjectPool<BigBlock>> bBuff_;
@@ -76,6 +73,5 @@ namespace Detail
 
 }  // namespace Detail
 using BlockPtr = Detail::BlockPool::Ptr;
-using BlockUniPtr = Detail::BlockPool::UniPtr;
 #endif // BLOCKPOOL_H_
 

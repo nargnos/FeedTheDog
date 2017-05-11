@@ -33,6 +33,10 @@ namespace Detail
 			onRun_(run)
 		{
 		}
+		// 可从外部传入read write处理方式或直接执行cb
+		// TODO: 有没有其它方法改进这个
+		// 可以分成DoRead，DoWrite，然后在函数中直接执行io对应函数
+		// 不过当执行conn回调时是会用到DoWrite的，还是只能用策略，执行conn回调就忽略掉策略
 		bool Do(TConn& conn, TConnDoFunc func)
 		{
 			return onRun_(this, conn, func);
@@ -43,6 +47,7 @@ namespace Detail
 		}
 		virtual ~ProgressRecord() = default;
 	private:
+
 		RunCompletePtr onComplete_;
 		RunTConnDoFuncPtr onRun_;
 	};
@@ -76,7 +81,7 @@ namespace Detail
 		TCallback cb_;
 	};
 
-	// void(TConn*,Error)
+	// void(TConn*, Error)
 	template<typename TConn, typename TCallback>
 	class CallbackRecord :
 		public ProgressRecord<TConn>
