@@ -1,4 +1,4 @@
-#ifndef BUFFERRECORD_H_
+ï»¿#ifndef BUFFERRECORD_H_
 #define BUFFERRECORD_H_
 
 #include <cassert>
@@ -10,8 +10,8 @@
 #include "TransferProgress.h"
 namespace Detail
 {
-	// ·¢Éú´íÎóÊ±Á¢¼´Ö´ĞĞcb
-	// TODO: ÕâÀï´íÎóÌáÊ¾²»¹»£¬Ó¦¸ÃÌá¹©Ïê¾¡µÄ´íÎóĞÅÏ¢
+	// å‘ç”Ÿé”™è¯¯æ—¶ç«‹å³æ‰§è¡Œcb
+	// TODO: è¿™é‡Œé”™è¯¯æç¤ºä¸å¤Ÿï¼Œåº”è¯¥æä¾›è¯¦å°½çš„é”™è¯¯ä¿¡æ¯
 	enum class Error :char
 	{
 		Success,
@@ -33,10 +33,10 @@ namespace Detail
 			onRun_(run)
 		{
 		}
-		// ¿É´ÓÍâ²¿´«Èëread write´¦Àí·½Ê½»òÖ±½ÓÖ´ĞĞcb
-		// TODO: ÓĞÃ»ÓĞÆäËü·½·¨¸Ä½øÕâ¸ö
-		// ¿ÉÒÔ·Ö³ÉDoRead£¬DoWrite£¬È»ºóÔÚº¯ÊıÖĞÖ±½ÓÖ´ĞĞio¶ÔÓ¦º¯Êı
-		// ²»¹ıµ±Ö´ĞĞconn»Øµ÷Ê±ÊÇ»áÓÃµ½DoWriteµÄ£¬»¹ÊÇÖ»ÄÜÓÃ²ßÂÔ£¬Ö´ĞĞconn»Øµ÷¾ÍºöÂÔµô²ßÂÔ
+		// å¯ä»å¤–éƒ¨ä¼ å…¥read writeå¤„ç†æ–¹å¼æˆ–ç›´æ¥æ‰§è¡Œcb
+		// TODO: æœ‰æ²¡æœ‰å…¶å®ƒæ–¹æ³•æ”¹è¿›è¿™ä¸ª
+		// å¯ä»¥åˆ†æˆDoReadï¼ŒDoWriteï¼Œç„¶ååœ¨å‡½æ•°ä¸­ç›´æ¥æ‰§è¡Œioå¯¹åº”å‡½æ•°
+		// ä¸è¿‡å½“æ‰§è¡Œconnå›è°ƒæ—¶æ˜¯ä¼šç”¨åˆ°DoWriteçš„ï¼Œè¿˜æ˜¯åªèƒ½ç”¨ç­–ç•¥ï¼Œæ‰§è¡Œconnå›è°ƒå°±å¿½ç•¥æ‰ç­–ç•¥
 		bool Do(TConn& conn, TConnDoFunc func)
 		{
 			return onRun_(this, conn, func);
@@ -69,6 +69,7 @@ namespace Detail
 		static bool Run(ProgressRecord<TConn>* self, TConn& conn, typename ProgressRecord<TConn>::TConnDoFunc func)
 		{
 			auto ptr = static_cast<RecordImpl*>(self);
+			// FIX: çƒ­åŒº
 			return (conn.*func)(*self, ptr->progress_);
 		}
 		static void RunComplete(ProgressRecord<TConn>* self, TConn& conn, Error e)

@@ -1,4 +1,4 @@
-#ifndef LOGGER_H_
+ï»¿#ifndef LOGGER_H_
 #define LOGGER_H_
 #include <stddef.h>
 #include <utility>
@@ -20,8 +20,8 @@ struct CanLog :
 };
 
 
-// ¿ÉÁ¬Ğ´£¬µ«ÊÇ·Ö´Î¼ÇÂ¼£¬Ö»¹²ÏíÓÅÏÈ¼¶
-// Ê¹ÓÃÈç£ºTRACEPOINT(LogPriority::Debug)("%d hello", 1)("%d world", 2)("test");
+// å¯è¿å†™ï¼Œä½†æ˜¯åˆ†æ¬¡è®°å½•ï¼Œåªå…±äº«ä¼˜å…ˆçº§
+// ä½¿ç”¨å¦‚ï¼šTRACEPOINT(LogPriority::Debug)("%d hello", 1)("%d world", 2)("test");
 template<int Priority>
 struct WriteLog :
 	public Noncopyable

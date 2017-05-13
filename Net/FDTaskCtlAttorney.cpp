@@ -1,4 +1,4 @@
-#include "FDTaskCtlAttorney.h"
+ï»¿#include "FDTaskCtlAttorney.h"
 #include "Loop.h"
 #include "EpollCpp.h"
 namespace Detail
@@ -19,7 +19,7 @@ namespace Detail
 	{
 		assert(obj != nullptr);
 		loop.epoll_.Del(obj->FD());
-		// TODO: ×¢ÒâÉú´æÆÚ
+		// TODO: æ³¨æ„ç”Ÿå­˜æœŸ
 	}
 
 }  // namespace Detail

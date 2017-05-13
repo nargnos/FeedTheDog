@@ -1,4 +1,4 @@
-#ifndef SOCKETCPP_H_
+ï»¿#ifndef SOCKETCPP_H_
 #define SOCKETCPP_H_
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -14,8 +14,8 @@ namespace Detail
 
 	enum SocketLevel
 	{
-		SolSocket = SOL_SOCKET, // ´«Êä²ã
-		IPProtoIP = IPPROTO_IP, // ÍøÂç²ã
+		SolSocket = SOL_SOCKET, // ä¼ è¾“å±‚
+		IPProtoIP = IPPROTO_IP, // ç½‘ç»œå±‚
 		IPProtoTcp = IPPROTO_TCP
 	};
 	enum OptName
@@ -95,7 +95,7 @@ namespace Detail
 		ssize_t SendTo(const void* buf, size_t nBytes, int flags, const sockaddr_in& addr) const;
 		ssize_t RecvFrom(void*__restrict buf, size_t nBytes, int flags, sockaddr_in*__restrict addr, socklen_t*__restrict size) const;
 	};
-	// addr²ÎÊıÔÚº¯ÊıÖĞ×ª»»×Ö½ÚĞò
+	// addrå‚æ•°åœ¨å‡½æ•°ä¸­è½¬æ¢å­—èŠ‚åº
 	sockaddr_in MakeSockaddr(in_addr_t addr, uint16_t port);
 	sockaddr_in MakeSockaddr(const char* addr, uint16_t port);
 }  // namespace Detail

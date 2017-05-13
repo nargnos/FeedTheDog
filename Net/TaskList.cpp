@@ -1,4 +1,4 @@
-#include "TaskList.h"
+﻿#include "TaskList.h"
 #include <cassert>
 namespace Detail
 {

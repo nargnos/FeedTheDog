@@ -1,4 +1,4 @@
-
+ï»¿
 #ifndef EPOLLCPP_H_
 #define EPOLLCPP_H_
 #include <cassert>
@@ -21,9 +21,8 @@ namespace Detail
 		void Del(int fd) const;
 
 		size_t Wait(Events& e, int ms);
-		static epoll_event CreateEpollEvent(EpollOption op, const void* userdata);
 	private:
-		// fdÕýÈ·ÆõÔ¼
+		// fdæ­£ç¡®å¥‘çº¦
 		void EpollCtl(int flag, int fd, const epoll_event& ev) const;
 		int epfd_;
 	};

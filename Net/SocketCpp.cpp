@@ -1,4 +1,4 @@
-#include "SocketCpp.h"
+ï»¿#include "SocketCpp.h"
 namespace Detail
 {
 
@@ -193,7 +193,7 @@ namespace Detail
 	}
 
 
-	// addr²ÎÊıÔÚº¯ÊıÖĞ×ª»»×Ö½ÚĞò
+	// addrå‚æ•°åœ¨å‡½æ•°ä¸­è½¬æ¢å­—èŠ‚åº
 	sockaddr_in MakeSockaddr(in_addr_t addr, uint16_t port)
 	{
 		sockaddr_in result;

@@ -1,4 +1,4 @@
-#include "Util.h"
+﻿#include "Util.h"
 #include "Logger.h"
 void SetAffinity(pthread_t t, unsigned int core)
 {

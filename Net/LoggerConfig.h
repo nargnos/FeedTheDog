@@ -1,4 +1,4 @@
-#ifndef LOGGERCONFIG_H_
+ï»¿#ifndef LOGGERCONFIG_H_
 #define LOGGERCONFIG_H_
 #include <syslog.h>
 #include "Noncopyable.h"
@@ -13,7 +13,7 @@ enum LogPriority :int
 	Info = LOG_WARNING,
 	Debug = LOG_DEBUG,
 };
-// ±ÈËüĞ¡µÄ¶¼¼ÇÂ¼
+// æ¯”å®ƒå°çš„éƒ½è®°å½•
 #define PRIORITY_LEVEL LogPriority::Warning
 #define APP_NAME "-hello world-"
 

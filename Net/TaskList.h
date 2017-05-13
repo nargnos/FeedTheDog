@@ -1,4 +1,4 @@
-#ifndef TASKLIST_H_
+ï»¿#ifndef TASKLIST_H_
 #define TASKLIST_H_
 #include <list>
 #include <memory>
@@ -15,9 +15,9 @@ namespace Detail
 		TaskList() = default;
 		~TaskList() = default;
 
-		// ·µ»ØtrueµÄtask»á´ÓÁĞ±íÖĞÒÆ³ı
+		// è¿”å›trueçš„taskä¼šä»åˆ—è¡¨ä¸­ç§»é™¤
 		void Register(std::shared_ptr<ITask>&& ptr);
-		// Èç¹ûÃ»ÓĞ¿ÉÖ´ĞĞµÄÈÎÎñ¾Í·µ»Øtrue
+		// å¦‚æœæ²¡æœ‰å¯æ‰§è¡Œçš„ä»»åŠ¡å°±è¿”å›true
 		bool DoOnce(Loop& loop);
 		void Clear();
 		size_t Count() const;

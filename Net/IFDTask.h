@@ -1,4 +1,4 @@
-#ifndef IFDTASK_H_
+﻿#ifndef IFDTASK_H_
 #define IFDTASK_H_
 #include "EpollOption.h"
 namespace Detail

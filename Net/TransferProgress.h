@@ -1,9 +1,9 @@
-#ifndef TRANSFERPROGRESS_H_
+ï»¿#ifndef TRANSFERPROGRESS_H_
 #define TRANSFERPROGRESS_H_
 #include "Buffer.h"
 namespace Detail
 {
-	// FIX: ÐÔÄÜÓÅ»¯
+	// FIX: æ€§èƒ½ä¼˜åŒ–
 	class TransferProgress :
 		public Noncopyable
 	{

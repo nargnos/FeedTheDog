@@ -1,4 +1,4 @@
-#ifndef TCPACCEPTOR_H_
+ï»¿#ifndef TCPACCEPTOR_H_
 #define TCPACCEPTOR_H_
 #include <memory>
 #include <atomic>
@@ -7,47 +7,131 @@
 #include "SocketCpp.h"
 #include "Logger.h"
 #include "TcpProactorConnection.h"
+#include "TcpAttachAttorney.h"
 namespace Detail
 {
 	class Worker;
 	class IoService;
-	class TcpAcceptor :
-		public std::enable_shared_from_this<TcpAcceptor>,
-		public IFDTask,
+	class ITcpAcceptor 
+	{
+	public:
+		ITcpAcceptor() = default;
+		virtual ~ITcpAcceptor() = default;
+		virtual void Cancel() = 0;
+		virtual void Join() const= 0;
+	private:
+
+	};
+
+
+	class TcpAcceptorBase :
+		protected IFDTask,
+		public ITcpAcceptor,
 		public Noncopyable
 	{
 	public:
-		using ConnectionPtr = TcpConnection*;
-		using AcceptHandler = std::function<void(ConnectionPtr)>;
-		using FailedHandler = std::function<void()>;
-		virtual int FD() const;
-		void Cancel();
-		// º¯ÊıÉùÃ÷Îª void(const std::shared_ptr<TcpConnection>&)
-		void SetOnAccept(AcceptHandler&& handler);
-		// Ä¬ÈÏ³ö´í¾ÍÍË³ö, ÉèÖÃºó»áÈ¡ÏûÄ¬ÈÏ²Ù×÷
-		void SetOnFailed(FailedHandler&& handler);
+		explicit TcpAcceptorBase(const sockaddr_in& bind);
+		virtual ~TcpAcceptorBase();
 
-		virtual ~TcpAcceptor();
-		static std::shared_ptr<TcpAcceptor> Create(const sockaddr_in& bind);
-	private:
-		explicit TcpAcceptor(const sockaddr_in& bind);
+		virtual int FD() const;
+		// æœ‰å¯èƒ½åœ¨å…¶å®ƒçº¿ç¨‹å…³é—­
+		virtual void Cancel() override;
+		virtual void Join() const override;
+	protected:
 		void RegListen();
 		void RegListen(Loop & loop);
 		void UnRegListen(Loop& loop);
-		void DoAccept(Loop & loop, int fd);
-		// »áÔÚ¶à¸öÏß³Ì±»µ÷ÓÃ£¬µ«Ò»´ÎÖ»ÓĞÒ»¸öÏß³ÌÄÜ·ÃÎÊ
-		virtual void DoEvent(Loop& loop, EpollOption op);
-		bool IsTooBusy(int selfCount, int sum);
-		void OnFailed();
 
-		FailedHandler onFailed_;
+		void Balance(Loop& loop);
+		bool IsTooBusy(size_t selfCount, size_t sum);
+
 		std::shared_ptr<IoService> ios_;
 		TcpSocket socket_;
-		AcceptHandler onAccept_;
 		std::atomic_bool isCanceled_;
 		bool needReregister_;
+
 	};
+	template<typename TAcceptHandler, typename TFailedHandler>
+	class TcpAccetpor :
+		public TcpAcceptorBase
+	{
+	public:
+		TcpAccetpor(const sockaddr_in& bind, TAcceptHandler&& ah, TFailedHandler&& fh) :
+			TcpAcceptorBase(bind),
+			acceptHandler_(std::forward<TAcceptHandler>(ah)),
+			failedHandler_(std::forward<TFailedHandler>(fh))
+		{
+		}
+
+	private:
+		void DoAccept(Loop & loop, int fd)
+		{
+			assert(fd != -1);
+			// ä¸å¤„ç†ï¼ˆç»´æŒconnectç”Ÿå­˜æœŸï¼Œæ‰§è¡Œrwï¼‰å°†ä¼šå…³é—­å¹¶ä¸¢å¼ƒè¿æ¥
+			auto sock = TcpAttachAttorney::Attach(loop, fd);
+			acceptHandler_(*sock);
+		}
+		// ä¼šåœ¨å¤šä¸ªçº¿ç¨‹è¢«è°ƒç”¨ï¼Œä½†ä¸€æ¬¡åªæœ‰ä¸€ä¸ªçº¿ç¨‹èƒ½è®¿é—®
+		virtual void DoEvent(Loop& loop, EpollOption op)
+		{
+			if (__glibc_unlikely(op.Flags.Err))
+			{
+				UnRegListen(loop);
+				OnFailed();
+				assert(false);
+				return;
+			}
+			assert(op.Flags.In);
+			do
+			{
+				auto fd = socket_.Accept();
+				if (__glibc_likely(fd != -1))
+				{
+					DoAccept(loop, fd);
+				}
+				else
+				{
+					auto err = errno;
+					if (__glibc_likely(err == EAGAIN || err == EWOULDBLOCK || err == EINTR))
+					{
+						break;
+					}
+					else
+					{
+						TRACEERRNOEXITSTR(LogPriority::Emerg, "Accept Failed");
+					}
+				}
+			} while (true);
+
+			Balance(loop);
+		}
+		void OnFailed()
+		{
+			failedHandler_();
+			TRACEPOINT_LINE(LogPriority::Debug);
+			TRACEERRNOEXIT(LogPriority::Emerg);
+		}
+
+		TAcceptHandler acceptHandler_;
+		TFailedHandler failedHandler_;
+	};
+	// void(TcpConnection&)
+	// void()
+	template<typename TAcceptHandler, typename TFailedHandler>
+	std::shared_ptr<ITcpAcceptor> CreateTcpAccepter(const sockaddr_in& bind,
+		TAcceptHandler&& acceptCallback, TFailedHandler&& failedCallback)
+	{
+		return std::make_shared<TcpAccetpor<TAcceptHandler, TFailedHandler>>(
+			bind, std::forward<TAcceptHandler>(acceptCallback), std::forward<TFailedHandler>(failedCallback));
+	}
+	// void(TcpConnection&)
+	template<typename TAcceptHandler>
+	std::shared_ptr<ITcpAcceptor> CreateTcpAccepter(const sockaddr_in& bind,
+		TAcceptHandler&& acceptCallback)
+	{
+		return CreateTcpAccepter(bind, std::forward<TAcceptHandler>(acceptCallback), []() {});
+	}
 }  // namespace Detail
-using Detail::TcpAcceptor;
-#endif // !TCPACCEPTOR_H_
+using Detail::CreateTcpAccepter;
+#endif // TCPACCEPTOR_H_
 

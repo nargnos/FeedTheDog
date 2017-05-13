@@ -1,4 +1,4 @@
-#include "LoggerConfig.h"
+﻿#include "LoggerConfig.h"
 
 LoggerConfig::LoggerConfig()
 {

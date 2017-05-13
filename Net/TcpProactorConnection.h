@@ -1,4 +1,4 @@
-#ifndef TCPSTATUSCONNECTION_H_
+ï»¿#ifndef TCPSTATUSCONNECTION_H_
 #define TCPSTATUSCONNECTION_H_
 #include <queue>
 #include <memory>
@@ -15,7 +15,7 @@ namespace Detail
 	class TcpAttachAttorney;
 	class TcpProactorConnection;
 
-	// ·ÇÏß³Ì°²È«£¬Ò»´ÎĞÔ
+	// éçº¿ç¨‹å®‰å…¨ï¼Œä¸€æ¬¡æ€§
 	class TcpProactorConnectionProxy :
 		public Noncopyable
 	{
@@ -27,7 +27,7 @@ namespace Detail
 		TcpProactorConnectionProxy(TcpProactorConnectionProxy&& obj) :
 			des_(std::move(obj.des_))
 		{
-			// ×ÔÉíÅĞ¶ÏÔÚshared_ptrÖĞ´¦Àí
+			// è‡ªèº«åˆ¤æ–­åœ¨shared_pträ¸­å¤„ç†
 		}
 		~TcpProactorConnectionProxy() = default;
 		template<typename THandler>
@@ -59,8 +59,8 @@ namespace Detail
 			{
 				GetReadRecord().push(
 					MakeRecord<TcpProactorConnection>(std::move(buffer), begin, std::forward<THandler>(cb)));
-				// ÓĞ¿ÉÄÜsocketÒ»Ö±²»½øepoll
-				// ÒòÎªÍê³ÉÊ±Á¢¼´Ö´ĞĞcb£¬Èç¹ûÕâÀïÔ¤¶Á¿ÉÄÜ»á¿¨ÔÚÄ³¸öÁ¬½ÓÉÏ£¬ËùÒÔÒªÏÈÈëtask
+				// æœ‰å¯èƒ½socketä¸€ç›´ä¸è¿›epoll
+				// å› ä¸ºå®Œæˆæ—¶ç«‹å³æ‰§è¡Œcbï¼Œå¦‚æœè¿™é‡Œé¢„è¯»å¯èƒ½ä¼šå¡åœ¨æŸä¸ªè¿æ¥ä¸Šï¼Œæ‰€ä»¥è¦å…ˆå…¥task
 				if (OnBuffReady(ReadState()))
 				{
 					OnRegTask();
@@ -74,15 +74,15 @@ namespace Detail
 		bool Shutdown(ShutdownMode m)
 		{
 			assert(false);
-			// TODO: ÏÈÕ¼Î»£¬ÏàÓ¦µÄÒ»Ğ©×´Ì¬ÒªÉèÖÃ
+			// TODO: å…ˆå ä½ï¼Œç›¸åº”çš„ä¸€äº›çŠ¶æ€è¦è®¾ç½®
 			return socket_.Shutdown(m);
 		}
 
-		// FIX: ÓĞÒ»µãĞ¡´í£¬ĞèÒª´¦Àí
+		// FIX: æœ‰ä¸€ç‚¹å°é”™ï¼Œéœ€è¦å¤„ç†
 		template<typename THandler>
 		void AsyncConnect(const sockaddr_in& addr, THandler&& cb)
 		{
-			// TODO: EINPROGRESS ºóÖ±½Ó·Åep£¬×¢ÒâÈç¹ûµ¥´¿Á¬½Ó»áÊ¹¸÷Ïß³ÌÁ¬½ÓÊı²»Æ½ºâ£¬Ó¦¸ÃÏÈÑ¡Ïß³ÌÔÙ´¦Àí
+			// TODO: EINPROGRESS åç›´æ¥æ”¾epï¼Œæ³¨æ„å¦‚æœå•çº¯è¿æ¥ä¼šä½¿å„çº¿ç¨‹è¿æ¥æ•°ä¸å¹³è¡¡ï¼Œåº”è¯¥å…ˆé€‰çº¿ç¨‹å†å¤„ç†
 			std::decay_t<decltype(errno)> err = 0;
 			do
 			{
@@ -101,7 +101,7 @@ namespace Detail
 					return;
 				}
 			} while (true);
-			// TODO: ÖØÊÔºÍ³¬Ê±
+			// TODO: é‡è¯•å’Œè¶…æ—¶
 			if (err == EINPROGRESS)
 			{
 				auto rec = MakeRecord<TcpProactorConnection>(std::forward<THandler>(cb));
@@ -157,14 +157,14 @@ namespace Detail
 			}
 		}
 
-		// ´´½¨¾ßÓĞÍ¬loopµÄĞÂÁ¬½Ó£¬ÔÚÍ¬Ïß³ÌÍ¶µİ
+		// åˆ›å»ºå…·æœ‰åŒloopçš„æ–°è¿æ¥ï¼Œåœ¨åŒçº¿ç¨‹æŠ•é€’
 		std::shared_ptr<TcpProactorConnection> Clone() const
 		{
 			return std::shared_ptr<TcpProactorConnection>(new TcpProactorConnection(loop_));
 		}
 
-		// Ñ¡Ôñ×îÏĞLoop´´½¨
-		// ´´½¨Ò»¸ö´úÀíÀà£¬ÏŞÖÆÖ»ÄÜÓÃconnectÒ»´Î
+		// é€‰æ‹©æœ€é—²Loopåˆ›å»º
+		// åˆ›å»ºä¸€ä¸ªä»£ç†ç±»ï¼Œé™åˆ¶åªèƒ½ç”¨connectä¸€æ¬¡
 		static TcpProactorConnectionProxy Create()
 		{
 			auto& info = IoService::Instance()->PerformanceSnapshot();
@@ -172,16 +172,16 @@ namespace Detail
 				std::shared_ptr<TcpProactorConnection>(new TcpProactorConnection(*info.IdleLoop)));
 		}
 	protected:
-		// fd ÎªÒÑÁ¬½Ó
+		// fd ä¸ºå·²è¿æ¥
 		TcpProactorConnection(Loop& loop, int fd) :
 			Base(loop, IoState::IoReady, IoState::IoReady),
 			socket_(fd)
 		{
 			assert(fd != -1);
-			constexpr int size = sizeof(TcpProactorConnection);
+			// constexpr int size = sizeof(TcpProactorConnection);
 			SetNonBlocking();
 		}
-		// ´´½¨£¬ĞèÒªconnect²ÅÄÜÊ¹ÓÃ
+		// åˆ›å»ºï¼Œéœ€è¦connectæ‰èƒ½ä½¿ç”¨
 		explicit TcpProactorConnection(Loop & loop) :
 			Base(loop, IoState::IoReady, IoState::BufReady)
 		{
@@ -209,16 +209,11 @@ namespace Detail
 			auto end = rec.IOVecEnd();
 			auto dt = std::distance(bgn, end);
 			assert(dt > 0);
-			ssize_t ret = 0;
 			if (__glibc_likely(dt == 1))
 			{
-				ret = socket_.Read(bgn->iov_base, bgn->iov_len);
+				return socket_.Read(bgn->iov_base, bgn->iov_len);
 			}
-			else
-			{
-				ret = socket_.Readv(&*bgn, static_cast<int>(dt));
-			}
-			return ret;
+			return socket_.Readv(&*bgn, static_cast<int>(dt));
 		}
 		ssize_t Write(TransferProgress& rec)
 		{
@@ -226,16 +221,11 @@ namespace Detail
 			auto end = rec.IOVecEnd();
 			auto dt = std::distance(bgn, end);
 			assert(dt > 0);
-			ssize_t ret = 0;
 			if (__glibc_likely(dt == 1))
 			{
-				ret = socket_.Write(bgn->iov_base, bgn->iov_len);
+				return socket_.Write(bgn->iov_base, bgn->iov_len);
 			}
-			else
-			{
-				ret = socket_.Writev(&*bgn, static_cast<int>(dt));
-			}
-			return ret;
+			return socket_.Writev(&*bgn, static_cast<int>(dt));
 		}
 
 	private:

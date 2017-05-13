@@ -1,4 +1,4 @@
-#ifndef IOSTATE_H_
+ï»¿#ifndef IOSTATE_H_
 #define IOSTATE_H_
 namespace Detail
 {
@@ -18,7 +18,7 @@ namespace Detail
 
 			DoIo = BufReady | IoReady,
 		};
-		// Ä¬ÈÏIOÒÑ×¼±¸ºÃ
+		// é»˜è®¤IOå·²å‡†å¤‡å¥½
 		explicit IoState(IoStatus stat);
 		explicit IoState(char val);
 		explicit operator char() const;

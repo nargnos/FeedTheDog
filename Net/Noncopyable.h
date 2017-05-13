@@ -1,4 +1,4 @@
-#ifndef NONCOPYABLE_H_
+﻿#ifndef NONCOPYABLE_H_
 #define NONCOPYABLE_H_
 class Noncopyable
 {

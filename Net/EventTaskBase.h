@@ -1,4 +1,4 @@
-#ifndef EVENTTASK_H_
+﻿#ifndef EVENTTASK_H_
 #define EVENTTASK_H_
 #include "IFDTask.h"
 #include "EventFd.h"

@@ -1,4 +1,4 @@
-#include "IoService.h"
+ï»¿#include "IoService.h"
 #include <algorithm>
 #include "Worker.h"
 #include "RunAttorney.h"
@@ -6,9 +6,9 @@
 #include "GetLoopAttorney.h"
 namespace Detail
 {
-	// ½á¹¹»¹ÊÇ²»¹»ºÃ£¬BufferµÄ´¦Àí¿É¸Ä½ø
+	// ç»“æ„è¿˜æ˜¯ä¸å¤Ÿå¥½ï¼ŒBufferçš„å¤„ç†å¯æ”¹è¿›
 
-	// NOTICE: ²ÎÊı: Ïß³ÌÊıÓëºËĞÄ±ÈÀı
+	// NOTICE: å‚æ•°: çº¿ç¨‹æ•°ä¸æ ¸å¿ƒæ¯”ä¾‹
 	const float CoreScale = 1.;
 
 	class StopWorkerAttorney
@@ -39,7 +39,7 @@ namespace Detail
 			workerSize_ = 1;
 		}
 		size_t i = 0;
-		// ÓÅÏÈ°Ñ¹¤×÷Ïß³Ì¹ØÁªcpu0
+		// ä¼˜å…ˆæŠŠå·¥ä½œçº¿ç¨‹å…³è”cpu0
 		for (; i < workerSize_; i++)
 		{
 			workers_.emplace_back(new Worker(static_cast<unsigned int>(i % cores)));
@@ -67,11 +67,11 @@ namespace Detail
 		return result;
 	}
 
-	void IoService::Wait()
+	void IoService::Join()
 	{
 		for (auto& i : workers_)
 		{
-			i->Wait();
+			i->Join();
 		}
 	}
 
@@ -83,7 +83,7 @@ namespace Detail
 	const PerfInfo& IoService::PerformanceSnapshot()
 	{
 		static thread_local PerfInfo result;
-		// ²¢²»ĞèÒª×¼È·
+		// å¹¶ä¸éœ€è¦å‡†ç¡®
 		result.TaskCount = 0;
 		auto it = workers_.begin();
 		result.IdleLoop = &GetLoopAttorney::GetLoop(**it);

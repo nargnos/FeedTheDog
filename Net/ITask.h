@@ -1,4 +1,4 @@
-#ifndef ITASK_H_
+ï»¿#ifndef ITASK_H_
 #define ITASK_H_
 #include <memory>
 namespace Detail
@@ -9,7 +9,7 @@ namespace Detail
 	public:
 		ITask() = default;
 		virtual ~ITask() = default;
-		// Ö´ĞĞÍê±Ï·µ»Øtrue£¬·ñÔò·µ»ØfalseµÈ´ıÏÂ´ÎÖ´ĞĞ
+		// æ‰§è¡Œå®Œæ¯•è¿”å›trueï¼Œå¦åˆ™è¿”å›falseç­‰å¾…ä¸‹æ¬¡æ‰§è¡Œ
 		virtual bool DoEvent(Loop& loop) = 0;
 	};
 

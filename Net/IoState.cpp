@@ -1,4 +1,4 @@
-#include "IoState.h"
+ï»¿#include "IoState.h"
 #include <cassert>
 namespace Detail
 {
@@ -39,7 +39,7 @@ namespace Detail
 
 	bool IoState::IsGood() const
 	{
-		// ¼ûÇ°ÃæµÄ±í
+		// è§å‰é¢çš„è¡¨
 		assert(current_ != IoStatus::None);
 		return current_ <= IoStatus::DoIo;
 	}

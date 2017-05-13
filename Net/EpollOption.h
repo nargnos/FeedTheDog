@@ -1,4 +1,4 @@
-
+﻿
 #ifndef EPOLLOPTION_H_
 #define EPOLLOPTION_H_
 #include <stdint.h>
@@ -14,7 +14,7 @@ namespace Detail
 		union
 		{
 			uint32_t Value;
-			// ûɶ�ã�debug ʱ�ÿ�Щ
+			// 没啥用，debug 时好看些
 			struct
 			{
 				bool In : 1;

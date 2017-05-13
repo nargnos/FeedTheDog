@@ -1,4 +1,4 @@
-#include "ProactorConnection.h"
+ï»¿#include "ProactorConnection.h"
 namespace Detail
 {
 
@@ -23,7 +23,7 @@ namespace Detail
 
 	bool ProactorConnectionBase::IsGood() const
 	{
-		// ´íÎó×´Ì¬»áÍ¬Ê±ÉèÖÃ£¬ËùÒÔÕâÀïÖ»ÓÃÅĞ¶ÏÒ»¸ö
+		// é”™è¯¯çŠ¶æ€ä¼šåŒæ—¶è®¾ç½®ï¼Œæ‰€ä»¥è¿™é‡Œåªç”¨åˆ¤æ–­ä¸€ä¸ª
 		return readState_.IsGood();
 		//return readState_.IsGood() && writeState_.IsGood();
 	}
@@ -62,7 +62,7 @@ namespace Detail
 		return writeState_;
 	}
 
-	// io¹ı³ÌÖĞµ÷ÓÃ, ³öÏÖÕâ¸ö±Ø×¢²áepollµÈ´ıio¿É´¦Àí
+	// ioè¿‡ç¨‹ä¸­è°ƒç”¨, å‡ºç°è¿™ä¸ªå¿…æ³¨å†Œepollç­‰å¾…ioå¯å¤„ç†
 
 	void ProactorConnectionBase::OnCantIo(IoState & s)
 	{
@@ -71,7 +71,7 @@ namespace Detail
 		assert(!s.IsIoReady());
 	}
 
-	// ÊÂ¼şÍê³ÉÊ±µ÷ÓÃ
+	// äº‹ä»¶å®Œæˆæ—¶è°ƒç”¨
 
 	void ProactorConnectionBase::OnNoBuff(IoState & s)
 	{
@@ -90,17 +90,17 @@ namespace Detail
 
 	void ProactorConnectionBase::RegisterSocket()
 	{
-		// FIX: µ±Ñ¡Ôñ¿ÕÏĞÏß³ÌÍ¶µİconnectµÄÒ»Ğ©»·¾³Ìõ¼ş£¬Èç¹ûÌõ¼ş¿¼ÂÇ²»È«»ò±»ÆÆ»µ£¬ÕâÀïºÍunreg»áÓĞÎÊÌâ
-		// addºóunreg²ÅÓĞ»ú»áÖ´ĞĞ
-		// regÍ¬Ê±±»¶à¸öÏß³Ì£¨2¸ö£¬µ±Ç°Î´ÍêÈ«ÍË³ö£©½øÈëÒ²ÊÇÔÚaddºó
-		// addºóreg²»»áÔÚ±¾Ïß³ÌÔÙ´Î±»µ÷ÓÃ£¬Ö®ºóµÄregºÍunreg¶¼ÊÇÔÚÍ¬Ò»Ïß³Ì±»µ÷ÓÃ
-		// TODO: ¶ÓÁĞÄÇÊÇ·ñÒ²Òª
+		// FIX: å½“é€‰æ‹©ç©ºé—²çº¿ç¨‹æŠ•é€’connectçš„ä¸€äº›ç¯å¢ƒæ¡ä»¶ï¼Œå¦‚æœæ¡ä»¶è€ƒè™‘ä¸å…¨æˆ–è¢«ç ´åï¼Œè¿™é‡Œå’Œunregä¼šæœ‰é—®é¢˜
+		// addåunregæ‰æœ‰æœºä¼šæ‰§è¡Œ
+		// regåŒæ—¶è¢«å¤šä¸ªçº¿ç¨‹ï¼ˆ2ä¸ªï¼Œå½“å‰æœªå®Œå…¨é€€å‡ºï¼‰è¿›å…¥ä¹Ÿæ˜¯åœ¨addå
+		// addåregä¸ä¼šåœ¨æœ¬çº¿ç¨‹å†æ¬¡è¢«è°ƒç”¨ï¼Œä¹‹åçš„regå’Œunregéƒ½æ˜¯åœ¨åŒä¸€çº¿ç¨‹è¢«è°ƒç”¨
+		// TODO: é˜Ÿåˆ—é‚£æ˜¯å¦ä¹Ÿè¦
 		if (isSocketRegistered_.load(std::memory_order_acquire))
 		{
 			return;
 		}
 		isSocketRegistered_.store(true, std::memory_order_release);
-		// ²»´¦Àí²»»áÓÃµ½µÄpri
+		// ä¸å¤„ç†ä¸ä¼šç”¨åˆ°çš„pri
 		FDTaskCtlAttorney::Add(loop_, EPOLLIN | EPOLLOUT | EPOLLET | EPOLLRDHUP, this);
 	}
 }  // namespace Detail

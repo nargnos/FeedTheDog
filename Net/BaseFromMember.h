@@ -1,4 +1,4 @@
-#ifndef BASEFROMMEMBER_H_
+﻿#ifndef BASEFROMMEMBER_H_
 #define BASEFROMMEMBER_H_
 #include <utility>
 template<typename T, int TUniqID = 0>

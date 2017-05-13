@@ -1,4 +1,4 @@
-
+ï»¿
 #include "Loop.h"
 #include <cassert>
 #include <unistd.h>
@@ -51,9 +51,9 @@ namespace Detail
 		TRACEPOINT(LogPriority::Info)("Loop Stop (id: %d)", loopID_);
 		state_ = LoopState::Stopped;
 		tid_ = std::thread::id();
-		// ±ØĞëÇå¿ÕÈÎÎñ¶ÓÁĞ£¬·ñÔòÓĞÑ­»·ÒıÓÃÎÊÌâ
-		// ERROR: ÕâÀï²»¶Ô£¬Ä³Ğ©¶ÔÏóÊÇÔÚÈÎÎñÖ´ĞĞÖĞÎö¹¹µÄ£¬ÕâÑù×ö¾Í»áÊ¹Îö¹¹Ê§°Ü
-		// ÆäÊµ²»ĞèÒªstop£¬ÊÇ·ñÓ¦¸ÃÈ¥µô
+		// å¿…é¡»æ¸…ç©ºä»»åŠ¡é˜Ÿåˆ—ï¼Œå¦åˆ™æœ‰å¾ªç¯å¼•ç”¨é—®é¢˜
+		// ERROR: è¿™é‡Œä¸å¯¹ï¼ŒæŸäº›å¯¹è±¡æ˜¯åœ¨ä»»åŠ¡æ‰§è¡Œä¸­ææ„çš„ï¼Œè¿™æ ·åšå°±ä¼šä½¿ææ„å¤±è´¥
+		// å…¶å®ä¸éœ€è¦stopï¼Œæ˜¯å¦åº”è¯¥å»æ‰
 		taskList_.Clear();
 	}
 
@@ -66,8 +66,8 @@ namespace Detail
 		{
 			while (true)
 			{
-				// ½«Á¬ĞøµÄ¶ÁĞ´²Ù×÷·Ö¶Î½øĞĞ£¬±ÜÃâ¼¢¶ö
-				// ¶ÁĞ´µ½EAGAIN³ö¶Ó
+				// å°†è¿ç»­çš„è¯»å†™æ“ä½œåˆ†æ®µè¿›è¡Œï¼Œé¿å…é¥¥é¥¿
+				// è¯»å†™åˆ°EAGAINå‡ºé˜Ÿ
 				if (__glibc_likely(!taskList_.DoOnce(*this)))
 				{
 					waitMs = 0;
@@ -107,7 +107,7 @@ namespace Detail
 		}
 		catch (...)
 		{
-			// Í£Ö¹
+			// åœæ­¢
 		}
 	}
 
@@ -134,7 +134,7 @@ namespace Detail
 		taskList_.Register(std::move(ptr));
 	}
 
-	int Loop::TaskCount() const
+	size_t Loop::TaskCount() const
 	{
 		return taskList_.Count();
 	}

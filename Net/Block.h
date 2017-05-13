@@ -1,4 +1,4 @@
-#ifndef BLOCK_H_
+ï»¿#ifndef BLOCK_H_
 #define BLOCK_H_
 #include <iterator>
 #include <cassert>
@@ -10,8 +10,8 @@
 #include "BaseFromMember.h"
 namespace Detail
 {
-	// ÅäºÏstlµÄÒ»Ğ©Ëã·¨£¬º¯ÊıÃûÓÃÄ¬ÈÏ·ç¸ñ
-	// TODO: Ïë¸Ä³ÉÖ§³ÖÇĞÆ¬µÄÄÇÖÖ
+	// é…åˆstlçš„ä¸€äº›ç®—æ³•ï¼Œå‡½æ•°åç”¨é»˜è®¤é£æ ¼
+	// TODO: æƒ³æ”¹æˆæ”¯æŒåˆ‡ç‰‡çš„é‚£ç§
 	class Block :
 		public Noncopyable
 	{
@@ -44,9 +44,12 @@ namespace Detail
 		size_t max_size() const;
 		size_t size() const;
 		void resize(size_t newsize);
-		void ResizeToMax();
+		inline void ResizeToMax()
+		{
+			iov_.iov_len = max_;
+		}
 	protected:
-		// bufferÖ¸ÕëºÍµ±Ç°ÉèÖÃ´óĞ¡´æÀïÃæ
+		// bufferæŒ‡é’ˆå’Œå½“å‰è®¾ç½®å¤§å°å­˜é‡Œé¢
 		iovec iov_;
 		const size_t max_;
 		const bool isReadOnly_;
@@ -74,7 +77,7 @@ namespace Detail
 		std::aligned_storage_t<Max, Align> buf_;
 	};
 
-	// ×öÒ»¸ö·â×°£¬·½±ã×éºÏ
+	// åšä¸€ä¸ªå°è£…ï¼Œæ–¹ä¾¿ç»„åˆ
 	class VectorBlock :
 		protected BaseFromMember<std::vector<char>>,
 		public Block
@@ -96,7 +99,7 @@ namespace Detail
 		using Member = BaseFromMember<std::string>;
 
 	};
-	// ÕâÀïÖ¸µÄÊÇÈ«¾Östr
+	// è¿™é‡ŒæŒ‡çš„æ˜¯å…¨å±€str
 	class CharBlock :
 		public Block
 	{

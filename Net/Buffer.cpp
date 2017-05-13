@@ -1,4 +1,4 @@
-#include "Buffer.h"
+ï»¿#include "Buffer.h"
 #include <numeric>
 namespace Detail
 {
@@ -16,7 +16,7 @@ namespace Detail
 	Buffer::Buffer(Buffer && val) :
 		list_(std::move(val.list_))
 	{
-		// listÓĞ×ÔÉíÅĞ¶Ï
+		// listæœ‰è‡ªèº«åˆ¤æ–­
 	}
 
 	bool Buffer::IsEmpty() const
@@ -79,7 +79,7 @@ namespace Detail
 
 	void Buffer::Resize(size_t size)
 	{
-		// µÈÓÚ0µÄbufferÃ»ÓĞÒâÒå
+		// ç­‰äº0çš„bufferæ²¡æœ‰æ„ä¹‰
 		assert(size > 0);
 		if (size == 0)
 		{
@@ -113,7 +113,10 @@ namespace Detail
 		}
 	}
 
-	void Buffer::StretchTo(size_t size)
+
+	// ä¼¸ç¼©å¤§å°ï¼Œæ‰©å±•åˆ°sizeå¤§å°ï¼Œä¼šä¿®æ”¹æ¯ä¸ªå…ƒç´ çš„size, 0è¡¨ç¤ºæŠŠæ¯ä¸ªå…ƒç´ éƒ½æ‰©å±•åˆ°max
+
+	 void Buffer::StretchTo(size_t size)
 	{
 		assert(!IsEmpty());
 		if (__glibc_likely(size == 0))
@@ -152,7 +155,6 @@ namespace Detail
 			EmplaceBackTotal(size);
 		}
 	}
-
 
 	const Buffer::BlockList & Buffer::VecList() const
 	{
@@ -222,7 +224,7 @@ namespace Detail
 			{
 				size -= tmp;
 				++count;
-				// ÏŞÖÆ5±¶MAX´óĞ¡£¬ÉêÇëµÄÕâ¸ö¿Õ¼äÌ«´óÁË
+				// é™åˆ¶5å€MAXå¤§å°ï¼Œç”³è¯·çš„è¿™ä¸ªç©ºé—´å¤ªå¤§äº†
 				assert(count <= 5);
 			}
 			else

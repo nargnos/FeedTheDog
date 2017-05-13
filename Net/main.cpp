@@ -1,4 +1,4 @@
-#include <cstdio>
+ï»¿#include <cstdio>
 #include <sys/epoll.h>
 #include <utility>
 #include <thread>
@@ -20,8 +20,8 @@ using namespace std;
 
 void TestBuffer()
 {
-	// TODO: Ê¹ÓÃ²»¹»·½±ã
-	// ÖØ¸´·ÖÅä
+	// TODO: ä½¿ç”¨ä¸å¤Ÿæ–¹ä¾¿
+	// é‡å¤åˆ†é…
 	{
 		void* ptr = nullptr;
 		{
@@ -44,33 +44,33 @@ void TestBuffer()
 		}
 	}
 
-	// ¿çÏß
+	// è·¨çº¿
 	{
 		auto buffA = Buffer::BufferPool().New();
 		auto buffB = Buffer::BufferPool().New();
 
 		void* ptrA = buffA->begin();
 		void* ptrB = buffB->begin();
-
-		thread t([buffA = move(buffA), buffB = move(buffB), ptrA, ptrB]() mutable
-		{
-			TestAssert(buffA->size() > 0);
-			buffA = nullptr;
-			TestAssert(!buffA);
-			auto buffNew = Buffer::BufferPool().New();
-			// ÒòÎªÎö¹¹Ê±Î´´´½¨pool
-			TestAssert(ptrA != buffNew->begin());
-			buffB = nullptr;
-			auto buffNew2 = Buffer::BufferPool().New();
-			TestAssert(ptrB == buffNew2->begin());
-		});
-		t.join();
+		//auto lambda= [buffA_ = move(buffA), buffB_ = move(buffB), ptrA, ptrB]() mutable
+		//{
+		//	TestAssert(buffA_->size() > 0);
+		//	buffA_ = nullptr;
+		//	TestAssert(!buffA_);
+		//	auto buffNew = Buffer::BufferPool().New();
+		//	// å› ä¸ºææ„æ—¶æœªåˆ›å»ºpool
+		//	TestAssert(ptrA != buffNew->begin());
+		//	buffB_ = nullptr;
+		//	auto buffNew2 = Buffer::BufferPool().New();
+		//	TestAssert(ptrB == buffNew2->begin());
+		//};
+		//thread t(lambda);
+		//t.join();
 		auto buffC = Buffer::BufferPool().New();
 		TestAssert(ptrB != buffC->begin());
 		TestAssert(ptrA != buffC->begin());
 
 	}
-	// ¸Ä´óĞ¡
+	// æ”¹å¤§å°
 	{
 
 		Buffer buff(4);
@@ -83,7 +83,7 @@ void TestBuffer()
 
 void TestProgressRecord()
 {
-	// TODO: ´íÎóÌáÊ¾ĞèÒª¸üÏê¾¡
+	// TODO: é”™è¯¯æç¤ºéœ€è¦æ›´è¯¦å°½
 	using namespace Detail;
 	struct Ignore
 	{
@@ -94,7 +94,7 @@ void TestProgressRecord()
 	};
 	Ignore ignore;
 	int flag = 0;
-	// TODO: Õâ¸ö½á¹¹²»ºÃ
+	// TODO: è¿™ä¸ªç»“æ„ä¸å¥½
 	std::unique_ptr<Detail::ProgressRecord<Ignore>> pr =
 		Detail::MakeRecord<Ignore>([&](auto, auto) {++flag; return true; });
 	pr->Complete(ignore, Detail::Error::Success);
@@ -188,21 +188,21 @@ void ReadCb(TcpConnection& self, Buffer&& buf, Error e)
 	self.AsyncWrite(std::move(buf), 0, WriteCb);
 
 }
-// Î´Íê³É£¬Ê¹ÓÃÕâ¸ö½á¹¹ÊÇÒòÎªÏëÖ»ÓÃepollµÄÏß³Ì°²È«»úÖÆºÍatomicÊµÏÖÕû¸ö½á¹¹Ïß³Ì°²È«£»ÓÃ×÷ÊµÑé£¬Ã»Ê²Ã´¿ÉÓÃĞÔ
+// æœªå®Œæˆï¼Œä½¿ç”¨è¿™ä¸ªç»“æ„æ˜¯å› ä¸ºæƒ³åªç”¨epollçš„çº¿ç¨‹å®‰å…¨æœºåˆ¶å’Œatomicå®ç°æ•´ä¸ªç»“æ„çº¿ç¨‹å®‰å…¨ï¼›ç”¨ä½œå®éªŒï¼Œæ²¡ä»€ä¹ˆå¯ç”¨æ€§
 
-// FIX: ĞéÄâ»úÓĞĞ©¶«Î÷²»ºÃ¸ú×Ù£¬»»ÊµÌå»úÔÙÅª
-// FIX: ½á¹¹ÔÙÅª¼òµ¥µã, ÓĞĞ©²»ĞèÒªµÄÅĞ¶Ïº¯ÊıĞèÒªÉ¾³ı
+// FIX: è™šæ‹Ÿæœºæœ‰äº›ä¸œè¥¿ä¸å¥½è·Ÿè¸ªï¼Œæ¢å®ä½“æœºå†å¼„
+// FIX: ç»“æ„å†å¼„ç®€å•ç‚¹, æœ‰äº›ä¸éœ€è¦çš„åˆ¤æ–­å‡½æ•°éœ€è¦åˆ é™¤
 
-// TODO: close/connect µÈÁ¬½Ó£¬¹ØÓÚµØÖ·µÄ²¿·ÖÊÇ·ñÖ±½ÓÓÃsockaddr_in±È½ÏºÃ
+// TODO: close/connect ç­‰è¿æ¥ï¼Œå…³äºåœ°å€çš„éƒ¨åˆ†æ˜¯å¦ç›´æ¥ç”¨sockaddr_inæ¯”è¾ƒå¥½
 // TODO: timer/asyncconnect/resolve
-// TODO: ¼ÓÒ»¸öÊÂ¼ş´¥·¢µÄconnection
-// TODO: vsÏîÄ¿Õâ±ß¼ÓÁËÒ»Ğ©ÎÄ¼ş£¬¸½´øµÄeclipseÏîÄ¿ÎÄ¼şÎ´¸üĞÂ£¬ÓÃeclipseÔØÈëÊ±Ë¢ĞÂÏÂ¾ÍºÃÁË
-// TODO: bufferµÄĞ´Èë²»¹»·½±ã£¬Ìí¼Ó×éºÏ²»¹»·½±ã
-// TODO: connect¿ÉÄÜÒªÌí¼ÓÒ»¸öÀàÀ´´¦Àí£¬¿´¿´ÄÜ²»ÄÜÆ½ºâÁ¬½ÓÊı£¬µ«ÊÇÕâÑù»áµ¼ÖÂÔÚ×ö×ª·¢Ê±¿çÏß³ÌÊ¹ÓÃÁ¬½Ó
-// TODO: ĞèÒªÌí¼ÓÃ÷È·µÄ½ûÖ¹¿çÏß³ÌÊ¹ÓÃconn
-// TODO: ±àÒëÊ±¶Ô´«ÈëÀàĞÍ¼ì²é£¬·ñÔòÌáÊ¾²»×¼È·ÌáÉı²é´íÄÑ¶È
-// TODO: ´íÎóĞÅÏ¢²»¹»ÏêÏ¸
-// TODO: Ğ¹Â¶´ı²é
+// TODO: åŠ ä¸€ä¸ªäº‹ä»¶è§¦å‘çš„connection
+// TODO: vsé¡¹ç›®è¿™è¾¹åŠ äº†ä¸€äº›æ–‡ä»¶ï¼Œé™„å¸¦çš„eclipseé¡¹ç›®æ–‡ä»¶æœªæ›´æ–°ï¼Œç”¨eclipseè½½å…¥æ—¶åˆ·æ–°ä¸‹å°±å¥½äº†
+// TODO: bufferçš„å†™å…¥ä¸å¤Ÿæ–¹ä¾¿ï¼Œæ·»åŠ ç»„åˆä¸å¤Ÿæ–¹ä¾¿
+// TODO: connectå¯èƒ½è¦æ·»åŠ ä¸€ä¸ªç±»æ¥å¤„ç†ï¼Œçœ‹çœ‹èƒ½ä¸èƒ½å¹³è¡¡è¿æ¥æ•°ï¼Œä½†æ˜¯è¿™æ ·ä¼šå¯¼è‡´åœ¨åšè½¬å‘æ—¶è·¨çº¿ç¨‹ä½¿ç”¨è¿æ¥
+// TODO: éœ€è¦æ·»åŠ æ˜ç¡®çš„ç¦æ­¢è·¨çº¿ç¨‹ä½¿ç”¨conn
+// TODO: ç¼–è¯‘æ—¶å¯¹ä¼ å…¥ç±»å‹æ£€æŸ¥ï¼Œå¦åˆ™æç¤ºä¸å‡†ç¡®æå‡æŸ¥é”™éš¾åº¦
+// TODO: é”™è¯¯ä¿¡æ¯ä¸å¤Ÿè¯¦ç»†
+// TODO: æ³„éœ²å¾…æŸ¥
 
 
 
@@ -215,46 +215,10 @@ int main()
 	//return 0;
 
 	TRACEPOINT(LogPriority::Info)("Echo test");
-	auto ios = IoService::Instance();
-	auto act = TcpAcceptor::Create(MakeSockaddr(INADDR_ANY, 8989));
-	act->SetOnAccept([](TcpAcceptor::ConnectionPtr conn) {
 
-		Buffer buf(0);
-		conn->AsyncReadSome(std::move(buf), 0, ReadCb);
-		/*auto clo = conn->Clone();
-		clo->AsyncConnect(MakeSockaddr("127.0.0.1", 7777), [](TcpConnection& c, Error e)
-		{
-			if (e == Error::Success)
-			{
-				Buffer b;
-				auto& x = b.EmplaceBack(0);
-				std::string str("hi");
-				copy(str.begin(), str.end(), x->begin());
-				x->resize(str.length());
-				c->AsyncWrite(std::move(b), 0, WriteCb);
-			}
-
-		});*/
-	});
-
-	//TcpConnection::Create().AsyncConnect(MakeSockaddr("127.0.0.1", 7777), [](TcpConnection& c, Error e)
-	//{
-	//	if (e == Error::Success)
-	//	{
-	//		auto block = std::make_shared<StringBlock>("hello world");
-	//		Buffer b;
-	//		b.PushBack(std::move(block));
-	//		c.AsyncWrite(std::move(b), 0, [](TcpConnection& c, Buffer&&, Error e)
-	//		{
-	//			std::cout << "Á¬½Ó-Ğ´ ³É¹¦" << std::endl;
-	//		});
-	//	}
-	//	else
-	//	{
-	//		std::cout << "Á¬½ÓÊ§°Ü: " <<std::endl;
-	//	}
-	//});
-
-	ios->Wait();
+	CreateTcpAccepter(MakeSockaddr(INADDR_ANY, 8989), [](TcpConnection& conn)
+	{
+		conn.AsyncReadSome(Buffer(0), 0, ReadCb);
+	})->Join();
 	return 0;
 }

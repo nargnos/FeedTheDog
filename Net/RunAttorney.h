@@ -1,4 +1,4 @@
-#ifndef RUNATTORNEY_H_
+﻿#ifndef RUNATTORNEY_H_
 #define RUNATTORNEY_H_
 
 namespace Detail

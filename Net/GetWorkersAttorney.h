@@ -1,4 +1,4 @@
-#ifndef GETWORKERSATTORNEY_H_
+﻿#ifndef GETWORKERSATTORNEY_H_
 #define GETWORKERSATTORNEY_H_
 #include <vector>
 #include <memory>
@@ -11,6 +11,7 @@ namespace Detail
 	{
 	public:
 		static const std::vector<std::unique_ptr<Worker>>& Workers(const IoService&);
+		static const std::unique_ptr<Worker>& FirstWorker(const IoService & ios);
 	private:
 		GetWorkersAttorney() = delete;
 		~GetWorkersAttorney() = delete;

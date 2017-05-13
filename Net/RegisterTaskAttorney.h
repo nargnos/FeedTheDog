@@ -1,4 +1,4 @@
-#ifndef REGISTERTASKATTORNEY_H_
+﻿#ifndef REGISTERTASKATTORNEY_H_
 #define REGISTERTASKATTORNEY_H_
 #include <memory>
 #include "ITask.h"

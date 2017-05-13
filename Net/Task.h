@@ -1,4 +1,4 @@
-#ifndef TASK_H_
+ï»¿#ifndef TASK_H_
 #define TASK_H_
 #include <memory>
 #include "ITask.h"
@@ -24,7 +24,7 @@ namespace Detail
 	private:
 		TFunc func_;
 	};
-	// »Øµ÷ÉùÃ÷ void(Loop& loop)
+	// å›žè°ƒå£°æ˜Ž void(Loop& loop)
 	template<typename TFunc>
 	ITaskPtr MakeTask(TFunc&& func)
 	{

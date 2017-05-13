@@ -1,4 +1,4 @@
-
+ï»¿
 #ifndef OBJECTPOOL_H_
 #define OBJECTPOOL_H_
 #include <memory>
@@ -32,7 +32,7 @@ namespace Detail
 	};
 
 
-	// TODO: ĞèÒªÑéÖ¤Ïß³Ì°²È«
+	// TODO: éœ€è¦éªŒè¯çº¿ç¨‹å®‰å…¨
 	template<typename TObj, int Max = 0, typename TObjAllocator = ObjAllocator<TObj>>
 	class ObjectPool :
 		public std::enable_shared_from_this<ObjectPool<TObj, Max, TObjAllocator>>,
@@ -40,7 +40,7 @@ namespace Detail
 	{
 	public:
 		using TSelf = ObjectPool<TObj, Max, TObjAllocator>;
-		static_assert(!std::is_void<TObj>::value && sizeof(TObj) > 0, "TObj ÀàĞÍ´íÎó");
+		static_assert(!std::is_void<TObj>::value && sizeof(TObj) > 0, "TObj ç±»å‹é”™è¯¯");
 		using TPollWeakPtr = std::weak_ptr<ObjectPool>;
 		using TObjPtr = std::shared_ptr<TObj>;
 		struct UniPtrDel :public std::default_delete<TObj>
@@ -80,7 +80,7 @@ namespace Detail
 			return instance;
 		}
 
-		// »ØÊÕËùÓĞÄÚ´æ
+		// å›æ”¶æ‰€æœ‰å†…å­˜
 		void Clear()
 		{
 			DeleteAll();

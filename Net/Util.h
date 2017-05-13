@@ -1,4 +1,4 @@
-#ifndef UTIL_H_
+﻿#ifndef UTIL_H_
 #define UTIL_H_
 #include <pthread.h>
 void SetAffinity(pthread_t t, unsigned int core);

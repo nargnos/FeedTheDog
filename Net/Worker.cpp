@@ -1,4 +1,4 @@
-#include "Worker.h"
+﻿#include "Worker.h"
 #include <sys/socket.h>
 #include <sys/epoll.h>
 #include <pthread.h>
@@ -44,7 +44,7 @@ namespace Detail
 		return workerID_;
 	}
 
-	void Worker::Wait()
+	void Worker::Join()
 	{
 		assert(worker_);
 		worker_->join();

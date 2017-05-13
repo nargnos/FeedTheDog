@@ -1,4 +1,4 @@
-#include "Block.h"
+﻿#include "Block.h"
 namespace Detail
 {
 
@@ -69,11 +69,6 @@ namespace Detail
 	{
 		assert(newsize <= max_);
 		iov_.iov_len = newsize;
-	}
-
-	void Block::ResizeToMax()
-	{
-		iov_.iov_len = max_;
 	}
 
 	bool Block::IsReadOnly() const

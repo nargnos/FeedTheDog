@@ -1,4 +1,4 @@
-
+ï»¿
 #ifndef LOOP_H_
 #define LOOP_H_
 #include <memory>
@@ -18,7 +18,7 @@ namespace Detail
 	class FDTaskCtlAttorney;
 	class RunAttorney;
 	class RegisterTaskAttorney;
-	// Ö»¶Ô×ÔÉí×¢²áµÄÈÎÎñ±©Â¶×ÔÉí·ÇÏß³Ì°²È«µÄ½Ó¿Ú
+	// åªå¯¹è‡ªèº«æ³¨å†Œçš„ä»»åŠ¡æš´éœ²è‡ªèº«éçº¿ç¨‹å®‰å…¨çš„æ¥å£
 	class Loop final :
 		public EventTaskBase
 	{
@@ -36,18 +36,18 @@ namespace Detail
 		~Loop();
 		LoopState State() const;
 		std::thread::id OwnerTid()const;
-		// È¡ÈÎÎñÊı¿ìÕÕ
-		int TaskCount() const;
+		// å–ä»»åŠ¡æ•°å¿«ç…§
+		size_t TaskCount() const;
 	private:
 		virtual void DoEvent(Loop & loop, EpollOption op) override;
 
-		// ·ÇÏß³Ì°²È«
+		// éçº¿ç¨‹å®‰å…¨
 		void RegisterTask(std::shared_ptr<ITask>&& ptr);
-		// ²»¿ÉÖØ¸´Ö´ĞĞ
+		// ä¸å¯é‡å¤æ‰§è¡Œ
 		void Start();
 		void DoLoop();
 		void PrepareBuffers();
-		// »áµ¼ÖÂÎ´Íê³ÉÈÎÎñ±»¶ªÆú
+		// ä¼šå¯¼è‡´æœªå®Œæˆä»»åŠ¡è¢«ä¸¢å¼ƒ
 		void Stop();
 		bool CheckTid() const;
 		EpollCpp& Epoll();

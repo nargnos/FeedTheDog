@@ -1,4 +1,4 @@
-#include "GetWorkersAttorney.h"
+﻿#include "GetWorkersAttorney.h"
 #include "IoService.h"
 namespace Detail
 {
@@ -7,5 +7,8 @@ namespace Detail
 	{
 		return ios.Workers();
 	}
-
+	const std::unique_ptr<Worker>& GetWorkersAttorney::FirstWorker(const IoService& ios)
+	{
+		return ios.workers_.front();
+	}
 }  // namespace Detail

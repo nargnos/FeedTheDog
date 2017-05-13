@@ -1,4 +1,4 @@
-#ifndef IOSERVICE_H_
+ï»¿#ifndef IOSERVICE_H_
 #define IOSERVICE_H_
 #include <memory>
 #include <vector>
@@ -12,13 +12,13 @@ namespace Detail
 	class GetWorkersAttorney;
 	struct PerfInfo
 	{
-		// ×îÏĞµÄÏß³ÌµÄloop½á¹¹
+		// æœ€é—²çš„çº¿ç¨‹çš„loopç»“æ„
 		Loop* __restrict IdleLoop;
-		// ×îÃ¦µÄÏß³ÌµÄloop½á¹¹
+		// æœ€å¿™çš„çº¿ç¨‹çš„loopç»“æ„
 		Loop* __restrict BusyLoop;
 		size_t IdleCount;
 		size_t BusyCount;
-		// Õû¸ö³ÌĞòµÄ »î¶¯ÈÎÎñÊı
+		// æ•´ä¸ªç¨‹åºçš„ æ´»åŠ¨ä»»åŠ¡æ•°
 		size_t TaskCount;
 	};
 	class IoService :
@@ -27,13 +27,13 @@ namespace Detail
 	public:
 		friend GetWorkersAttorney;
 		~IoService();
-		// ÖÕÖ¹ºó²»ÄÜÖØĞÂ¿ªÊ¼
+		// ç»ˆæ­¢åä¸èƒ½é‡æ–°å¼€å§‹
 		void Shutdown();
 		static std::shared_ptr<IoService> Instance();
-		void Wait();
+		void Join();
 		size_t WorkerCount() const;
-		// FIX: ·µ»ØÁËÒ»Ğ©ÓÃ²»µ½µÄĞÅÏ¢£¬¿´Ö®ºóÈç¹û»¹Ã»ÓÃ¿ÉÒÔ¿¼ÂÇÈ¥µô
-		// ²¢²»±£Ö¤½á¹ûÕıÈ·
+		// FIX: è¿”å›äº†ä¸€äº›ç”¨ä¸åˆ°çš„ä¿¡æ¯ï¼Œçœ‹ä¹‹åå¦‚æœè¿˜æ²¡ç”¨å¯ä»¥è€ƒè™‘å»æ‰
+		// å¹¶ä¸ä¿è¯ç»“æœæ­£ç¡®
 		const PerfInfo& PerformanceSnapshot();
 	private:
 		IoService();

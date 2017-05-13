@@ -1,4 +1,4 @@
-#ifndef WORKER_H_
+ï»¿#ifndef WORKER_H_
 #define WORKER_H_
 #include <memory>
 #include <thread>
@@ -15,7 +15,7 @@ namespace Detail
 	class ITcpAcceptor;
 	class StopWorkerAttorney;
 	class GetLoopAttorney;
-	// Ïß³Ì°²È«
+	// çº¿ç¨‹å®‰å…¨
 	class Worker :
 		public Noncopyable
 	{
@@ -25,11 +25,11 @@ namespace Detail
 		explicit Worker(unsigned int coreId);
 		virtual ~Worker();
 		int ID() const;
-		void Wait();
+		void Join();
 		std::thread::id Tid()const;
 	private:
 		Loop& GetLoop();
-		// »áµ¼ÖÂÎ´Íê³ÉÈÎÎñ±»¶ªÆú
+		// ä¼šå¯¼è‡´æœªå®Œæˆä»»åŠ¡è¢«ä¸¢å¼ƒ
 		void Stop();
 		Loop loop_;
 		std::unique_ptr<std::thread> worker_;

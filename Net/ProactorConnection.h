@@ -1,4 +1,4 @@
-#ifndef STATUSCONNECTION_H_
+ï»¿#ifndef STATUSCONNECTION_H_
 #define STATUSCONNECTION_H_
 #include <cassert>
 #include <memory>
@@ -16,8 +16,8 @@
 #include "RegisterTaskAttorney.h"
 namespace Detail
 {
-	// FIX: ÓĞµãÂÒ£¬ÔÙÕûÒ»Õû
-	// TODO: ÖØ¹¹
+	// FIX: æœ‰ç‚¹ä¹±ï¼Œå†æ•´ä¸€æ•´
+	// TODO: é‡æ„
 	class ProactorConnectionBase :
 		public IFDTask,
 		public Noncopyable
@@ -33,14 +33,14 @@ namespace Detail
 
 		IoState& ReadState();
 		IoState& WriteState();
-		// io¹ı³ÌÖĞµ÷ÓÃ, ³öÏÖÕâ¸ö±Ø×¢²áepollµÈ´ıio¿É´¦Àí
+		// ioè¿‡ç¨‹ä¸­è°ƒç”¨, å‡ºç°è¿™ä¸ªå¿…æ³¨å†Œepollç­‰å¾…ioå¯å¤„ç†
 		void OnCantIo(IoState& s);
-		// ÊÂ¼şÍê³ÉÊ±µ÷ÓÃ
+		// äº‹ä»¶å®Œæˆæ—¶è°ƒç”¨
 		void OnNoBuff(IoState& s);
-		// ·µ»Øtrue±íÊ¾µ±Ç°¿Éio
-		// postÊÂ¼şÊ±µ÷ÓÃ
+		// è¿”å›trueè¡¨ç¤ºå½“å‰å¯io
+		// postäº‹ä»¶æ—¶è°ƒç”¨
 		bool OnBuffReady(IoState& s);
-		// epµÄcbÖĞµ÷ÓÃ
+		// epçš„cbä¸­è°ƒç”¨
 		bool OnIoReady(IoState& s);
 
 		void OnFailState() const;
@@ -51,7 +51,7 @@ namespace Detail
 		Loop& loop_;
 		IoState readState_;
 		IoState writeState_;
-		// FIX: ÔÚconnectµÄÊ±ºò»áÓÃµ½£¬¿ÉÄÜ»áÓëÆäËüÏß³Ì¹²ÓÃÕâ¸ö±äÁ¿
+		// FIX: åœ¨connectçš„æ—¶å€™ä¼šç”¨åˆ°ï¼Œå¯èƒ½ä¼šä¸å…¶å®ƒçº¿ç¨‹å…±ç”¨è¿™ä¸ªå˜é‡
 		std::atomic_bool isSocketRegistered_;
 		bool isTaskRegistered_;
 	};
@@ -93,7 +93,7 @@ namespace Detail
 		{
 			return static_cast<TChild*>(this);
 		}
-		// ÉèÖÃtask²¢ÇÒ×¢²á
+		// è®¾ç½®taskå¹¶ä¸”æ³¨å†Œ
 		void OnRegTask()
 		{
 			if (isTaskRegistered_)
@@ -109,27 +109,27 @@ namespace Detail
 			writeState_.SetError();
 		}
 
-		// ×ÔÉí´æ´¢ÒıÓÃ£¬±£»¤²»±»Îö¹¹
-		// TODO: ÓĞÒş»¼£¬Òª¶Ô¸÷ÖÖÇé¿ö²âÊÔ
-		// ERROR: µ±loop±»ÖÕÖ¹Ê±»áÖ´ĞĞ²»µ½Îö¹¹
-		// ÓĞÎŞ²»Ê¹ÓÃÈİÆ÷ÄÜÊ¹ËüÎ¬³ÖµÄ·½·¨
+		// è‡ªèº«å­˜å‚¨å¼•ç”¨ï¼Œä¿æŠ¤ä¸è¢«ææ„
+		// TODO: æœ‰éšæ‚£ï¼Œè¦å¯¹å„ç§æƒ…å†µæµ‹è¯•
+		// ERROR: å½“loopè¢«ç»ˆæ­¢æ—¶ä¼šæ‰§è¡Œä¸åˆ°ææ„
+		// æœ‰æ— ä¸ä½¿ç”¨å®¹å™¨èƒ½ä½¿å®ƒç»´æŒçš„æ–¹æ³•
 		void StoreObj()
 		{
 			if (store_)
 			{
 				return;
 			}
-			// ÌáÉıÒıÓÃ¼ÆÊı
+			// æå‡å¼•ç”¨è®¡æ•°
 			store_ = Self()->shared_from_this();
 		}
 	private:
 
-		// ´¦ÀíepollÊÂ¼ş
+		// å¤„ç†epolläº‹ä»¶
 		virtual void DoEvent(Loop& loop, EpollOption op)  override
 		{
 			assert(IsGood());
 			assert(std::addressof(loop) == std::addressof(GetLoop()));
-			// ·Ö·¢
+			// åˆ†å‘
 			if ((op & EPOLLERR) || ((op & (EPOLLIN | EPOLLHUP))) == EPOLLHUP)
 			{
 				OnError();
@@ -150,49 +150,49 @@ namespace Detail
 				OnRegTask();
 			}
 		}
-		// ´¦ÀítaskÊÂ¼ş£¬Ö»Ö´ĞĞIO£¬·¢ÉúÍê³É¡¢¹Ø±Õ»ò´íÎóÊÂ¼şÊ±¾ÍµØ´¦Àí²¢×¢Ïú
-		// ²»½øepollµÄÁ¬½ÓÔÚÖ´ĞĞcbµÄÊ±ºòÉèÖÃ×´Ì¬, Èç¹û¿ÕÏĞ¶øÃ»Ïà¹ØÒıÓÃ£¬×Ô¼º¾ÍÎö¹¹µô
+		// å¤„ç†taskäº‹ä»¶ï¼Œåªæ‰§è¡ŒIOï¼Œå‘ç”Ÿå®Œæˆã€å…³é—­æˆ–é”™è¯¯äº‹ä»¶æ—¶å°±åœ°å¤„ç†å¹¶æ³¨é”€
+		// ä¸è¿›epollçš„è¿æ¥åœ¨æ‰§è¡Œcbçš„æ—¶å€™è®¾ç½®çŠ¶æ€, å¦‚æœç©ºé—²è€Œæ²¡ç›¸å…³å¼•ç”¨ï¼Œè‡ªå·±å°±ææ„æ‰
 		virtual bool DoEvent(Loop & loop) override
 		{
 			if (readState_.IsDoIo())
 			{
 				OnRead();
 			}
-			// ×öÒ»Ì×¶ÁĞ´£¬¼õÉÙÑ­»·´ÎÊı
-			// read ³ö´í»áÉèÖÃwrite£¬Ê¹ÕâÀï²»»á±»Ö´ĞĞ
+			// åšä¸€å¥—è¯»å†™ï¼Œå‡å°‘å¾ªç¯æ¬¡æ•°
+			// read å‡ºé”™ä¼šè®¾ç½®writeï¼Œä½¿è¿™é‡Œä¸ä¼šè¢«æ‰§è¡Œ
 			if (writeState_.IsDoIo())
 			{
 				OnWrite();
 			}
 			auto val = readState_.Value() * writeState_.Value();
 			assert(val != 0);
-			// ÎşÉüµô¿É¶ÁĞÔ
+			// ç‰ºç‰²æ‰å¯è¯»æ€§
 			switch (val)
 			{
 			case 3:
 			case 9:
 				// 2 doio || 1 doio 1 ioready
-				// ¼ÌĞøÖ´ĞĞio -> ±£³Ötask false
+				// ç»§ç»­æ‰§è¡Œio -> ä¿æŒtask false
 				return false;
 			default:
-				// ³ö´í£¬close»òerror
+				// å‡ºé”™ï¼Œcloseæˆ–error
 				break;
 			case 6:
 				// 1 doio 1 bufready
-				// µÈ´ıio¿ÉÓÃ£¬×¢²á£¬Í¬Ê±¼ÌĞøÖ´ĞĞio -> ±£³Ötask false
+				// ç­‰å¾…ioå¯ç”¨ï¼Œæ³¨å†Œï¼ŒåŒæ—¶ç»§ç»­æ‰§è¡Œio -> ä¿æŒtask false
 				RegisterSocket();
 				StoreObj();
 				return false;
 			case 2:
 			case 4:
 				// 1 ioready 1 bufready || 2 bufready
-				// µÈ´ıio¿ÉÓÃ£¬×¢²á -> ×¢Ïútask true
+				// ç­‰å¾…ioå¯ç”¨ï¼Œæ³¨å†Œ -> æ³¨é”€task true
 				RegisterSocket();
 				StoreObj();
 				break;
 			case 1:
 				// 2 io ready
-				// Î´post»Øµ÷£¬×¢ÏúËùÓĞ -> ×¢Ïútask true
+				// æœªpostå›è°ƒï¼Œæ³¨é”€æ‰€æœ‰ -> æ³¨é”€task true
 				UnregisterSocket();
 				DestoryObj();
 				break;
@@ -204,10 +204,10 @@ namespace Detail
 
 			isTaskRegistered_ = false;
 			return true;
-			// Èç¹û´æÔÚhas buf¾Íreg,store
-			// Èç¹û´æÔÚdoio ->false£¬·ñÔòÈ«true
-			// Èç¹û¶¼ÊÇio rdy£¬±íÊ¾´ËÊ±Î´Ìá½»»Øµ÷¡£detach unreg->true
-			// Èç¹û´íÎó£¬Ïà¹Øcb¶¼ÒÑ±»Ö´ĞĞ£¬Ö±½Ótrue
+			// å¦‚æœå­˜åœ¨has bufå°±reg,store
+			// å¦‚æœå­˜åœ¨doio ->falseï¼Œå¦åˆ™å…¨true
+			// å¦‚æœéƒ½æ˜¯io rdyï¼Œè¡¨ç¤ºæ­¤æ—¶æœªæäº¤å›è°ƒã€‚detach unreg->true
+			// å¦‚æœé”™è¯¯ï¼Œç›¸å…³cbéƒ½å·²è¢«æ‰§è¡Œï¼Œç›´æ¥true
 
 		}
 
@@ -284,7 +284,7 @@ namespace Detail
 			}
 		}
 
-		// ·µ»Øtrue±íÊ¾ÒªÇåÀí¶ÓÊ×
+		// è¿”å›trueè¡¨ç¤ºè¦æ¸…ç†é˜Ÿé¦–
 		bool DoRead(TRecord& rec, TransferProgress& progress)
 		{
 			assert(ReadState().IsDoIo());
@@ -324,13 +324,13 @@ namespace Detail
 			case 0:
 				OnClose();
 				assert(ReadState().IsClose());
-				// ¶ÓÁĞÒÑÔÚoncloseÖĞÇåÀí
+				// é˜Ÿåˆ—å·²åœ¨oncloseä¸­æ¸…ç†
 				assert(GetReadRecord().empty());
 				return false;
 			}
 			OnError();
 			assert(ReadState().HasError());
-			// Í¬ÉÏ
+			// åŒä¸Š
 			assert(GetReadRecord().empty());
 			return false;
 		}
@@ -382,7 +382,7 @@ namespace Detail
 			while (!queue.empty())
 			{
 				auto& rec = *queue.front();
-				// Èç¹û´ËÊ±ÓĞÊı¾İÔÚÄÚ£¬Òª´¦Àí¾Í×Ô¼º¶Á£¬ÕâÀï²»´¦Àí
+				// å¦‚æœæ­¤æ—¶æœ‰æ•°æ®åœ¨å†…ï¼Œè¦å¤„ç†å°±è‡ªå·±è¯»ï¼Œè¿™é‡Œä¸å¤„ç†
 				RunCompleteHandler(rec, e);
 				queue.pop();
 			}

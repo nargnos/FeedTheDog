@@ -1,4 +1,4 @@
-
+﻿
 #include "EpollCpp.h"
 #include <stdlib.h>
 #include <unistd.h>
@@ -10,7 +10,6 @@ namespace Detail
 	// 不接受任何可通过编程方式解决的errno
 	EpollCpp::EpollCpp() :
 		epfd_(epoll_create1(EPOLL_CLOEXEC))
-
 	{
 		if (epfd_ == -1)
 		{
@@ -31,17 +30,18 @@ namespace Detail
 
 	void EpollCpp::Add(int fd, EpollOption op, const void * userdata) const
 	{
-		EpollCtl(EPOLL_CTL_ADD, fd, CreateEpollEvent(op, userdata));
+		EpollCtl(EPOLL_CTL_ADD, fd, epoll_event{ op, const_cast<void*>(userdata) });
 	}
 
 	void EpollCpp::Mod(int fd, EpollOption op, const void * userdata) const
 	{
-		EpollCtl(EPOLL_CTL_MOD, fd, CreateEpollEvent(op, userdata));
+		EpollCtl(EPOLL_CTL_MOD, fd, epoll_event{ op, const_cast<void*>(userdata) });
 	}
 
 	void EpollCpp::Del(int fd) const
 	{
-		EpollCtl(EPOLL_CTL_DEL, fd, CreateEpollEvent(0, nullptr));
+		constexpr static epoll_event ev{ 0,nullptr };
+		EpollCtl(EPOLL_CTL_DEL, fd, ev);
 	}
 
 	size_t EpollCpp::Wait(Events& e, int ms)
@@ -52,7 +52,7 @@ namespace Detail
 		while (true)
 		{
 			nevent = epoll_wait(epfd_, e.data(), static_cast<int>(e.size()), ms);
-			if (nevent == -1)
+			if (__glibc_unlikely(nevent == -1))
 			{
 				// 只允许EINTR，其它是编程错误
 				if (errno == EINTR)
@@ -68,19 +68,11 @@ namespace Detail
 		return static_cast<size_t>(nevent);
 	}
 
-	epoll_event EpollCpp::CreateEpollEvent(EpollOption op, const void * userdata)
-	{
-		epoll_event ev;
-		ev.events = op.Value;
-		ev.data.ptr = const_cast<void*>(userdata);
-		return ev;
-	}
-
 	void EpollCpp::EpollCtl(int flag, int fd, const epoll_event & ev) const
 	{
 		assert(epfd_ != -1);
 		assert(fd != -1);
-		if (epoll_ctl(epfd_, flag, fd, const_cast<epoll_event*>(&ev)) == -1)
+		if (__glibc_unlikely(epoll_ctl(epfd_, flag, fd, const_cast<epoll_event*>(&ev)) == -1))
 		{
 			assert(errno == ENOMEM || errno == ENOSPC);
 			TRACEPOINT(LogPriority::Debug).Errno();

@@ -1,4 +1,4 @@
-#ifndef GETLOOPATTORNEY_H_
+﻿#ifndef GETLOOPATTORNEY_H_
 #define GETLOOPATTORNEY_H_
 #include <type_traits>
 namespace Detail

@@ -1,4 +1,4 @@
-#ifndef BUFFER_H_
+ï»¿#ifndef BUFFER_H_
 #define BUFFER_H_
 #include <memory>
 #include <list>
@@ -7,15 +7,15 @@
 #include "Noncopyable.h"
 namespace Detail
 {
-	// ·ÇÏß³Ì°²È«£¬²»ÄÜ¸øÆäËüÏß³ÌÓÃ
+	// éçº¿ç¨‹å®‰å…¨ï¼Œä¸èƒ½ç»™å…¶å®ƒçº¿ç¨‹ç”¨
 	class Buffer :public Noncopyable
 	{
 	public:
-		// Ê¹ÓÃshared_ptr´æ´¢£¬ÕâÑù¿ÉÒÔ¸úÆäËübuffer¹²ÓÃÒ»²¿·Ö£¨·¢ËÍ£©ÄÚÈİ£¨¹Ì¶¨ÎÄ±¾Ê²Ã´µÄ£©£¬µ«×¢ÒâÄ³Ğ©º¯Êı»áĞŞ¸Äµ½ÔªËØµÄ´óĞ¡	
+		// ä½¿ç”¨shared_ptrå­˜å‚¨ï¼Œè¿™æ ·å¯ä»¥è·Ÿå…¶å®ƒbufferå…±ç”¨ä¸€éƒ¨åˆ†ï¼ˆå‘é€ï¼‰å†…å®¹ï¼ˆå›ºå®šæ–‡æœ¬ä»€ä¹ˆçš„ï¼‰ï¼Œä½†æ³¨æ„æŸäº›å‡½æ•°ä¼šä¿®æ”¹åˆ°å…ƒç´ çš„å¤§å°	
 		using BlockList = std::list<BlockPtr>;
 		explicit Buffer(size_t size);
 		explicit Buffer(const BlockPtr& vec);
-		// ×¢Òâ´ËÊ±Î´·ÖÅä¿Õ¼ä
+		// æ³¨æ„æ­¤æ—¶æœªåˆ†é…ç©ºé—´
 		Buffer() = default;
 
 		Buffer(Buffer&& val);
@@ -32,9 +32,9 @@ namespace Detail
 		void PopBack();
 		void PopFront();
 		size_t Size()const;
-		// ±£Áô¸÷×Ôvec´óĞ¡£¬Ö»ÔÚ×îºóÔªËØĞŞ¸Ä
+		// ä¿ç•™å„è‡ªvecå¤§å°ï¼Œåªåœ¨æœ€åå…ƒç´ ä¿®æ”¹
 		void Resize(size_t size);
-		// ÉìËõ´óĞ¡£¬À©Õ¹µ½size´óĞ¡£¬»áĞŞ¸ÄÃ¿¸öÔªËØµÄsize, 0±íÊ¾°ÑÃ¿¸öÔªËØ¶¼À©Õ¹µ½max
+		// ä¼¸ç¼©å¤§å°ï¼Œæ‰©å±•åˆ°sizeå¤§å°ï¼Œä¼šä¿®æ”¹æ¯ä¸ªå…ƒç´ çš„size, 0è¡¨ç¤ºæŠŠæ¯ä¸ªå…ƒç´ éƒ½æ‰©å±•åˆ°max
 		void StretchTo(size_t size = 0);
 		const BlockList& VecList() const;
 		static BlockPool& BufferPool();
@@ -43,7 +43,7 @@ namespace Detail
 		bool HasReadOnlyBlock() const;
 		void DropReadOnlyBlock();
 	private:
-		// ×ÜÌî³äsize
+		// æ€»å¡«å……size
 		void EmplaceBackTotal(size_t size);
 		BlockList list_;
 	};

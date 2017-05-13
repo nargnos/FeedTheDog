@@ -1,4 +1,4 @@
-#include "BlockPool.h"
+﻿#include "BlockPool.h"
 namespace Detail
 {
 

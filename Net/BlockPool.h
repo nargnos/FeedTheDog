@@ -1,4 +1,4 @@
-#ifndef BLOCKPOOL_H_
+ï»¿#ifndef BLOCKPOOL_H_
 #define BLOCKPOOL_H_
 #include <vector>
 #include <type_traits>
@@ -28,7 +28,7 @@ namespace Detail
 
 		T* New(size_t size)
 		{
-			// ¿ÉÔÚÕâÀï·ÖÅä¶ÔÆë
+			// å¯åœ¨è¿™é‡Œåˆ†é…å¯¹é½
 			return new T(size);
 		}
 		T* New()
@@ -55,7 +55,7 @@ namespace Detail
 	};
 
 
-	// ¸Ğ¾õÆäÊµÃ»Ê²Ã´ÓÃ	
+	// æ„Ÿè§‰å…¶å®æ²¡ä»€ä¹ˆç”¨	
 	class BlockPool :
 		public Noncopyable
 	{
@@ -63,7 +63,7 @@ namespace Detail
 		using Ptr = std::shared_ptr<Block>;
 		BlockPool();
 		~BlockPool() = default;
-		// Ìî0·ÖÅäÄ¬ÈÏ´óĞ¡
+		// å¡«0åˆ†é…é»˜è®¤å¤§å°
 		Ptr New(size_t size);
 		Ptr New();
 	private:

@@ -1,4 +1,4 @@
-#include "EventTaskBase.h"
+﻿#include "EventTaskBase.h"
 #include <utility>
 namespace Detail
 {

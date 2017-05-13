@@ -1,4 +1,4 @@
-#include "TcpAcceptor.h"
+ï»¿#include "TcpAcceptor.h"
 #include <array>
 #include "Loop.h"
 #include "IoService.h"
@@ -6,11 +6,31 @@
 #include "FDTaskCtlAttorney.h"
 #include "Task.h"
 #include "GetLoopAttorney.h"
-#include "TcpAttachAttorney.h"
 #include "GetWorkersAttorney.h"
 namespace Detail
 {
-	TcpAcceptor::TcpAcceptor(const sockaddr_in& bind) :
+	int TcpAcceptorBase::FD() const
+	{
+		return socket_.FD();
+	}
+
+	// æœ‰å¯èƒ½åœ¨å…¶å®ƒçº¿ç¨‹å…³é—­
+
+	void TcpAcceptorBase::Cancel()
+	{
+		auto f = false;
+		if (isCanceled_.compare_exchange_strong(f, true, std::memory_order_release))
+		{
+			// TODO: è¿™é‡Œæœ‰äº›é—®é¢˜
+			//UnRegListen();
+			socket_.Close();
+		}
+	}
+	TcpAcceptorBase::~TcpAcceptorBase()
+	{
+		Cancel();
+	}
+	TcpAcceptorBase::TcpAcceptorBase(const sockaddr_in & bind) :
 		ios_(IoService::Instance()),
 		isCanceled_(false),
 		needReregister_(false)
@@ -20,172 +40,80 @@ namespace Detail
 		if (!socket_)
 		{
 			TRACEERRNOEXITSTR(LogPriority::Emerg, "Create Socket Failed");
+			return;
 		}
 		if (!socket_.SetNonBlocking())
 		{
-			TRACEPOINT(LogPriority::Emerg)("Set NonBlocking Failed");
-			_EXIT;
+			TRACEERRNOEXITSTR(LogPriority::Emerg, "Set NonBlocking Failed");
+			return;
 		}
 		if (!socket_.SetReusePort(true))
 		{
 			TRACEPOINT(LogPriority::Notice)("Set Reuse Port Failed");
+			return;
 		}
 		if (!socket_.Bind(bind))
 		{
 			TRACEERRNOEXITSTR(LogPriority::Emerg, "Bind Socket Failed");
+			return;
 		}
 		if (!socket_.Listen())
 		{
 			TRACEERRNOEXITSTR(LogPriority::Emerg, "Listen Socket Failed");
+			return;
 		}
 		needReregister_ = ios_->WorkerCount() > 1;
 		RegListen();
 	}
-
-	void TcpAcceptor::RegListen()
+	void TcpAcceptorBase::RegListen()
 	{
-		// Ñ¡Ôñworker×¢²á
-		auto& workers = GetWorkersAttorney::Workers(*ios_);
-		auto& worker = *workers.front();
-		auto& newLoop = GetLoopAttorney::GetLoop(worker);
+		// é€‰æ‹©workeræ³¨å†Œ
+		auto& worker = GetWorkersAttorney::FirstWorker(*ios_);
+		auto& newLoop = GetLoopAttorney::GetLoop(*worker);
 		RegListen(newLoop);
 	}
-	void TcpAcceptor::RegListen(Loop& loop)
+	void TcpAcceptorBase::RegListen(Loop & loop)
 	{
 		FDTaskCtlAttorney::Add(loop, EPOLLIN, this);
 	}
-	void TcpAcceptor::UnRegListen(Loop& loop)
+	void TcpAcceptorBase::UnRegListen(Loop & loop)
 	{
-		// Ö»ÔÚ×ÔÉíÏß³ÌÊ¹ÓÃ
+		// åªåœ¨è‡ªèº«çº¿ç¨‹ä½¿ç”¨
 		FDTaskCtlAttorney::Del(loop, this);
 	}
-
-
-	void TcpAcceptor::DoAccept(Loop & loop, int fd)
+	void TcpAcceptorBase::Balance(Loop & loop)
 	{
-		assert(fd != -1);
-		// ²»´¦Àí£¨Î¬³ÖconnectÉú´æÆÚ£¬Ö´ĞĞrw£©½«»á¹Ø±Õ²¢¶ªÆúÁ¬½Ó
-		auto sock = TcpAttachAttorney::Attach(loop, fd);
-		// ´ËÊ±Èç¹ûÔÚÉèÖÃcbµÄ¼äÏ¶¾ÍÓĞÁ¬½Ó¹ıÀ´Ôò¶ªÆú
-		if (onAccept_)
-		{
-			onAccept_(sock.get());
-		}
-	}
-
-	void TcpAcceptor::DoEvent(Loop & loop, EpollOption op)
-	{
-		if (__glibc_unlikely(op.Flags.Err))
-		{
-			UnRegListen(loop);
-			OnFailed();
-			assert(false);
-			return;
-		}
-		assert(op.Flags.In);
-		do
-		{
-			auto fd = socket_.Accept();
-			if (__glibc_likely(fd != -1))
-			{
-				DoAccept(loop, fd);
-			}
-			else
-			{
-				auto err = errno;
-				if (__glibc_likely(err == EAGAIN || err == EWOULDBLOCK || err == EINTR))
-				{
-					break;
-				}
-				else
-				{
-					TRACEERRNOEXITSTR(LogPriority::Emerg, "Accept Failed");
-				}
-			}
-		} while (true);
-
-		// NOTICE: ²ÎÊı: ¶Ñ»ıÊı³¬¹ıÕâ¸ö¾Í¿¼ÂÇ½»³öÈ¨Àû
-		// ÊıÖµÔ½´ó²¨¶¯Ô½´ó£¬µ½Ä³¸öÖµÔ½Ğ¡Ô½Âı£¬ÃÅ¼÷¹ı¸ß»áÈÃ¸÷cpu²»Æ½¾ù	
+		// NOTICE: å‚æ•°: å †ç§¯æ•°è¶…è¿‡è¿™ä¸ªå°±è€ƒè™‘äº¤å‡ºæƒåˆ©
+		// æ•°å€¼è¶Šå¤§æ³¢åŠ¨è¶Šå¤§ï¼Œåˆ°æŸä¸ªå€¼è¶Šå°è¶Šæ…¢ï¼Œé—¨æ§›è¿‡é«˜ä¼šè®©å„cpuä¸å¹³å‡	
 		constexpr int limit = 8;
 		if (!needReregister_ || loop.TaskCount() < limit)
 		{
 			return;
 		}
-
-		// È¡×ÜÊı£¬Èç¹ûÃ¦¾ÍÕÒ¸ö×îĞ¡µÄ×¢²á
-		// ²¢²»ĞèÒª×¼È·
-		// TODO: ÇĞ»»µÄÏûºÄÓ¦¸ÃÄÜ±»µÖÏûµô
+		// å–æ€»æ•°ï¼Œå¦‚æœå¿™å°±æ‰¾ä¸ªæœ€å°çš„æ³¨å†Œ
+		// å¹¶ä¸éœ€è¦å‡†ç¡®
+		// TODO: åˆ‡æ¢çš„æ¶ˆè€—åº”è¯¥èƒ½è¢«æŠµæ¶ˆæ‰
 		auto& perf = ios_->PerformanceSnapshot();
-		// TODO: Ëã·¨²»Ì«¶Ô£¬ÓĞµã²»Æ½¾ù£»µÈÍê³ÉËùÓĞÔÙ´¦ÀíÕâÀï
+		// TODO: ç®—æ³•ä¸å¤ªå¯¹ï¼Œæœ‰ç‚¹ä¸å¹³å‡ï¼›ç­‰å®Œæˆæ‰€æœ‰å†å¤„ç†è¿™é‡Œ
 		if (perf.IdleCount == 0 || (perf.BusyLoop == &loop && IsTooBusy(perf.BusyCount, perf.TaskCount)))
 		{
 			TRACEPOINT(LogPriority::Debug)("Switch! self: %d  max: %d  idle: %d",
 				perf.BusyCount, perf.TaskCount, perf.IdleCount);
-			// ¹ıÃ¦£¬ÇĞ»»½ÓÊÕÈ¨
-			// FIX: ÕâÀïÊÇ·ñ»á²úÉú½»½ÓÆµ·±ÎÊÌâ£¬ÈçºÎ¾ùºâÓÖ¼õÉÙ½»½Ó´ÎÊı£¿
-			// TODO: Èç¹û¸ú×ÙloopÖ´ĞĞÇ°ºóµÄÈÎÎñÊı£¬¿ÉÒÔµÃµ½Ôö³¤»òÕß¼õÉÙµÄËÙÂÊ£¬Õâ¸ö¿ÉÄÜÓĞÓÃ
+			// è¿‡å¿™ï¼Œåˆ‡æ¢æ¥æ”¶æƒ
+			// FIX: è¿™é‡Œæ˜¯å¦ä¼šäº§ç”Ÿäº¤æ¥é¢‘ç¹é—®é¢˜ï¼Œå¦‚ä½•å‡è¡¡åˆå‡å°‘äº¤æ¥æ¬¡æ•°ï¼Ÿ
+			// TODO: å¦‚æœè·Ÿè¸ªloopæ‰§è¡Œå‰åçš„ä»»åŠ¡æ•°ï¼Œå¯ä»¥å¾—åˆ°å¢é•¿æˆ–è€…å‡å°‘çš„é€Ÿç‡ï¼Œè¿™ä¸ªå¯èƒ½æœ‰ç”¨
 			UnRegListen(loop);
 			RegListen(*perf.IdleLoop);
 		}
 	}
-
-	bool TcpAcceptor::IsTooBusy(int selfCount, int sum)
+	bool TcpAcceptorBase::IsTooBusy(size_t selfCount, size_t sum)
 	{
-		// NOTICE: ²ÎÊı: Ã¦ÅĞ¶¨
+		// NOTICE: å‚æ•°: å¿™åˆ¤å®š
 		constexpr int rsh = 3;
 		return selfCount >= (sum - (sum >> rsh));
 	}
-
-
-	int TcpAcceptor::FD() const
+	void TcpAcceptorBase::Join() const
 	{
-		return socket_.FD();
+		ios_->Join();
 	}
-
-	void TcpAcceptor::OnFailed()
-	{
-		if (onFailed_)
-		{
-			onFailed_();
-		}
-		TRACEPOINT_LINE(LogPriority::Debug);
-		TRACEERRNOEXIT(LogPriority::Emerg);
-	}
-
-
-	// ÓĞ¿ÉÄÜÔÚÆäËüÏß³Ì¹Ø±Õ
-	void TcpAcceptor::Cancel()
-	{
-		auto f = false;
-		if (isCanceled_.compare_exchange_strong(f, true, std::memory_order_release))
-		{
-			// TODO: ÕâÀïÓĞĞ©ÎÊÌâ
-			//UnRegListen();
-			socket_.Close();
-		}
-	}
-
-	TcpAcceptor::~TcpAcceptor()
-	{
-		Cancel();
-	}
-
-	void TcpAcceptor::SetOnAccept(AcceptHandler && h)
-	{
-		assert(!onAccept_);
-		onAccept_ = std::move(h);
-	}
-
-	void TcpAcceptor::SetOnFailed(FailedHandler&& h)
-	{
-		assert(!onFailed_);
-		onFailed_ = std::move(h);
-	}
-
-	std::shared_ptr<TcpAcceptor> TcpAcceptor::Create(const sockaddr_in& bind)
-	{
-		std::shared_ptr<TcpAcceptor> result(new TcpAcceptor(bind));
-		return result;
-	}
-
 }  // namespace Detail
