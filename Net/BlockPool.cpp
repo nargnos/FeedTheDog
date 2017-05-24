@@ -16,13 +16,17 @@ namespace Detail
 		{
 			result = bBuff_->New();
 		}
-		else if (__glibc_likely(size > SmallBlock::Max))
+		else if (__glibc_likely(size <= SmallBlock::Max))
+		{
+			result = sBuff_->New(size);
+		}
+		else if (size <= BigBlock::Max)
 		{
 			result = bBuff_->New(size);
 		}
 		else
 		{
-			result = sBuff_->New(size);
+			result = bBuff_->New();
 		}
 		return result;
 	}

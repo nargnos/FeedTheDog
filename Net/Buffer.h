@@ -23,31 +23,25 @@ namespace Detail
 		~Buffer() = default;
 		bool IsEmpty() const;
 
-		const BlockPtr& EmplaceBack(size_t size);
-		const BlockPtr& EmplaceFront(size_t size);
-		void PushBack(const BlockPtr& buf);
-		void PushFront(const BlockPtr& buf);
-		void PushBack(BlockPtr&& buf);
-		void PushFront(BlockPtr&& buf);
-		void PopBack();
-		void PopFront();
 		size_t Size()const;
+		static BlockPtr New();
+		static BlockPtr New(size_t size);
 		// 保留各自vec大小，只在最后元素修改
 		void Resize(size_t size);
-		// 伸缩大小，扩展到size大小，会修改每个元素的size, 0表示把每个元素都扩展到max
-		void StretchTo(size_t size = 0);
-		const BlockList& VecList() const;
+		// 填充指定大小block, 0为填充默认大小
+		void PushSize(size_t size);
+		// 0表示设置为最大
+		void StretchTo(size_t size);
+		BlockList Blocks();
+		const BlockList& Blocks() const;
 		static BlockPool& BufferPool();
 		static size_t Size(const std::vector<iovec>& iov);
 		static size_t Size(const Buffer& buf);
-		bool HasReadOnlyBlock() const;
-		void DropReadOnlyBlock();
+		std::vector<iovec> GetIovec() const;
 	private:
-		// 总填充size
-		void EmplaceBackTotal(size_t size);
 		BlockList list_;
 	};
-
+	
 }  // namespace Detail
 using Detail::Buffer;
 #endif // BUFFER_H_

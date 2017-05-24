@@ -9,7 +9,7 @@
 #include <iostream>
 #include <string>
 #include "IoService.h"
-#include "TcpAcceptor.h"
+#include "TcpServer.h"
 #include "Task.h"
 #include "Util.h"
 
@@ -17,137 +17,118 @@ using namespace std;
 #define _STD std::
 #define TestAssert(c) if(!(c)) _STD cout << "Error: "<<__LINE__ << _STD endl;
 
+//
+//void TestBuffer()
+//{
+//	// TODO: 使用不够方便
+//	// 重复分配
+//	{
+//		void* ptr = nullptr;
+//		{
+//			auto buffA = Buffer::BufferPool().New(0);
+//			buffA->resize(1);
+//			ptr = buffA->begin();
+//		}
+//		auto buffB = Buffer::BufferPool().New(4);
+//		auto buffANew = Buffer::BufferPool().New();
+//		TestAssert(buffB->begin() != ptr);
+//		TestAssert(buffANew->begin() == ptr);
+//		{
+//			int loop = 10;
+//			for (int i = 0; i < loop; i++)
+//			{
+//				Buffer buf(0);
+//				buf.Resize(100);
+//				buf.StretchTo(0);
+//			}
+//		}
+//	}
+//
+//	// 跨线
+//	{
+//		auto buffA = Buffer::BufferPool().New();
+//		auto buffB = Buffer::BufferPool().New();
+//
+//		void* ptrA = buffA->begin();
+//		void* ptrB = buffB->begin();
+//		//auto lambda= [buffA_ = move(buffA), buffB_ = move(buffB), ptrA, ptrB]() mutable
+//		//{
+//		//	TestAssert(buffA_->size() > 0);
+//		//	buffA_ = nullptr;
+//		//	TestAssert(!buffA_);
+//		//	auto buffNew = Buffer::BufferPool().New();
+//		//	// 因为析构时未创建pool
+//		//	TestAssert(ptrA != buffNew->begin());
+//		//	buffB_ = nullptr;
+//		//	auto buffNew2 = Buffer::BufferPool().New();
+//		//	TestAssert(ptrB == buffNew2->begin());
+//		//};
+//		//thread t(lambda);
+//		//t.join();
+//		auto buffC = Buffer::BufferPool().New();
+//		TestAssert(ptrB != buffC->begin());
+//		TestAssert(ptrA != buffC->begin());
+//
+//	}
+//	// 改大小
+//	{
+//
+//		Buffer buff(4);
+//		buff.EmplaceBack(0)->resize(4);
+//		TestAssert(!buff.HasReadOnlyBlock());
+//		TestAssert(buff.Size() == 8);
+//		buff.StretchTo(0);
+//	}
+//}
+//
 
-void TestBuffer()
-{
-	// TODO: 使用不够方便
-	// 重复分配
-	{
-		void* ptr = nullptr;
-		{
-			auto buffA = Buffer::BufferPool().New(0);
-			buffA->resize(1);
-			ptr = buffA->begin();
-		}
-		auto buffB = Buffer::BufferPool().New(4);
-		auto buffANew = Buffer::BufferPool().New();
-		TestAssert(buffB->begin() != ptr);
-		TestAssert(buffANew->begin() == ptr);
-		{
-			int loop = 10;
-			for (int i = 0; i < loop; i++)
-			{
-				Buffer buf(0);
-				buf.Resize(100);
-				buf.StretchTo(0);
-			}
-		}
-	}
-
-	// 跨线
-	{
-		auto buffA = Buffer::BufferPool().New();
-		auto buffB = Buffer::BufferPool().New();
-
-		void* ptrA = buffA->begin();
-		void* ptrB = buffB->begin();
-		//auto lambda= [buffA_ = move(buffA), buffB_ = move(buffB), ptrA, ptrB]() mutable
-		//{
-		//	TestAssert(buffA_->size() > 0);
-		//	buffA_ = nullptr;
-		//	TestAssert(!buffA_);
-		//	auto buffNew = Buffer::BufferPool().New();
-		//	// 因为析构时未创建pool
-		//	TestAssert(ptrA != buffNew->begin());
-		//	buffB_ = nullptr;
-		//	auto buffNew2 = Buffer::BufferPool().New();
-		//	TestAssert(ptrB == buffNew2->begin());
-		//};
-		//thread t(lambda);
-		//t.join();
-		auto buffC = Buffer::BufferPool().New();
-		TestAssert(ptrB != buffC->begin());
-		TestAssert(ptrA != buffC->begin());
-
-	}
-	// 改大小
-	{
-
-		Buffer buff(4);
-		buff.EmplaceBack(0)->resize(4);
-		TestAssert(!buff.HasReadOnlyBlock());
-		TestAssert(buff.Size() == 8);
-		buff.StretchTo(0);
-	}
-}
-
-void TestProgressRecord()
-{
-	// TODO: 错误提示需要更详尽
-	using namespace Detail;
-	struct Ignore
-	{
-		bool I(ProgressRecord<Ignore>&, TransferProgress&)
-		{
-			return true;
-		}
-	};
-	Ignore ignore;
-	int flag = 0;
-	// TODO: 这个结构不好
-	std::unique_ptr<Detail::ProgressRecord<Ignore>> pr =
-		Detail::MakeRecord<Ignore>([&](auto, auto) {++flag; return true; });
-	pr->Complete(ignore, Detail::Error::Success);
-	pr->Do(ignore, &Ignore::I);
-	TestAssert(flag == 2);
-}
-void TestTask()
-{
-	int loop = 100000;
-	Detail::TaskList t;
-	Detail::Loop* ignore = nullptr;
-	int count = 0;
-	for (int i = 0; i < loop; i++)
-	{
-		t.Register(Detail::MakeTask([&](Detail::Loop&) {++count; return true; }));
-	}
-	for (int i = 0; i < loop; i++)
-	{
-		t.DoOnce(*ignore);
-	}
-	TestAssert(count == loop);
-}
-void TestCpuSpeed()
-{
-	size_t core = thread::hardware_concurrency();
-	if (core == 0)
-	{
-		core = 1;
-	}
-	vector<clock_t> rec;
-
-	size_t loop = 5000000000;
-	for (size_t i = 0; i < core; i++)
-	{
-		SetAffinity(pthread_self(), i);
-		sleep(1);
-
-		volatile size_t sum = 0;
-		auto t = clock();
-		for (size_t i = 0; i < loop; i++)
-		{
-			sum += i;
-		}
-		t = clock() - t;
-		rec.push_back(t);
-	}
-
-	int i = 0;
-	for (auto& item : rec)
-	{
-		std::cout << "core" << i++ << " " << (double)item / CLOCKS_PER_SEC << std::endl;
-	}
-}
+//void TestTask()
+//{
+//	int loop = 100000;
+//	Detail::TaskList t;
+//	Detail::Loop* ignore = nullptr;
+//	int count = 0;
+//	for (int i = 0; i < loop; i++)
+//	{
+//		t.Register(Detail::MakeTask([&](Detail::Loop&) {++count; return true; }));
+//	}
+//	for (int i = 0; i < loop; i++)
+//	{
+//		t.DoOnce(*ignore);
+//	}
+//	TestAssert(count == loop);
+//}
+//void TestCpuSpeed()
+//{
+//	size_t core = thread::hardware_concurrency();
+//	if (core == 0)
+//	{
+//		core = 1;
+//	}
+//	vector<clock_t> rec;
+//
+//	size_t loop = 5000000000;
+//	for (size_t i = 0; i < core; i++)
+//	{
+//		SetAffinity(pthread_self(), i);
+//		sleep(1);
+//
+//		volatile size_t sum = 0;
+//		auto t = clock();
+//		for (size_t i = 0; i < loop; i++)
+//		{
+//			sum += i;
+//		}
+//		t = clock() - t;
+//		rec.push_back(t);
+//	}
+//
+//	int i = 0;
+//	for (auto& item : rec)
+//	{
+//		std::cout << "core" << i++ << " " << (double)item / CLOCKS_PER_SEC << std::endl;
+//	}
+//}
 
 
 
@@ -167,18 +148,18 @@ void ReadCb(TcpConnection& self, Buffer&& buf, Error e);
 void WriteCb(TcpConnection& self, Buffer&& buf, Error e)
 {
 
-	if (e != Error::Success)
+	if (!e)
 	{
 		return;
 	}
 	//buf.PopBack();
 	//buf.PopFront();
-	buf.StretchTo();
-	self.AsyncReadSome(std::move(buf), 0, ReadCb);
+	//self.AsyncRead(12, ReadCb);
+	self.AsyncReadSome(ReadCb);
 }
 void ReadCb(TcpConnection& self, Buffer&& buf, Error e)
 {
-	if (e != Error::Success)
+	if (!e)
 	{
 		return;
 	}
@@ -186,9 +167,8 @@ void ReadCb(TcpConnection& self, Buffer&& buf, Error e)
 	//buf.PushBack(GetResponseEnd());
 
 	self.AsyncWrite(std::move(buf), 0, WriteCb);
-
 }
-// 未完成，使用这个结构是因为想只用epoll的线程安全机制和atomic实现整个结构线程安全；用作实验，没什么可用性
+// 未完成，各线程互相隔离，用作实验，没什么可用性
 
 // FIX: 虚拟机有些东西不好跟踪，换实体机再弄
 // FIX: 结构再弄简单点, 有些不需要的判断函数需要删除
@@ -216,9 +196,14 @@ int main()
 
 	TRACEPOINT(LogPriority::Info)("Echo test");
 
-	CreateTcpAccepter(MakeSockaddr(INADDR_ANY, 8989), [](TcpConnection& conn)
+	CreateTcpServer(MakeSockaddr(INADDR_ANY, 8989), [](TcpConnection& conn)
 	{
-		conn.AsyncReadSome(Buffer(0), 0, ReadCb);
+		//conn.AsyncRead(12,ReadCb);
+	/*	conn.AsyncReadMessage<uint16_t>(ReadCb, [](uint16_t val) {
+			return ntohs(val);
+		});*/
+
+		conn.AsyncReadSome(ReadCb);
 	})->Join();
 	return 0;
 }

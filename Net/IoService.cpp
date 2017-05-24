@@ -11,17 +11,17 @@ namespace Detail
 	// NOTICE: 参数: 线程数与核心比例
 	const float CoreScale = 1.;
 
-	class StopWorkerAttorney
-	{
-	public:
-		static void Stop(Worker& worker)
-		{
-			worker.Stop();
-		}
-	private:
-		StopWorkerAttorney() = delete;
-		~StopWorkerAttorney() = delete;
-	};
+	//class StopWorkerAttorney
+	//{
+	//public:
+	//	static void Stop(Worker& worker)
+	//	{
+	//		worker.Stop();
+	//	}
+	//private:
+	//	StopWorkerAttorney() = delete;
+	//	~StopWorkerAttorney() = delete;
+	//};
 
 
 	IoService::IoService()
@@ -53,13 +53,13 @@ namespace Detail
 
 	IoService::~IoService() = default;
 
-	void IoService::Shutdown()
-	{
-		for (auto& i : workers_)
-		{
-			StopWorkerAttorney::Stop(*i);
-		}
-	}
+	//void IoService::Shutdown()
+	//{
+	//	for (auto& i : workers_)
+	//	{
+	//		StopWorkerAttorney::Stop(*i);
+	//	}
+	//}
 
 	std::shared_ptr<IoService> IoService::Instance()
 	{

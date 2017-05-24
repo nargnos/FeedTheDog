@@ -9,6 +9,7 @@
 #include "Logger.h"
 #include "Loop.h"
 #include "Util.h"
+#include "GetLoopAttorney.h"
 namespace Detail
 {
 	Worker::Worker(unsigned int coreId)
@@ -16,26 +17,18 @@ namespace Detail
 		static int ID = 0;
 		workerID_ = ID++;
 		worker_ = std::make_unique<std::thread>([this]() {
-			RunAttorney::PrepareBuffers(GetLoop());
-			RunAttorney::Start(GetLoop());
+			RunAttorney::PrepareBuffers(loop_);
+			RunAttorney::Start(loop_);
 		});
 		SetAffinity(worker_->native_handle(), coreId);
 	}
 
 	Worker::~Worker()
 	{
-		assert(GetLoop().State() == Loop::LoopState::Stopped);
-
 		if (worker_)
 		{
 			worker_->join();
 		}
-	}
-
-
-	void Worker::Stop()
-	{
-		RunAttorney::Stop(GetLoop());
 	}
 
 	int Worker::ID() const
@@ -60,7 +53,5 @@ namespace Detail
 	{
 		return loop_;
 	}
-
-
 
 }  // namespace Detail

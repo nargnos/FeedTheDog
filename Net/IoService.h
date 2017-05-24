@@ -28,7 +28,7 @@ namespace Detail
 		friend GetWorkersAttorney;
 		~IoService();
 		// 终止后不能重新开始
-		void Shutdown();
+		//void Shutdown();
 		static std::shared_ptr<IoService> Instance();
 		void Join();
 		size_t WorkerCount() const;

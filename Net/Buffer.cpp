@@ -4,13 +4,13 @@ namespace Detail
 {
 	Buffer::Buffer(size_t size)
 	{
-		list_.push_front(Buffer::BufferPool().New(size));
+		PushSize(size);
 	}
 
 	Buffer::Buffer(const BlockPtr & vec)
 	{
 		assert(vec);
-		PushBack(vec);
+		list_.push_back(vec);
 	}
 
 	Buffer::Buffer(Buffer && val) :
@@ -21,105 +21,93 @@ namespace Detail
 
 	bool Buffer::IsEmpty() const
 	{
-
 		return list_.empty();
 	}
-
-	const BlockPtr & Buffer::EmplaceBack(size_t size)
-	{
-		return *list_.insert(list_.end(), BufferPool().New(size));
-	}
-
-	const BlockPtr & Buffer::EmplaceFront(size_t size)
-	{
-		return *list_.insert(list_.begin(), BufferPool().New(size));
-	}
-
-	void Buffer::PushBack(const BlockPtr & buf)
-	{
-		assert(buf);
-		list_.push_back(buf);
-	}
-
-	void Buffer::PushFront(const BlockPtr & buf)
-	{
-		assert(buf);
-		list_.push_front(buf);
-	}
-
-	void Buffer::PushBack(BlockPtr && buf)
-	{
-		assert(buf);
-		list_.push_back(std::move(buf));
-	}
-
-	void Buffer::PushFront(BlockPtr && buf)
-	{
-		assert(buf);
-		list_.push_front(std::move(buf));
-	}
-
-	void Buffer::PopBack()
-	{
-		assert(!IsEmpty());
-		list_.pop_back();
-	}
-
-	void Buffer::PopFront()
-	{
-		assert(!IsEmpty());
-		list_.pop_front();
-	}
-
 
 	size_t Buffer::Size() const
 	{
 		return Size(*this);
 	}
 
+	BlockPtr Buffer::New()
+	{
+		return BufferPool().New();
+	}
+
+	BlockPtr Buffer::New(size_t size)
+	{
+		return BufferPool().New(size);
+	}
+
+	// 保留各自vec大小，只在最后元素修改
+
 	void Buffer::Resize(size_t size)
 	{
 		// 等于0的buffer没有意义
-		assert(size > 0);
 		if (size == 0)
 		{
+			if (!list_.empty())
+			{
+				list_.erase(++list_.begin(), list_.end());
+				list_.front()->resize(0);
+			}
 			return;
 		}
 		auto it = list_.begin();
 		auto end = list_.end();
 
-		bool needAppend = true;
 		while (it != end)
 		{
 			auto& v = *it;
 			auto tmp = v->size();
-			if (__glibc_unlikely(size > tmp))
+			if (__glibc_unlikely(tmp == 0))
+			{
+				list_.erase(it++);
+				continue;
+			}
+			if (__glibc_unlikely(size >= tmp))
 			{
 				size -= tmp;
+				++it;
+			}
+			else if (size == 0)
+			{
+				list_.erase(it, end);
 			}
 			else
 			{
 				v->resize(size);
+				size = 0;
 				list_.erase(++it, end);
-				needAppend = false;
-				break;
 			}
-			++it;
 		}
 
-		if (needAppend)
+		if (size > 0)
 		{
-			EmplaceBackTotal(size);
+			PushSize(size);
 		}
 	}
 
 
-	// 伸缩大小，扩展到size大小，会修改每个元素的size, 0表示把每个元素都扩展到max
-
-	 void Buffer::StretchTo(size_t size)
+	void Buffer::PushSize(size_t size)
 	{
-		assert(!IsEmpty());
-		if (__glibc_likely(size == 0))
+		if (size == 0)
+		{
+			list_.push_back(New());
+			return;
+		}
+		while (size != 0)
+		{
+			auto ptr = New(size);
+			assert(ptr->size() <= size);
+			size -= ptr->size();
+			list_.push_back(ptr);
+		}
+	}
+
+	void Buffer::StretchTo(size_t size)
+	{
+		if (size == 0)
 		{
 			for (auto& i : list_)
 			{
@@ -127,36 +115,45 @@ namespace Detail
 			}
 			return;
 		}
+
 		auto it = list_.begin();
 		auto end = list_.end();
-		bool needAppend = true;
+
 		while (it != end)
 		{
 			auto& v = *it;
-			assert(!v->IsReadOnly());
-			auto cap = v->max_size();
-			if (size > cap)
+			auto max = v->max_size();
+			assert(max > 0);
+			if (size >= max)
 			{
-				size -= cap;
-				v->resize(cap);
+				v->ResizeToMax();
+				size -= max;
+				++it;
+			}
+			else if (size == 0)
+			{
+				list_.erase(it, end);
 			}
 			else
 			{
 				v->resize(size);
+				size = 0;
 				list_.erase(++it, end);
-				needAppend = false;
 				break;
 			}
-			++it;
 		}
-
-		if (needAppend)
+		if (size > 0)
 		{
-			EmplaceBackTotal(size);
+			PushSize(size);
 		}
 	}
 
-	const Buffer::BlockList & Buffer::VecList() const
+	Buffer::BlockList Buffer::Blocks()
+	{
+		return list_;
+	}
+
+	const Buffer::BlockList & Buffer::Blocks() const
 	{
 		return list_;
 	}
@@ -169,69 +166,30 @@ namespace Detail
 
 	size_t Buffer::Size(const std::vector<iovec>& iov)
 	{
-		size_t result = 0;
-		for (auto& i : iov)
-		{
-			result += i.iov_len;
-		}
-		return result;
+		return std::accumulate(iov.begin(), iov.end(), 0,
+			[](size_t val, const iovec& item) {
+			return val + item.iov_len;
+		});
 	}
 
 	size_t Buffer::Size(const Buffer & buf)
 	{
-		size_t result = 0;
-		for (auto& i : buf.list_)
+		auto& blocks = buf.Blocks();
+		return std::accumulate(blocks.begin(), blocks.end(), 0,
+			[](size_t val, const BlockPtr& ptr) {
+			return val + ptr->size();
+		});
+	}
+
+	std::vector<iovec> Buffer::GetIovec() const
+	{
+		std::vector<iovec> result(0);
+		result.reserve(Size());
+		for (auto& item : Blocks())
 		{
-			result += i->size();
+			result.push_back(item->GetIOV());
 		}
 		return result;
-	}
-
-	bool Buffer::HasReadOnlyBlock() const
-	{
-		for (auto& i : list_)
-		{
-			if (i->IsReadOnly())
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-
-	void Buffer::DropReadOnlyBlock()
-	{
-		auto it = list_.begin();
-		auto end = list_.end();
-		for (; it != end; ++it)
-		{
-			if ((*it)->IsReadOnly())
-			{
-				it = list_.erase(it);
-			}
-		}
-	}
-
-
-	void Buffer::EmplaceBackTotal(size_t size)
-	{
-		int count = 0;
-		while (true)
-		{
-			auto tmp = EmplaceBack(size)->size();
-			assert(size >= tmp);
-			if (size > tmp)
-			{
-				size -= tmp;
-				++count;
-				// 限制5倍MAX大小，申请的这个空间太大了
-				assert(count <= 5);
-			}
-			else
-			{
-				break;
-			}
-		}
 	}
 
 }  // namespace Detail

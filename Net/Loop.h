@@ -32,6 +32,7 @@ namespace Detail
 		friend FDTaskCtlAttorney;
 		friend RunAttorney;
 		friend RegisterTaskAttorney;
+
 		Loop();
 		~Loop();
 		LoopState State() const;

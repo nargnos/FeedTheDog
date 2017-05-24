@@ -18,4 +18,5 @@ namespace Detail
 		return Value;
 	}
 
+
 }  // namespace Detail

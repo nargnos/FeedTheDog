@@ -1,107 +1,172 @@
 ﻿#include "ProactorConnection.h"
 namespace Detail
 {
-
-	bool ProactorConnectionBase::IsClosed() const
-	{
-		return readState_.IsClose();
-	}
-
-	ProactorConnectionBase::ProactorConnectionBase(Loop & loop, IoState::IoStatus readStat, IoState::IoStatus writeStat) :
+	ProactorConnection::ProactorConnection(Loop & loop) :
 		loop_(loop),
-		readState_(readStat),
-		writeState_(writeStat),
+		currentEvent_(EPOLLIN | EPOLLOUT),
 		isSocketRegistered_(false),
 		isTaskRegistered_(false)
 	{
 	}
-
-	bool ProactorConnectionBase::HasError() const
+#ifdef NDEBUG
+	ProactorConnection::~ProactorConnection() = default;
+#else
+	ProactorConnection::~ProactorConnection()
 	{
-		return readState_.HasError();
+		assert(IsAllOpQueueEmpty());
 	}
+#endif // NDEBUG
 
-	bool ProactorConnectionBase::IsGood() const
+	void ProactorConnection::RegTask()
 	{
-		// 错误状态会同时设置，所以这里只用判断一个
-		return readState_.IsGood();
-		//return readState_.IsGood() && writeState_.IsGood();
-	}
-
-	Loop & ProactorConnectionBase::GetLoop() const
-	{
-		return loop_;
-	}
-
-
-	bool ProactorConnectionBase::OnBuffReady(IoState & s)
-	{
-		s.SetBuffReady(true);
-		return s.IsDoIo();
-	}
-
-	bool ProactorConnectionBase::OnIoReady(IoState & s)
-	{
-		s.SetIoReady(true);
-		return s.IsDoIo();
-	}
-
-	void ProactorConnectionBase::OnFailState() const
-	{
-		assert(false);
-		throw nullptr;
-	}
-
-	IoState & ProactorConnectionBase::ReadState()
-	{
-		return readState_;
-	}
-
-	IoState & ProactorConnectionBase::WriteState()
-	{
-		return writeState_;
-	}
-
-	// io过程中调用, 出现这个必注册epoll等待io可处理
-
-	void ProactorConnectionBase::OnCantIo(IoState & s)
-	{
-		assert(s.IsDoIo());
-		s.SetIoReady(false);
-		assert(!s.IsIoReady());
-	}
-
-	// 事件完成时调用
-
-	void ProactorConnectionBase::OnNoBuff(IoState & s)
-	{
-		s.SetBuffReady(false);
-	}
-
-	void ProactorConnectionBase::UnregisterSocket()
-	{
-		if (!isSocketRegistered_.load(std::memory_order_acquire))
+		if (__glibc_likely(isTaskRegistered_))
 		{
 			return;
 		}
-		FDTaskCtlAttorney::Del(loop_, this);
-		isSocketRegistered_.store(false,std::memory_order_release);
+		isTaskRegistered_ = true;
+		RegisterTaskAttorney::RegisterTask(loop_, shared_from_this());
 	}
-
-	void ProactorConnectionBase::RegisterSocket()
+	void ProactorConnection::CheckAndRegTask(EpollOption e)
 	{
-		// FIX: 当选择空闲线程投递connect的一些环境条件，如果条件考虑不全或被破坏，这里和unreg会有问题
-		// add后unreg才有机会执行
-		// reg同时被多个线程（2个，当前未完全退出）进入也是在add后
-		// add后reg不会在本线程再次被调用，之后的reg和unreg都是在同一线程被调用
-		// TODO: 队列那是否也要
-		if (isSocketRegistered_.load(std::memory_order_acquire))
+		if (CurrentEvent()&e)
+		{
+			RegTask();
+		}
+	}
+	void ProactorConnection::PostReadOp(OpPtr && op)
+	{
+		assert(!(currentEvent_ & EPOLLERR));
+		opqueue_[0].push(std::move(op));
+	}
+	void ProactorConnection::PostWriteOp(OpPtr && op)
+	{
+		assert(!(currentEvent_ & EPOLLERR));
+		opqueue_[1].push(std::move(op));
+	}
+	void ProactorConnection::Protect()
+	{
+		if (store_)
 		{
 			return;
 		}
-		isSocketRegistered_.store(true, std::memory_order_release);
-		// 不处理不会用到的pri
+		store_ = shared_from_this();
+	}
+	void ProactorConnection::Destory()
+	{
+		store_ = nullptr;
+	}
+	bool ProactorConnection::HasError() const
+	{
+		return currentEvent_&EPOLLERR;
+	}
+	EpollOption ProactorConnection::CurrentEvent() const
+	{
+		return currentEvent_;
+	}
+	void ProactorConnection::RegSocket()
+	{
+		if (__glibc_likely(isSocketRegistered_))
+		{
+			return;
+		}
+		isSocketRegistered_ = true;
 		FDTaskCtlAttorney::Add(loop_, EPOLLIN | EPOLLOUT | EPOLLET | EPOLLRDHUP, this);
+	}
+	void ProactorConnection::UnRegSocket()
+	{
+		if (__glibc_likely(isSocketRegistered_))
+		{
+			isSocketRegistered_ = false;
+			FDTaskCtlAttorney::Del(loop_, this);
+		}
+	}
+	void ProactorConnection::DoEvent(Loop & loop, EpollOption op)
+	{
+		assert(&loop_ == &loop);
+		if (currentEvent_ == op)
+		{
+			return;
+		}
+		currentEvent_ = op;
+		RegTask();
+	}
+	bool ProactorConnection::DoEvent(Loop & loop)
+	{
+		assert(&loop_ == &loop);
+		assert(!IsAllOpQueueEmpty());
+
+		static constexpr uint32_t flags[]
+		{
+			EPOLLIN | EPOLLRDHUP ,
+			EPOLLOUT
+		};
+
+		for (size_t i = 0; i < MaxOps; i++)
+		{
+			if ((currentEvent_&(flags[i] | EPOLLERR | EPOLLHUP)) &&
+				!opqueue_[i].empty())
+			{
+				auto& tmpQueue = opqueue_[i];
+				auto& op = *tmpQueue.front();
+				Error err{ 0,ErrStat::None };
+				op.DoOperator(err);
+				switch (err.State)
+				{
+				case ErrStat::Continue:
+					break;
+				case ErrStat::Pause:
+					currentEvent_ = ~flags[i] & currentEvent_;
+					Protect();
+					RegSocket();
+					break;
+				case ErrStat::Success:
+					// 会影响队列元素
+					op.DoComplete(err);
+					tmpQueue.pop();
+					break;
+				case ErrStat::Close:
+				case ErrStat::Error:
+					UnRegSocket();
+					Destory();
+					currentEvent_.Value |= EPOLLERR;
+					ClearQueue(opqueue_[i], err);
+					break;
+				default:
+					assert(false);
+					__builtin_unreachable();
+					break;
+				}
+			}
+		}
+
+		auto readEmpty = opqueue_[ReadOp].empty();
+		auto writeEmpty = opqueue_[WriteOp].empty();
+		if (((currentEvent_&EPOLLIN) && !readEmpty) ||
+			((currentEvent_&EPOLLOUT) && !writeEmpty))
+		{
+			return false;
+		}
+		if (readEmpty&&writeEmpty)
+		{
+			Destory();
+			UnRegSocket();
+		}
+		isTaskRegistered_ = false;
+		return true;
+
+	}
+	void ProactorConnection::ClearQueue(OpQueue & q, Error err)
+	{
+		while (!q.empty())
+		{
+			q.front()->DoComplete(err);
+			q.pop();
+		}
+	}
+	bool ProactorConnection::IsAllOpQueueEmpty()
+	{
+		assert(MaxOps == 2);
+		return opqueue_[0].empty() && opqueue_[1].empty();
 	}
 }  // namespace Detail
 

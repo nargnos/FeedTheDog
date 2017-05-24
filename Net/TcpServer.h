@@ -12,11 +12,11 @@ namespace Detail
 {
 	class Worker;
 	class IoService;
-	class ITcpAcceptor 
+	class ITcpServer 
 	{
 	public:
-		ITcpAcceptor() = default;
-		virtual ~ITcpAcceptor() = default;
+		ITcpServer() = default;
+		virtual ~ITcpServer() = default;
 		virtual void Cancel() = 0;
 		virtual void Join() const= 0;
 	private:
@@ -24,14 +24,14 @@ namespace Detail
 	};
 
 
-	class TcpAcceptorBase :
+	class TcpServerBase :
 		protected IFDTask,
-		public ITcpAcceptor,
+		public ITcpServer,
 		public Noncopyable
 	{
 	public:
-		explicit TcpAcceptorBase(const sockaddr_in& bind);
-		virtual ~TcpAcceptorBase();
+		explicit TcpServerBase(const sockaddr_in& bind);
+		virtual ~TcpServerBase();
 
 		virtual int FD() const;
 		// 有可能在其它线程关闭
@@ -52,12 +52,12 @@ namespace Detail
 
 	};
 	template<typename TAcceptHandler, typename TFailedHandler>
-	class TcpAccetpor :
-		public TcpAcceptorBase
+	class TcpServer :
+		public TcpServerBase
 	{
 	public:
-		TcpAccetpor(const sockaddr_in& bind, TAcceptHandler&& ah, TFailedHandler&& fh) :
-			TcpAcceptorBase(bind),
+		TcpServer(const sockaddr_in& bind, TAcceptHandler&& ah, TFailedHandler&& fh) :
+			TcpServerBase(bind),
 			acceptHandler_(std::forward<TAcceptHandler>(ah)),
 			failedHandler_(std::forward<TFailedHandler>(fh))
 		{
@@ -118,20 +118,20 @@ namespace Detail
 	// void(TcpConnection&)
 	// void()
 	template<typename TAcceptHandler, typename TFailedHandler>
-	std::shared_ptr<ITcpAcceptor> CreateTcpAccepter(const sockaddr_in& bind,
+	std::shared_ptr<ITcpServer> CreateTcpServer(const sockaddr_in& bind,
 		TAcceptHandler&& acceptCallback, TFailedHandler&& failedCallback)
 	{
-		return std::make_shared<TcpAccetpor<TAcceptHandler, TFailedHandler>>(
+		return std::make_shared<TcpServer<TAcceptHandler, TFailedHandler>>(
 			bind, std::forward<TAcceptHandler>(acceptCallback), std::forward<TFailedHandler>(failedCallback));
 	}
 	// void(TcpConnection&)
 	template<typename TAcceptHandler>
-	std::shared_ptr<ITcpAcceptor> CreateTcpAccepter(const sockaddr_in& bind,
+	std::shared_ptr<ITcpServer> CreateTcpServer(const sockaddr_in& bind,
 		TAcceptHandler&& acceptCallback)
 	{
-		return CreateTcpAccepter(bind, std::forward<TAcceptHandler>(acceptCallback), []() {});
+		return CreateTcpServer(bind, std::forward<TAcceptHandler>(acceptCallback), []() {});
 	}
 }  // namespace Detail
-using Detail::CreateTcpAccepter;
+using Detail::CreateTcpServer;
 #endif // TCPACCEPTOR_H_
 

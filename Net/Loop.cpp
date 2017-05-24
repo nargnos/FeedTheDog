@@ -153,4 +153,4 @@ namespace Detail
 	{
 		throw nullptr;
 	}
-}  // namespace Detail
+	}  // namespace Detail

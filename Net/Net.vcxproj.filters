@@ -50,16 +50,10 @@
     <ClCompile Include="TcpProactorConnection.cpp">
       <Filter>Conn</Filter>
     </ClCompile>
-    <ClCompile Include="TcpAcceptor.cpp">
-      <Filter>Conn</Filter>
-    </ClCompile>
     <ClCompile Include="Worker.cpp">
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="Loop.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="IoState.cpp">
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="IoService.cpp">
@@ -73,6 +67,18 @@
     </ClCompile>
     <ClCompile Include="Util.cpp">
       <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Operator.cpp">
+      <Filter>Conn</Filter>
+    </ClCompile>
+    <ClCompile Include="Progress.cpp">
+      <Filter>Buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="TcpOperator.cpp">
+      <Filter>Conn</Filter>
+    </ClCompile>
+    <ClCompile Include="TcpServer.cpp">
+      <Filter>Conn</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -104,12 +110,6 @@
       <Filter>Buffer</Filter>
     </ClInclude>
     <ClInclude Include="Buffer.h">
-      <Filter>Buffer</Filter>
-    </ClInclude>
-    <ClInclude Include="BufferRecord.h">
-      <Filter>Buffer</Filter>
-    </ClInclude>
-    <ClInclude Include="TransferProgress.h">
       <Filter>Buffer</Filter>
     </ClInclude>
     <ClInclude Include="TcpAttachAttorney.h">
@@ -148,9 +148,6 @@
     <ClInclude Include="TcpProactorConnection.h">
       <Filter>Conn</Filter>
     </ClInclude>
-    <ClInclude Include="TcpAcceptor.h">
-      <Filter>Conn</Filter>
-    </ClInclude>
     <ClInclude Include="ObjectPool.h">
       <Filter>Buffer</Filter>
     </ClInclude>
@@ -158,9 +155,6 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Loop.h">
-      <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="IoState.h">
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="IoService.h">
@@ -174,6 +168,21 @@
     </ClInclude>
     <ClInclude Include="BaseFromMember.h">
       <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Operator.h">
+      <Filter>Buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="GetSocketAttorney.h">
+      <Filter>Attorney</Filter>
+    </ClInclude>
+    <ClInclude Include="TcpOperator.h">
+      <Filter>Conn</Filter>
+    </ClInclude>
+    <ClInclude Include="Progress.h">
+      <Filter>Buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="TcpServer.h">
+      <Filter>Conn</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

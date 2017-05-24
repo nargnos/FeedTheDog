@@ -1,4 +1,4 @@
-﻿#include "TcpAcceptor.h"
+﻿#include "TcpServer.h"
 #include <array>
 #include "Loop.h"
 #include "IoService.h"
@@ -9,14 +9,14 @@
 #include "GetWorkersAttorney.h"
 namespace Detail
 {
-	int TcpAcceptorBase::FD() const
+	int TcpServerBase::FD() const
 	{
 		return socket_.FD();
 	}
 
 	// 有可能在其它线程关闭
 
-	void TcpAcceptorBase::Cancel()
+	void TcpServerBase::Cancel()
 	{
 		auto f = false;
 		if (isCanceled_.compare_exchange_strong(f, true, std::memory_order_release))
@@ -26,11 +26,11 @@ namespace Detail
 			socket_.Close();
 		}
 	}
-	TcpAcceptorBase::~TcpAcceptorBase()
+	TcpServerBase::~TcpServerBase()
 	{
 		Cancel();
 	}
-	TcpAcceptorBase::TcpAcceptorBase(const sockaddr_in & bind) :
+	TcpServerBase::TcpServerBase(const sockaddr_in & bind) :
 		ios_(IoService::Instance()),
 		isCanceled_(false),
 		needReregister_(false)
@@ -65,23 +65,23 @@ namespace Detail
 		needReregister_ = ios_->WorkerCount() > 1;
 		RegListen();
 	}
-	void TcpAcceptorBase::RegListen()
+	void TcpServerBase::RegListen()
 	{
 		// 选择worker注册
 		auto& worker = GetWorkersAttorney::FirstWorker(*ios_);
 		auto& newLoop = GetLoopAttorney::GetLoop(*worker);
 		RegListen(newLoop);
 	}
-	void TcpAcceptorBase::RegListen(Loop & loop)
+	void TcpServerBase::RegListen(Loop & loop)
 	{
 		FDTaskCtlAttorney::Add(loop, EPOLLIN, this);
 	}
-	void TcpAcceptorBase::UnRegListen(Loop & loop)
+	void TcpServerBase::UnRegListen(Loop & loop)
 	{
 		// 只在自身线程使用
 		FDTaskCtlAttorney::Del(loop, this);
 	}
-	void TcpAcceptorBase::Balance(Loop & loop)
+	void TcpServerBase::Balance(Loop & loop)
 	{
 		// NOTICE: 参数: 堆积数超过这个就考虑交出权利
 		// 数值越大波动越大，到某个值越小越慢，门槛过高会让各cpu不平均	
@@ -106,13 +106,13 @@ namespace Detail
 			RegListen(*perf.IdleLoop);
 		}
 	}
-	bool TcpAcceptorBase::IsTooBusy(size_t selfCount, size_t sum)
+	bool TcpServerBase::IsTooBusy(size_t selfCount, size_t sum)
 	{
 		// NOTICE: 参数: 忙判定
 		constexpr int rsh = 3;
 		return selfCount >= (sum - (sum >> rsh));
 	}
-	void TcpAcceptorBase::Join() const
+	void TcpServerBase::Join() const
 	{
 		ios_->Join();
 	}
