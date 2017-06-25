@@ -5,12 +5,20 @@
 #include <sys/epoll.h>
 namespace Detail
 {
-
 	struct EpollOption
 	{
-		EpollOption(uint32_t event);
-		constexpr EpollOption();
-		operator uint32_t() const;
+		constexpr EpollOption(uint32_t event) :
+			Value(event)
+		{
+
+		}
+		constexpr EpollOption() : Value(0)
+		{
+		}
+		inline operator uint32_t() const
+		{
+			return Value;
+		}
 		union
 		{
 			uint32_t Value;
@@ -35,7 +43,7 @@ namespace Detail
 				bool : 1; // x4000
 				bool : 1; // x8000
 
-				unsigned int : 8;
+				unsigned char : 8;
 
 				bool : 1; // x 100 0000
 				bool : 1; // x 200 0000

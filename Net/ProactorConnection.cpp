@@ -1,11 +1,16 @@
 ﻿#include "ProactorConnection.h"
+#include "TlsPackage.h"
+#include "SocketCpp.h"
 namespace Detail
 {
-	ProactorConnection::ProactorConnection(Loop & loop) :
+	ProactorConnection::ProactorConnection(Loop & loop, Socket* socketPtr) :
+		storePos_(GlobalTlsPackage::Instance().TlsConnectionList.end()),
 		loop_(loop),
+		socketPtr_(socketPtr),
 		currentEvent_(EPOLLIN | EPOLLOUT),
 		isSocketRegistered_(false),
-		isTaskRegistered_(false)
+		isTaskRegistered_(false),
+		isProtected_(false)
 	{
 	}
 #ifdef NDEBUG
@@ -13,9 +18,18 @@ namespace Detail
 #else
 	ProactorConnection::~ProactorConnection()
 	{
+		assert(storePos_ == GlobalTlsPackage::Instance().TlsConnectionList.end());
 		assert(IsAllOpQueueEmpty());
 	}
 #endif // NDEBUG
+
+	void ProactorConnection::ClearQueues(Error err)
+	{
+		for (auto& i : opqueue_)
+		{
+			ClearQueue(i, err);
+		}
+	}
 
 	void ProactorConnection::RegTask()
 	{
@@ -28,32 +42,45 @@ namespace Detail
 	}
 	void ProactorConnection::CheckAndRegTask(EpollOption e)
 	{
-		if (CurrentEvent()&e)
+		if (CurrentEvent() ^ e)
 		{
 			RegTask();
 		}
 	}
 	void ProactorConnection::PostReadOp(OpPtr && op)
 	{
-		assert(!(currentEvent_ & EPOLLERR));
+		// assert(!(currentEvent_ & EPOLLERR));
 		opqueue_[0].push(std::move(op));
 	}
 	void ProactorConnection::PostWriteOp(OpPtr && op)
 	{
-		assert(!(currentEvent_ & EPOLLERR));
+		// assert(!(currentEvent_ & EPOLLERR));
 		opqueue_[1].push(std::move(op));
 	}
 	void ProactorConnection::Protect()
 	{
-		if (store_)
+		if (isProtected_)
 		{
 			return;
 		}
-		store_ = shared_from_this();
+		auto& tls = GlobalTlsPackage::Instance();
+		auto storeEnd = tls.TlsConnectionList.end();
+		assert(storePos_ == storeEnd);
+		storePos_ = tls.TlsConnectionList.insert(storeEnd, shared_from_this());
+		isProtected_ = true;
 	}
 	void ProactorConnection::Destory()
 	{
-		store_ = nullptr;
+		if (!isProtected_)
+		{
+			return;
+		}
+		auto& tls = GlobalTlsPackage::Instance();
+		auto storeEnd = tls.TlsConnectionList.end();
+		assert(storePos_ != storeEnd);
+		tls.TlsConnectionList.erase(storePos_);
+		storePos_ = storeEnd;
+		isProtected_ = false;
 	}
 	bool ProactorConnection::HasError() const
 	{
@@ -63,12 +90,40 @@ namespace Detail
 	{
 		return currentEvent_;
 	}
+
+	void ProactorConnection::Recycle()
+	{
+		CheckTid();
+		assert(&loop_ == GlobalTlsPackage::Instance().TlsLoop);
+		assert(storePos_ == GlobalTlsPackage::Instance().TlsConnectionList.end());
+		assert(IsAllOpQueueEmpty());
+		assert(!isSocketRegistered_);
+		assert(!isTaskRegistered_);
+		assert(!isProtected_);
+		if (socketPtr_ != nullptr)
+		{
+			socketPtr_->Close();
+			socketPtr_ = nullptr;
+		}
+		currentEvent_ = EPOLLIN | EPOLLOUT;
+	}
+	void ProactorConnection::CheckFd()
+	{
+		assert(socketPtr_ != nullptr);
+		assert(socketPtr_->FD() != -1);
+	}
+	int ProactorConnection::FD() const
+	{
+		assert(socketPtr_ != nullptr);
+		return socketPtr_->FD();
+	}
 	void ProactorConnection::RegSocket()
 	{
 		if (__glibc_likely(isSocketRegistered_))
 		{
 			return;
 		}
+		assert(!HasError());
 		isSocketRegistered_ = true;
 		FDTaskCtlAttorney::Add(loop_, EPOLLIN | EPOLLOUT | EPOLLET | EPOLLRDHUP, this);
 	}
@@ -78,6 +133,14 @@ namespace Detail
 		{
 			isSocketRegistered_ = false;
 			FDTaskCtlAttorney::Del(loop_, this);
+		}
+	}
+	void ProactorConnection::SetNonBlocking()
+	{
+		assert(socketPtr_ != nullptr);
+		if (UNLIKELY(!socketPtr_->SetNonBlocking()))
+		{
+			TRACEPOINT(LogPriority::Warning)("tcpsocket setnonblocking failed");
 		}
 	}
 	void ProactorConnection::DoEvent(Loop & loop, EpollOption op)
@@ -107,9 +170,8 @@ namespace Detail
 				!opqueue_[i].empty())
 			{
 				auto& tmpQueue = opqueue_[i];
-				auto& op = *tmpQueue.front();
 				Error err{ 0,ErrStat::None };
-				op.DoOperator(err);
+				tmpQueue.front()->DoOperator(err);
 				switch (err.State)
 				{
 				case ErrStat::Continue:
@@ -121,15 +183,18 @@ namespace Detail
 					break;
 				case ErrStat::Success:
 					// 会影响队列元素
-					op.DoComplete(err);
+				{
+					auto tmpop = std::move(tmpQueue.front());
 					tmpQueue.pop();
-					break;
+					tmpop->DoComplete(err);
+				}
+				break;
 				case ErrStat::Close:
 				case ErrStat::Error:
-					UnRegSocket();
-					Destory();
 					currentEvent_.Value |= EPOLLERR;
+					UnRegSocket();
 					ClearQueue(opqueue_[i], err);
+					Destory();
 					break;
 				default:
 					assert(false);
@@ -148,8 +213,8 @@ namespace Detail
 		}
 		if (readEmpty&&writeEmpty)
 		{
-			Destory();
 			UnRegSocket();
+			Destory();
 		}
 		isTaskRegistered_ = false;
 		return true;
@@ -167,6 +232,18 @@ namespace Detail
 	{
 		assert(MaxOps == 2);
 		return opqueue_[0].empty() && opqueue_[1].empty();
+	}
+	void ProactorConnection::Close()
+	{
+		if (socketPtr_ != nullptr)
+		{
+			UnRegSocket();
+			socketPtr_->Close();
+			socketPtr_ = nullptr;
+			ClearQueues(Error{ 0,ErrStat::Close });
+			Destory();
+			assert(IsAllOpQueueEmpty());
+		}
 	}
 }  // namespace Detail
 

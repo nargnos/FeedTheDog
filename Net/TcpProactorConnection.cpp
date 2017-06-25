@@ -1,7 +1,8 @@
 ﻿#include "TcpProactorConnection.h"
-
+#include "ConnectionAttorney.h"
+#include "TlsPackage.h"
 Detail::TcpProactorConnection::TcpProactorConnection(Loop & loop, int fd) :
-	ProactorConnection(loop),
+	ProactorConnection(loop, &socket_),
 	socket_(fd)
 {
 	SetNonBlocking();
@@ -9,12 +10,17 @@ Detail::TcpProactorConnection::TcpProactorConnection(Loop & loop, int fd) :
 
 std::shared_ptr<Detail::TcpProactorConnection> Detail::TcpProactorConnection::Attach(Loop & loop, int fd)
 {
-	return std::shared_ptr<TcpProactorConnection>(new TcpProactorConnection(loop, fd));
+	return GlobalTlsPackage::Instance().TlsConnPool.GetTcpConn(loop, fd);
 }
 
-int Detail::TcpProactorConnection::FD() const
+bool Detail::TcpProactorConnection::SetKeepAlive(bool opt) const
 {
-	return socket_.FD();
+	return socket_.SetKeepAlive(opt);
+}
+
+bool Detail::TcpProactorConnection::SetNoDelay(bool opt) const
+{
+	return socket_.SetNoDelay(opt);
 }
 
 Detail::TcpSocket & Detail::TcpProactorConnection::Socket()
@@ -22,10 +28,3 @@ Detail::TcpSocket & Detail::TcpProactorConnection::Socket()
 	return socket_;
 }
 
-void Detail::TcpProactorConnection::SetNonBlocking()
-{
-	if (!socket_.SetNonBlocking())
-	{
-		TRACEPOINT(LogPriority::Warning)("tcpsocket setnonblocking failed");
-	}
-}

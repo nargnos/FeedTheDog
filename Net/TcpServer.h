@@ -78,7 +78,6 @@ namespace Detail
 			{
 				UnRegListen(loop);
 				OnFailed();
-				assert(false);
 				return;
 			}
 			assert(op.Flags.In);
@@ -92,13 +91,21 @@ namespace Detail
 				else
 				{
 					auto err = errno;
-					if (__glibc_likely(err == EAGAIN || err == EWOULDBLOCK || err == EINTR))
+					if (LIKELY(err == EAGAIN || err == EWOULDBLOCK || err == EINTR))
 					{
 						break;
 					}
+					// EMFILE 还是直接退出好了
+					/*else if(UNLIKELY(err == EMFILE))
+					{
+						TRACEERRNO(LogPriority::Emerg);
+						// TODO: 丢弃
+						break;
+					}*/
 					else
 					{
-						TRACEERRNOEXITSTR(LogPriority::Emerg, "Accept Failed");
+						OnFailed();
+						return;
 					}
 				}
 			} while (true);
@@ -108,8 +115,6 @@ namespace Detail
 		void OnFailed()
 		{
 			failedHandler_();
-			TRACEPOINT_LINE(LogPriority::Debug);
-			TRACEERRNOEXIT(LogPriority::Emerg);
 		}
 
 		TAcceptHandler acceptHandler_;
@@ -129,9 +134,14 @@ namespace Detail
 	std::shared_ptr<ITcpServer> CreateTcpServer(const sockaddr_in& bind,
 		TAcceptHandler&& acceptCallback)
 	{
-		return CreateTcpServer(bind, std::forward<TAcceptHandler>(acceptCallback), []() {});
+		return CreateTcpServer(bind, std::forward<TAcceptHandler>(acceptCallback), []()
+		{
+			TRACEPOINT_LINE(LogPriority::Debug);
+			TRACEERRNOEXITSTR(LogPriority::Emerg, "Accept Failed");
+		});
 	}
 }  // namespace Detail
 using Detail::CreateTcpServer;
+using Detail::ITcpServer;
 #endif // TCPACCEPTOR_H_
 

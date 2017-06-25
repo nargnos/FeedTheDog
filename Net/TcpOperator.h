@@ -13,9 +13,6 @@ namespace Detail
 {
 	void AddProgress(Progress& p, size_t trans, Error& e);
 
-
-
-
 	// FIX: 去冗余，优化算法，提取共性，扩展udp
 	template<typename TConnection, typename TCallback>
 	class TcpReadSomeOperator :
@@ -95,7 +92,7 @@ namespace Detail
 			auto ptr = progress_.Iovec();
 			auto count = progress_.Count();
 			assert(count > 0);
-			auto trans = s.Writev(ptr, count);
+			auto trans = s.Writev(ptr, static_cast<int>(count));
 			if (LIKELY(trans > 0))
 			{
 				AddProgress(progress_, trans, error);

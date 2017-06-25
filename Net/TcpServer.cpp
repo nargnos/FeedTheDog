@@ -85,7 +85,7 @@ namespace Detail
 	{
 		// NOTICE: 参数: 堆积数超过这个就考虑交出权利
 		// 数值越大波动越大，到某个值越小越慢，门槛过高会让各cpu不平均	
-		constexpr int limit = 8;
+		constexpr int limit = 8; // 门槛
 		if (!needReregister_ || loop.TaskCount() < limit)
 		{
 			return;

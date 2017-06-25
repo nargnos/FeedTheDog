@@ -4,18 +4,17 @@ namespace Detail
 
 	Block::reference Block::operator[](int index)
 	{
-		assert(index > 0 && index < size());
+		assert(index > 0 && index < (int)size());
 		return begin()[index];
 	}
 	Block::const_reference Block::operator[](int index) const
 	{
-		assert(index > 0 && index < size());
+		assert(index > 0 && index < (int)size());
 		return begin()[index];
 	}
-	Block::Block(void * ptr, size_t max, size_t size, bool isReadOnly) :
+	Block::Block(void * ptr, size_t max, size_t size) :
 		iov_{ ptr,size },
-		max_(max),
-		isReadOnly_(isReadOnly)
+		max_(max)
 	{
 		assert(ptr);
 	}
@@ -71,11 +70,6 @@ namespace Detail
 		iov_.iov_len = newsize;
 	}
 
-	bool Block::IsReadOnly() const
-	{
-		return isReadOnly_;
-	}
-
 	const iovec& Block::GetIOV() const
 	{
 		return iov_;
@@ -83,7 +77,7 @@ namespace Detail
 
 
 	BigBlock::BigBlock(size_t size) :
-		Block(&buf_, Max, size, false)
+		Block(&buf_, Max, size)
 	{
 		assert(size <= Max);
 	}
@@ -92,7 +86,7 @@ namespace Detail
 	BigBlock::~BigBlock() = default;
 
 	SmallBlock::SmallBlock(size_t size) :
-		Block(&buf_, Max, size, false)
+		Block(&buf_, Max, size)
 	{
 		assert(size <= Max);
 	}
@@ -102,8 +96,7 @@ namespace Detail
 		VectorBlock::Member(vec),
 		Block(VectorBlock::Member::Member().data(),
 			VectorBlock::Member::Member().size(),
-			VectorBlock::Member::Member().size(),
-			true)
+			VectorBlock::Member::Member().size())
 	{
 	}
 
@@ -111,8 +104,7 @@ namespace Detail
 		VectorBlock::Member(std::move(vec)),
 		Block(VectorBlock::Member::Member().data(),
 			VectorBlock::Member::Member().size(),
-			VectorBlock::Member::Member().size(),
-			true)
+			VectorBlock::Member::Member().size())
 	{
 
 	}
@@ -121,22 +113,20 @@ namespace Detail
 		StringBlock::Member(str),
 		Block(const_cast<char*>(StringBlock::Member::Member().data()),
 			StringBlock::Member::Member().length(),
-			StringBlock::Member::Member().length(),
-			true)
+			StringBlock::Member::Member().length())
 	{
 	}
 	StringBlock::StringBlock(std::string && str) :
 		StringBlock::Member(std::move(str)),
 		Block(const_cast<char*>(StringBlock::Member::Member().data()),
 			StringBlock::Member::Member().length(),
-			StringBlock::Member::Member().length(),
-			true)
+			StringBlock::Member::Member().length())
 	{
-		
+
 	}
 
 	CharBlock::CharBlock(const char * str, size_t len) :
-		Block(const_cast<char*>(str), len, len, true)
+		Block(const_cast<char*>(str), len, len)
 	{
 	}
 

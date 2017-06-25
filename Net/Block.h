@@ -29,9 +29,8 @@ namespace Detail
 		typedef size_t size_type;
 		typedef std::ptrdiff_t difference_type;
 
-		Block(void* ptr, size_t max, size_t size, bool isReadOnly);
+		Block(void* ptr, size_t max, size_t size);
 		virtual ~Block();
-		bool IsReadOnly() const;
 		const_iterator begin() const;
 		const_iterator data()const;
 		const_iterator end() const;
@@ -46,13 +45,13 @@ namespace Detail
 		void resize(size_t newsize);
 		inline void ResizeToMax()
 		{
+			// TODO: max在编译时可确定
 			iov_.iov_len = max_;
 		}
 	protected:
 		// buffer指针和当前设置大小存里面
 		iovec iov_;
 		const size_t max_;
-		const bool isReadOnly_;
 	};
 
 	class SmallBlock :
@@ -99,7 +98,7 @@ namespace Detail
 		using Member = BaseFromMember<std::string>;
 
 	};
-	// 这里指的是全局str
+	// 这里指的是全局str, 不会做副本，所以要自己维持指针生存期
 	class CharBlock :
 		public Block
 	{

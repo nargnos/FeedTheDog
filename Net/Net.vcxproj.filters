@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
     <ClCompile Include="FDTaskCtlAttorney.cpp">
       <Filter>Attorney</Filter>
     </ClCompile>
@@ -68,18 +67,47 @@
     <ClCompile Include="Util.cpp">
       <Filter>Util</Filter>
     </ClCompile>
-    <ClCompile Include="Operator.cpp">
-      <Filter>Conn</Filter>
-    </ClCompile>
-    <ClCompile Include="Progress.cpp">
-      <Filter>Buffer</Filter>
-    </ClCompile>
-    <ClCompile Include="TcpOperator.cpp">
-      <Filter>Conn</Filter>
-    </ClCompile>
     <ClCompile Include="TcpServer.cpp">
       <Filter>Conn</Filter>
     </ClCompile>
+    <ClCompile Include="TidChecker.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="TcpOperator.cpp">
+      <Filter>Operator</Filter>
+    </ClCompile>
+    <ClCompile Include="Progress.cpp">
+      <Filter>Operator</Filter>
+    </ClCompile>
+    <ClCompile Include="Operator.cpp">
+      <Filter>Operator</Filter>
+    </ClCompile>
+    <ClCompile Include="SocketAttorney.cpp">
+      <Filter>Attorney</Filter>
+    </ClCompile>
+    <ClCompile Include="echotest.cpp" />
+    <ClCompile Include="ConnectionAttorney.cpp">
+      <Filter>Attorney</Filter>
+    </ClCompile>
+    <ClCompile Include="ConnectionPool.cpp">
+      <Filter>Conn</Filter>
+    </ClCompile>
+    <ClCompile Include="TlsPackage.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="TimerFd.cpp">
+      <Filter>Sys</Filter>
+    </ClCompile>
+    <ClCompile Include="TimerManager.cpp">
+      <Filter>Task</Filter>
+    </ClCompile>
+    <ClCompile Include="TimeHeap.cpp">
+      <Filter>Task</Filter>
+    </ClCompile>
+    <ClCompile Include="FdTask.cpp">
+      <Filter>Task</Filter>
+    </ClCompile>
+    <ClCompile Include="Task.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FDTaskCtlAttorney.h">
@@ -148,9 +176,6 @@
     <ClInclude Include="TcpProactorConnection.h">
       <Filter>Conn</Filter>
     </ClInclude>
-    <ClInclude Include="ObjectPool.h">
-      <Filter>Buffer</Filter>
-    </ClInclude>
     <ClInclude Include="Worker.h">
       <Filter>Core</Filter>
     </ClInclude>
@@ -169,20 +194,59 @@
     <ClInclude Include="BaseFromMember.h">
       <Filter>Util</Filter>
     </ClInclude>
-    <ClInclude Include="Operator.h">
-      <Filter>Buffer</Filter>
-    </ClInclude>
     <ClInclude Include="GetSocketAttorney.h">
       <Filter>Attorney</Filter>
     </ClInclude>
-    <ClInclude Include="TcpOperator.h">
-      <Filter>Conn</Filter>
-    </ClInclude>
-    <ClInclude Include="Progress.h">
-      <Filter>Buffer</Filter>
-    </ClInclude>
     <ClInclude Include="TcpServer.h">
       <Filter>Conn</Filter>
+    </ClInclude>
+    <ClInclude Include="TidChecker.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryPool.h">
+      <Filter>Buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="TcpOperator.h">
+      <Filter>Operator</Filter>
+    </ClInclude>
+    <ClInclude Include="Progress.h">
+      <Filter>Operator</Filter>
+    </ClInclude>
+    <ClInclude Include="Operator.h">
+      <Filter>Operator</Filter>
+    </ClInclude>
+    <ClInclude Include="ConnectionPool.h">
+      <Filter>Conn</Filter>
+    </ClInclude>
+    <ClInclude Include="IConnection.h">
+      <Filter>Conn</Filter>
+    </ClInclude>
+    <ClInclude Include="TlsPackage.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="ConnectionAttorney.h">
+      <Filter>Attorney</Filter>
+    </ClInclude>
+    <ClInclude Include="SocketAttorney.h">
+      <Filter>Attorney</Filter>
+    </ClInclude>
+    <ClInclude Include="TimerFd.h">
+      <Filter>Sys</Filter>
+    </ClInclude>
+    <ClInclude Include="TimerManager.h">
+      <Filter>Task</Filter>
+    </ClInclude>
+    <ClInclude Include="TimeHeap.h">
+      <Filter>Task</Filter>
+    </ClInclude>
+    <ClInclude Include="FdTask.h">
+      <Filter>Task</Filter>
+    </ClInclude>
+    <ClInclude Include="TimerCallback.h">
+      <Filter>Task</Filter>
+    </ClInclude>
+    <ClInclude Include="Timer.h">
+      <Filter>Task</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -213,6 +277,9 @@
     </Filter>
     <Filter Include="Core">
       <UniqueIdentifier>{b2bac3b6-d160-4bb7-98dd-4d13f60b2ba1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Operator">
+      <UniqueIdentifier>{7bb3ab19-9210-4b6e-9783-dc84e81af555}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

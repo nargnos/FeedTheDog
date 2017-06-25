@@ -10,6 +10,7 @@
 #include "Loop.h"
 #include "Util.h"
 #include "GetLoopAttorney.h"
+#include "TlsPackage.h"
 namespace Detail
 {
 	Worker::Worker(unsigned int coreId)
@@ -18,6 +19,7 @@ namespace Detail
 		workerID_ = ID++;
 		worker_ = std::make_unique<std::thread>([this]() {
 			RunAttorney::PrepareBuffers(loop_);
+			GlobalTlsPackage::Instance().SetLoop(&loop_);
 			RunAttorney::Start(loop_);
 		});
 		SetAffinity(worker_->native_handle(), coreId);

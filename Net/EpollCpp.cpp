@@ -40,8 +40,7 @@ namespace Detail
 
 	void EpollCpp::Del(int fd) const
 	{
-		constexpr static epoll_event ev{ 0,nullptr };
-		EpollCtl(EPOLL_CTL_DEL, fd, ev);
+		EpollCtl(EPOLL_CTL_DEL, fd, epoll_event{ 0,nullptr });
 	}
 
 	size_t EpollCpp::Wait(Events& e, int ms)

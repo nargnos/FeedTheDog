@@ -1,10 +1,28 @@
 ﻿#include "SocketCpp.h"
+#include <utility>
 namespace Detail
 {
 
 	Socket::Socket(int fd) :
 		fd_(fd)
 	{
+	}
+
+	Socket::Socket(Socket && sock)
+	{
+		*this = std::move(sock);
+	}
+
+	Socket & Socket::operator=(Socket && sock)
+	{
+		if (&sock == this)
+		{
+			return sock;
+		}
+		assert(fd_ == -1);
+		fd_ = sock.fd_;
+		sock.fd_ = -1;
+		return *this;
 	}
 
 
@@ -85,15 +103,6 @@ namespace Detail
 		return getsockopt(fd_, level, opt, optval, len) != -1;
 	}
 
-	bool Socket::SetNoDelay(bool opt) const
-	{
-		int val = opt ? 1 : 0;
-		return SetSocketOption(SocketLevel::IPProtoTcp,
-			OptName::Opt_TcpNoDelay,
-			&val,
-			sizeof(val));
-	}
-
 	bool Socket::SetReuseAddr(bool opt) const
 	{
 		int val = opt ? 1 : 0;
@@ -112,18 +121,12 @@ namespace Detail
 			sizeof(val));
 	}
 
-	bool Socket::SetKeepAlive(bool opt) const
-	{
-		int val = opt ? 1 : 0;
-		return SetSocketOption(SocketLevel::SolSocket,
-			OptName::Opt_KeepAlive,
-			&val,
-			sizeof(val));
-	}
-
 	void Socket::Close()
 	{
-		assert(fd_ != -1);
+		if (fd_ == -1)
+		{
+			return;
+		}
 		close(fd_);
 		fd_ = -1;
 	}
@@ -174,6 +177,24 @@ namespace Detail
 	{
 		assert(fd_ != -1);
 		return shutdown(fd_, how) != -1;
+	}
+
+	bool TcpSocket::SetKeepAlive(bool opt) const
+	{
+		int val = opt ? 1 : 0;
+		return SetSocketOption(SocketLevel::SolSocket,
+			OptName::Opt_KeepAlive,
+			&val,
+			sizeof(val));
+	}
+
+	bool TcpSocket::SetNoDelay(bool opt) const
+	{
+		int val = opt ? 1 : 0;
+		return SetSocketOption(SocketLevel::IPProtoTcp,
+			OptName::Opt_TcpNoDelay,
+			&val,
+			sizeof(val));
 	}
 
 	UdpSocket::UdpSocket() :Socket(socket(AF_INET, SOCK_DGRAM, 0))

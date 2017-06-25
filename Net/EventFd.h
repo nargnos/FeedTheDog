@@ -23,11 +23,10 @@ namespace Detail
 		int FD()const;
 		bool Read(eventfd_t* val) const;
 		bool Write(eventfd_t val)const;
+		void Close();
 	private:
 		int fd_;
 	};
 
 }  // namespace Detail
 #endif // EVENTFD_H_
-
-

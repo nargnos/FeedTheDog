@@ -7,7 +7,7 @@
 #include "Noncopyable.h"
 namespace Detail
 {
-	// 非线程安全，不能给其它线程用
+	// 非线程安全
 	class Buffer :public Noncopyable
 	{
 	public:
@@ -32,7 +32,7 @@ namespace Detail
 		void PushSize(size_t size);
 		// 0表示设置为最大
 		void StretchTo(size_t size);
-		BlockList Blocks();
+		BlockList& Blocks();
 		const BlockList& Blocks() const;
 		static BlockPool& BufferPool();
 		static size_t Size(const std::vector<iovec>& iov);

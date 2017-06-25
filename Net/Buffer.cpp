@@ -1,5 +1,6 @@
 ﻿#include "Buffer.h"
 #include <numeric>
+#include "TlsPackage.h"
 namespace Detail
 {
 	Buffer::Buffer(size_t size)
@@ -148,7 +149,7 @@ namespace Detail
 		}
 	}
 
-	Buffer::BlockList Buffer::Blocks()
+	Buffer::BlockList& Buffer::Blocks()
 	{
 		return list_;
 	}
@@ -160,8 +161,7 @@ namespace Detail
 
 	BlockPool& Buffer::BufferPool()
 	{
-		static thread_local BlockPool result;
-		return result;
+		return GlobalTlsPackage::Instance().TlsBlockPool;
 	}
 
 	size_t Buffer::Size(const std::vector<iovec>& iov)

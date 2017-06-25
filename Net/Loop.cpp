@@ -17,6 +17,7 @@ namespace Detail
 	{
 		static int ID = 0;
 		loopID_ = ID++;
+		
 	}
 
 	Loop::~Loop()

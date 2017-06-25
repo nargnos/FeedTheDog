@@ -3,8 +3,8 @@ namespace Detail
 {
 
 	BlockPool::BlockPool() :
-		bBuff_(ObjectPool<BigBlock>::Instance()),
-		sBuff_(ObjectPool<SmallBlock>::Instance())
+		bBuff_(BigBlockPool::Instance()),
+		sBuff_(SmallBlockPool::Instance())
 	{
 
 	}

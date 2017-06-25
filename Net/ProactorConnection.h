@@ -6,50 +6,55 @@
 #include <atomic>
 #include <algorithm>
 #include <sys/epoll.h>
-#include "ITask.h"
-#include "IFDTask.h"
+#include "IConnection.h"
 #include "Noncopyable.h"
 #include "FDTaskCtlAttorney.h"
 #include "Operator.h"
 #include "Loop.h"
 #include "RegisterTaskAttorney.h"
+#include "TidChecker.h"
 namespace Detail
 {
+	class ConnectionAttorney;
+	class Socket;
 	class ProactorConnection :
-		public ITask,
-		public IFDTask,
-		public std::enable_shared_from_this<ITask>,
-		public Noncopyable
+		public IConnection,
+		public std::enable_shared_from_this<IConnection>,
+		public Noncopyable,
+		public TidChecker
 	{
 	protected:
 		using OpPtr = std::unique_ptr<Operator>;
 		using OpQueue = std::queue<OpPtr>;
 	public:
-		explicit ProactorConnection(Loop& loop);
-
+		friend class ConnectionAttorney;
+		ProactorConnection(Loop& loop, Socket* socketPtr);
 		virtual ~ProactorConnection();
+
+		void Close();
 	protected:
+		void ClearQueues(Error err);
 		void RegTask();
 
 		void CheckAndRegTask(EpollOption e);
 		void PostReadOp(OpPtr&& op);
 		void PostWriteOp(OpPtr&& op);
-		// FIX: 有隐患（这样做会无法顺畅终止程序），
-		// 用boost的ObjectPool管理就不需要用这个，也可以取消掉智能指针的使用
-		void Protect();
-		void Destory();
 		bool HasError() const;
 		EpollOption CurrentEvent()const;
-	private:
+		bool IsAllOpQueueEmpty();
+		void Protect();
+		void Destory();
 		void RegSocket();
 		void UnRegSocket();
+		void SetNonBlocking();
+		void Recycle();
+		void CheckFd();
+		virtual int FD() const override;
+	private:
 		virtual void DoEvent(Loop & loop, EpollOption op) override;
 		virtual bool DoEvent(Loop & loop) override;
 
-		void ClearQueue(OpQueue& q, Error err);
-
-		bool IsAllOpQueueEmpty();
-
+		static void ClearQueue(OpQueue& q, Error err);
 
 		enum
 		{
@@ -58,11 +63,14 @@ namespace Detail
 			MaxOps = 2
 		};
 		OpQueue opqueue_[MaxOps];
-		std::shared_ptr<ITask> store_;
+		typename std::list<std::shared_ptr<IConnection>>::const_iterator storePos_;
 		Loop& loop_;
+		Socket* socketPtr_;
 		EpollOption currentEvent_;
 		bool isSocketRegistered_;
 		bool isTaskRegistered_;
+		// 是否已保护不被析构
+		bool isProtected_;
 	};
 
 

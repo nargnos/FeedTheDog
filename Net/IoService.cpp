@@ -33,7 +33,7 @@ namespace Detail
 		}
 
 
-		workerSize_ = static_cast<size_t>(cores * CoreScale);
+		workerSize_ = static_cast<size_t>((float)cores * CoreScale);
 		if (workerSize_ == 0)
 		{
 			workerSize_ = 1;

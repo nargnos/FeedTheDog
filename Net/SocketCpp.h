@@ -42,11 +42,15 @@ namespace Detail
 		Opt_Linger = SO_LINGER,
 
 	};
+	class SocketAttorney;
 	class Socket :
 		public Noncopyable
 	{
 	public:
+		friend class SocketAttorney;
 		explicit Socket(int fd);
+		explicit Socket(Socket&& sock);
+		Socket& operator=(Socket&& sock);
 		explicit operator bool() const;
 		ssize_t Read(void* buf, size_t nBytes) const;
 		ssize_t Readv(const iovec* iov, int count) const;
@@ -57,15 +61,16 @@ namespace Detail
 		bool SetSocketOption(SocketLevel level, OptName opt, const void* optval, socklen_t len) const;
 		bool GetSocketOption(SocketLevel level, OptName opt, void* __restrict optval, socklen_t* __restrict len) const;
 
-		bool SetNoDelay(bool opt) const;
+
 		bool SetNonBlocking() const;
 		bool IsNonBlocking() const;
 		bool SetReuseAddr(bool opt) const;
 		bool SetReusePort(bool opt) const;
-		bool SetKeepAlive(bool opt) const;
 		void Close();
 		virtual ~Socket();
 		int FD() const;
+
+
 	protected:
 		int fd_;
 	};
@@ -85,6 +90,8 @@ namespace Detail
 		int Accept(sockaddr_in& __restrict addr, socklen_t& __restrict len) const;
 		int Accept() const;
 		bool Shutdown(ShutdownMode how) const;
+		bool SetKeepAlive(bool opt) const;
+		bool SetNoDelay(bool opt) const;
 	};
 	class UdpSocket :
 		public Socket

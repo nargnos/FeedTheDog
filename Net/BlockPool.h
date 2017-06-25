@@ -2,7 +2,7 @@
 #define BLOCKPOOL_H_
 #include <vector>
 #include <type_traits>
-#include "ObjectPool.h"
+#include "MemoryPool.h"
 #include "Block.h"
 #include "Noncopyable.h"
 namespace Detail
@@ -10,7 +10,6 @@ namespace Detail
 	template<typename T>
 	class BlockAllocator
 	{
-	public:
 	public:
 		constexpr BlockAllocator() = default;
 
@@ -44,18 +43,19 @@ namespace Detail
 
 
 	template<>
-	struct ObjAllocator<SmallBlock> :public BlockAllocator<SmallBlock>
+	struct MemAllocator<SmallBlock> :public BlockAllocator<SmallBlock>
 	{
 		using BlockAllocator<SmallBlock>::BlockAllocator;
 	};
 	template<>
-	struct ObjAllocator<BigBlock> :public BlockAllocator<BigBlock>
+	struct MemAllocator<BigBlock> :public BlockAllocator<BigBlock>
 	{
 		using BlockAllocator<BigBlock>::BlockAllocator;
 	};
 
 
 	// 感觉其实没什么用	
+	// block可以到其它线程去析构，放到其它线程的mpool里，只能放到用它的线程，否则会堆积，所以mpool自带的tls就不统一放了
 	class BlockPool :
 		public Noncopyable
 	{
@@ -67,8 +67,10 @@ namespace Detail
 		Ptr New(size_t size);
 		Ptr New();
 	private:
-		std::shared_ptr<ObjectPool<BigBlock>> bBuff_;
-		std::shared_ptr<ObjectPool<SmallBlock>> sBuff_;
+		using BigBlockPool = MemoryPool<BigBlock, 4096>;
+		using SmallBlockPool = MemoryPool<SmallBlock, 4096>;
+		std::shared_ptr<BigBlockPool> bBuff_;
+		std::shared_ptr<SmallBlockPool> sBuff_;
 	};
 
 }  // namespace Detail

@@ -43,4 +43,13 @@ namespace Detail
 		return eventfd_write(fd_, val) != -1;
 	}
 
+	void EventFd::Close()
+	{
+		if (fd_ != -1)
+		{
+			close(fd_);
+			fd_ = -1;
+		}
+	}
+
 }  // namespace Detail
