@@ -176,8 +176,7 @@ namespace Detail
 		public OperatorImpl<TcpReadMessageOperator<TConnection, PrefixType, TCallback, TPrefixHandler>>
 	{
 	public:
-		static_assert(sizeof(PrefixType) > 0 && sizeof(PrefixType) <= sizeof(ssize_t), "PrefixSize");
-		static_assert(std::is_arithmetic<PrefixType>::value, "!is_arithmetic");
+		static_assert(std::is_pod<PrefixType>::value, "!is_pod");
 
 		// 回调返回的数据长度表示剩余长度，已读长度通过buffer得到
 		// 根据THeadHandler回调确定数据大小

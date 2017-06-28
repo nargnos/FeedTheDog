@@ -65,9 +65,10 @@ namespace Detail
 	template<typename TCb>
 	void PostFdTask(TCb&& cb)
 	{
+		assert(GlobalTlsPackage::Instance().TlsLoop != nullptr);
 		auto task = new FdTask<TCb>(std::forward<TCb>(cb));
 		// FIX: 如果epoll那边有问题，这里会有析构隐患
-		FDTaskCtlAttorney::Add(*GlobalTlsPackage::Instance().TlsLoop(), EPOLLIN | EPOLLONESHOT, task);
+		FDTaskCtlAttorney::Add(*GlobalTlsPackage::Instance().TlsLoop, EPOLLIN | EPOLLONESHOT, task);
 	}
 	// 这个会选空闲的post
 	// void(Loop&)

@@ -5,18 +5,19 @@
 namespace Detail
 {
 
-	template<typename T>
-	void PostTimer(TimerPtr&& ptr, T&& duration)
+	template<typename TRep, typename TPeriod>
+	void PostTimer(TimerPtr&& ptr, const std::chrono::duration<TRep, TPeriod>& duration)
 	{
-		GlobalTlsPackage::Instance().TlsTimerManager.Add(std::move(ptr), std::forward<T>(duration));
+		assert(GlobalTlsPackage::Instance().TlsLoop != nullptr);
+		GlobalTlsPackage::Instance().TlsTimerManager.Add(std::move(ptr), duration);
 	}
 	// void(const TimerCallback&)
-	template<typename THandler, typename T>
-	TimerPtr PostTimer(THandler&& cb, T&& duration)
+	template<typename THandler, typename TRep, typename TPeriod>
+	TimerPtr PostTimer(THandler&& cb, const std::chrono::duration<TRep, TPeriod>& duration)
 	{
 		auto tm = MakeTimerCallback(std::forward<THandler>(cb));
 		auto ret = tm;
-		PostTimer(std::move(tm), std::forward<T>(duration));
+		PostTimer(std::move(tm), duration);
 		return ret;
 	}
 }  // namespace Detail

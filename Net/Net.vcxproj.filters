@@ -107,7 +107,9 @@
     <ClCompile Include="FdTask.cpp">
       <Filter>Task</Filter>
     </ClCompile>
-    <ClCompile Include="Task.cpp" />
+    <ClCompile Include="Task.cpp">
+      <Filter>Task</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FDTaskCtlAttorney.h">

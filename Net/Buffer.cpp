@@ -192,4 +192,15 @@ namespace Detail
 		return result;
 	}
 
+	Buffer Buffer::Clone() const
+	{
+		return Buffer(list_);
+	}
+
+	Buffer::Buffer(const BlockList & list) :
+		list_(list)
+	{
+
+	}
+
 }  // namespace Detail

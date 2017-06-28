@@ -33,8 +33,8 @@ namespace Detail
 		long long Do();
 		// 添加，多次添加就只按最后一次的时间触发
 		// 返回规则同Do
-		template<typename T>
-		long long Add(TimerPtr&& ptr, T&& duration)
+		template<typename TRep, typename TPeriod>
+		long long Add(TimerPtr&& ptr, const std::chrono::duration<TRep, TPeriod>& duration)
 		{
 			heap_.push({ std::move(ptr),std::chrono::system_clock::now() + duration });
 			return Do();

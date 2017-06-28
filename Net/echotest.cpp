@@ -72,6 +72,10 @@ constexpr int echoTestWithStrs = 9003;
 
 int main()
 {
+	//if (daemon(0, 0) == -1)
+	//{
+	//	return -1;
+	//}
 	TRACEPOINT(LogPriority::Info)("Start test");
 	std::vector<std::shared_ptr<ITcpServer>> servers;
 	PostFdTaskIdle([](Detail::Loop&)

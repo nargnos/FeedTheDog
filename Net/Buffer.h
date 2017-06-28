@@ -38,7 +38,10 @@ namespace Detail
 		static size_t Size(const std::vector<iovec>& iov);
 		static size_t Size(const Buffer& buf);
 		std::vector<iovec> GetIovec() const;
+		// 浅拷贝
+		Buffer Clone() const;
 	private:
+		explicit Buffer(const BlockList& list);
 		BlockList list_;
 	};
 	

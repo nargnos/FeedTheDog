@@ -39,7 +39,7 @@ namespace Detail
 		std::thread::id OwnerTid()const;
 		// 取任务数快照
 		size_t TaskCount() const;
-		
+
 	private:
 		virtual void DoEvent(Loop & loop, EpollOption op) override;
 
