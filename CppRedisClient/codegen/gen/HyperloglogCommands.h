@@ -8,27 +8,27 @@
 namespace HyperloglogCommands
 {
 
-    // PFADD key element [element ...]
-    // Adds the specified elements to the specified HyperLogLog.
+	// PFADD key element [element ...]
+	// Adds the specified elements to the specified HyperLogLog.
 	void Pfadd(std::ostream& out)
 	{
-        // TODO: PFADD
+		// TODO: PFADD
 		assert(false);
 	}
 
-    // PFCOUNT key [key ...]
-    // Return the approximated cardinality of the set(s) observed by the HyperLogLog at key(s).
+	// PFCOUNT key [key ...]
+	// Return the approximated cardinality of the set(s) observed by the HyperLogLog at key(s).
 	void Pfcount(std::ostream& out)
 	{
-        // TODO: PFCOUNT
+		// TODO: PFCOUNT
 		assert(false);
 	}
 
-    // PFMERGE destkey sourcekey [sourcekey ...]
-    // Merge N different HyperLogLogs into a single one.
+	// PFMERGE destkey sourcekey [sourcekey ...]
+	// Merge N different HyperLogLogs into a single one.
 	void Pfmerge(std::ostream& out)
 	{
-        // TODO: PFMERGE
+		// TODO: PFMERGE
 		assert(false);
 	}
 

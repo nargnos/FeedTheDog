@@ -14,9 +14,9 @@ LuaCpp
 cpp简单封装lua，之后打算直接传lua字节码到pi去执行  
 与c交互的部分写了个控制栈的函数  
   
-Net  
+WaitGo  
 未完成，雏形  
-网络部分，要弄台vps中转到pi，打算把它弄成代理看世界，所以自己写看世界的类库玩  
+网络部分，自己写类库玩  
 linux olpt accept-lt connection-et 模拟proactor, 结构参考了asio  
 还有很多未完成
 

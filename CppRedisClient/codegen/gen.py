@@ -74,11 +74,11 @@ ${Func}
 ''')
 
 funcTemplate = Template('''
-    // ${Cmd} ${Args}
-    // ${Summary}
+	// ${Cmd} ${Args}
+	// ${Summary}
 	void ${Name}(std::ostream& out${Param})
 	{
-        ${Code}
+		${Code}
 	}
 ''')
 
@@ -259,13 +259,22 @@ param = {
             "Code": 'GenCmd(out, "{}", key, field, val);'
         }
     ],
+    "key incrementFloat":
+    [{
+        "Param": ", const std::string& key, float i",
+        "Code": 'GenCmd(out, "{}", key, i);'
+    }]
 }
+# 微调参数表示
+# 某些类型不同的用相同的参数标识，需要区分
+cmdArgs={"INCRBYFLOAT":"key incrementFloat"}
 
 
 def Gen(arr):
     ret = []
     left = 0
     done = 0
+    leftArg = []
     for grpName, item in arr.items():
         headerPath = os.path.join(path, "{}Commands.h".format(grpName))
         nsName = "{}Commands".format(grpName)
@@ -273,6 +282,8 @@ def Gen(arr):
 
         func = ""
         for i in item:
+            if i["Cmd"] in cmdArgs:
+                i["Args"]=cmdArgs[i["Cmd"]]
             if len(i["Args"]) == 0:
                 i["Code"] = 'GenCmd(out, "{}");'.format(i["Cmd"])
                 i["Param"] = ""
@@ -296,17 +307,19 @@ def Gen(arr):
                     i["Param"] = ""
                     left += 1
                     func += funcTemplate.substitute(i)
-
+                    leftArg.append(i["Args"])
         tmpFile["Func"] = func
         res = fileTemplate.substitute(tmpFile)
 
-        with open(headerPath, mode='w',encoding="utf8") as file:
+        with open(headerPath, mode='w', encoding="utf8") as file:
             file.write(res)
             ret.append(headerPath)
-    return ret, left, done
+    return ret, left, done, leftArg
 
 
-paths, left, done = Gen(cmds)
+paths, left, done, leftArg = Gen(cmds)
 print("count:", len(paths))
 print("left:", left)
 print("done:", done)
+print("left arg:", "\r\n".join(set(leftArg)))
+
