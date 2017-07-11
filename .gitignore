@@ -277,3 +277,10 @@ FeedTheDog.VC.db
 FeedTheDog.VC.db
 *.opendb
 WaitGo.VC.db
+*.pyc
+CppRedisClient/codegen/.vscode/.ropeproject/objectdb
+CppRedisClient/codegen/.vscode/.ropeproject/config.py
+WayGo/Client/debug
+WayGo/Encryption/debug.test
+WayGo/Protocol/debug.test
+WayGo/Server/debug

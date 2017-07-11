@@ -148,13 +148,9 @@ func echo() (err error) {
 
 func doEcho(conn *net.TCPConn, buf []byte, i uint64) (err error) {
 	conn.SetWriteDeadline(time.Now().Add(durConv(*timeout)))
-	for writes := 0; writes < len(buf); {
-		var ws int
-		ws, err = conn.Write(buf[writes:])
-		if err != nil {
-			return
-		}
-		writes += ws
+	_, err = conn.Write(buf)
+	if err != nil {
+		return
 	}
 	conn.SetReadDeadline(time.Now().Add(durConv(*timeout)))
 	_, err = io.ReadFull(conn, buf)

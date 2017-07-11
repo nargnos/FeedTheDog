@@ -13,5 +13,19 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Util.h" />
+    <ClInclude Include="StringCommands.h" />
+    <ClInclude Include="TransactionsCommands.h" />
+    <ClInclude Include="ClusterCommands.h" />
+    <ClInclude Include="ConnectionCommands.h" />
+    <ClInclude Include="GenericCommands.h" />
+    <ClInclude Include="GeoCommands.h" />
+    <ClInclude Include="HashCommands.h" />
+    <ClInclude Include="HyperloglogCommands.h" />
+    <ClInclude Include="ListCommands.h" />
+    <ClInclude Include="PubsubCommands.h" />
+    <ClInclude Include="ScriptingCommands.h" />
+    <ClInclude Include="ServerCommands.h" />
+    <ClInclude Include="SetCommands.h" />
+    <ClInclude Include="SortedSetCommands.h" />
   </ItemGroup>
 </Project>

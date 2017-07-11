@@ -44,9 +44,9 @@ class DoPython(ICommand):
         return exec(' '.join(code), globals().copy())
 
 
-class CmdDict(object):
-    __commands = dict()
-
+class CmdDict(object):    
+    def __init__(self):
+        self.__commands = {}
     def Add(self, cmdClass):
         if not issubclass(cmdClass, ICommand):
             return
@@ -70,11 +70,10 @@ class CmdDict(object):
         self.__commands.clear()
 
 
-class CommandManager(object):
-    __cmd = CmdDict()
-
+class CommandManager(object):    
     def __init__(self):
-        self.FlushCommands()
+        self.__cmd = CmdDict()    
+        self.FlushCommands()        
 
     def __AddDefaultCommand(self):
         self.__cmd.Add(ListCommands)

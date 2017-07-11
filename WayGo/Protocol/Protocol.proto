@@ -1,0 +1,67 @@
+syntax="proto3";
+package Protocol;
+
+// C <-> S
+// 1. -> data:UserName,RandomNumber key:sKey
+// key是serverKey
+
+// 2. <- data:NewRandomNumber key:cKey
+// 此时server已获得userKey，用前一个随机数处理key后发随机数回去
+
+
+// 3. -> data:Command key:cKey
+// 处理新key后发Cmd，接下来就用这套key开始
+
+// 这样password从始至终没有直接传输过..
+// 外层再弄个tls，费一些cpu，传输应该不会明显过慢
+// 不知道这样是否安全
+
+message RequestMessage
+{
+    bytes Junk = 17;
+    message Greet
+    {
+        fixed64 RandomNumber = 1;
+        string UserName = 2; 
+    }
+    // 类型就是参数
+    oneof Command
+    {
+        Greet Hi = 1;
+        string Connect = 5;
+        string Bind = 22;
+        string UdpAssociate = 23;        
+    }
+}
+
+
+
+message ResponseMessage
+{
+    enum ErrorStatus
+    {
+        // 0-8 是原本的
+        Succeeded = 0x00;
+        GeneralSocksServerFailure = 0x01;
+        ConnectionNotAllowedByRuleset = 0x02;
+        NetworkUnreachable = 0x03;
+        HostUnreachable = 0x04;
+        ConnectionRefused = 0x05;
+        TtlExpired = 0x06;
+        CommandNotSupported = 0x07;
+        AddressTypeNotSupported = 0x08;
+        
+        LoginFailed = 0x10;    
+    }
+
+    ErrorStatus Status = 1;
+    bytes Junk = 17;
+    oneof Value
+    {
+        fixed64 RandomNumber = 2;
+        string Bind = 20;
+    }
+}
+
+
+
