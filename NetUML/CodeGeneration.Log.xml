@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="file:///D:/PROGRAM FILES (X86)/MICROSOFT VISUAL STUDIO 14.0/COMMON7/IDE/EXTENSIONS/MICROSOFT/ARCHITECTURE TOOLS/EXTENSIBILITY/Logging/CodeGenLog.xslt"?>
+<Log xmlns="http://schemas.microsoft.com/VisualStudio/2010/CodeGen.RE.Log" Label="代码生成/文本转换记录">
+  <MessageClass Name="Message" Label="消息" Option="显示提供相关信息的消息" />
+  <MessageClass Name="Warning" Label="警告" Option="显示警告" />
+  <MessageClass Name="Error" Label="错误" Option="显示错误" />
+  <MessageClass Name="Property" Label="属性" Option="显示元数据" />
+  <MessageClass Name="Diagnostic" Label="消息" Option="显示诊断消息" />
+  <Message Timestamp="2017-10-11T19:59:43" Importance="High" Text="已启动代码生成或文本转换。" />
+  <Error Timestamp="2017-10-11T19:59:44" Importance="High" Text="找不到要处理的模板。" />
+  <Message Timestamp="2017-10-11T19:59:44" Importance="Diagnostic" Text="选定内容包含未绑定到模板的 18 元素。" />
+  <Message Timestamp="2017-10-11T19:59:44" Importance="Diagnostic" Text="“144f5e92-7e6a-4379-b176-17c8830577d4”- (Comment): 没有绑定的模板。" />
+  <Message Timestamp="2017-10-11T19:59:44" Importance="Diagnostic" Text="“667949fa-135c-430f-b993-e561ece8b78e”- (Generalization): 没有绑定的模板。" />
+  <Message Timestamp="2017-10-11T19:59:44" Importance="Diagnostic" Text="“c019a4b6-8fd3-47c2-942f-f2fa5a17bce8”- (Generalization): 没有绑定的模板。" />
+  <Message Timestamp="2017-10-11T19:59:44" Importance="Diagnostic" Text="“NetUML::ParkServer”- (Package): 没有绑定的模板。" />
+  <Warning Timestamp="2017-10-11T19:59:44" Importance="Medium" Text="“NetUML::ParkServer::IReg”- (Interface): 没有绑定的模板。" />
+  <Warning Timestamp="2017-10-11T19:59:44" Importance="Medium" Text="“NetUML::ParkServer::IGetQueues”- (Interface): 没有绑定的模板。" />
+  <Warning Timestamp="2017-10-11T19:59:44" Importance="Medium" Text="“NetUML::ParkServer::IRegWorker”- (Interface): 没有绑定的模板。" />
+  <Warning Timestamp="2017-10-11T19:59:44" Importance="Medium" Text="“NetUML::ParkServer::IRegQueue”- (Interface): 没有绑定的模板。" />
+  <Message Timestamp="2017-10-11T19:59:44" Importance="Diagnostic" Text="“cb68b05b-846f-461d-877b-2d0bfa053d99”- (Comment): 没有绑定的模板。" />
+  <Message Timestamp="2017-10-11T19:59:44" Importance="Diagnostic" Text="“c3690905-3217-4564-b0e7-13e787bd9681”- (Comment): 没有绑定的模板。" />
+  <Message Timestamp="2017-10-11T19:59:44" Importance="Diagnostic" Text="“NetUML::1. register”- (Dependency): 没有绑定的模板。" />
+  <Message Timestamp="2017-10-11T19:59:44" Importance="Diagnostic" Text="“NetUML::1. register”- (Dependency): 没有绑定的模板。" />
+  <Message Timestamp="2017-10-11T19:59:44" Importance="Diagnostic" Text="“b05f1eb8-8b28-49a7-80ec-fc5d5a4121b1”- (Comment): 没有绑定的模板。" />
+  <Message Timestamp="2017-10-11T19:59:44" Importance="Diagnostic" Text="“NetUML::Contractor”- (Package): 没有绑定的模板。" />
+  <Message Timestamp="2017-10-11T19:59:44" Importance="Diagnostic" Text="“NetUML::MessageQueue”- (Package): 没有绑定的模板。" />
+  <Message Timestamp="2017-10-11T19:59:44" Importance="Diagnostic" Text="“NetUML::2. ”- (Dependency): 没有绑定的模板。" />
+  <Message Timestamp="2017-10-11T19:59:44" Importance="Diagnostic" Text="“NetUML::MigrantWorker”- (Package): 没有绑定的模板。" />
+  <Warning Timestamp="2017-10-11T19:59:44" Importance="Medium" Text="“NetUML::MigrantWorker::IWorker”- (Interface): 没有绑定的模板。" />
+  <Message Timestamp="2017-10-11T19:59:44" Importance="High" Text="代码生成完成。错误: 1。警告: 5。" />
+</Log>

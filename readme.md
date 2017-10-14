@@ -16,9 +16,8 @@ cpp简单封装lua，之后打算直接传lua字节码到pi去执行
   
 WaitGo  
 未完成，雏形  
-网络部分，自己写类库玩  
-linux olpt accept-lt connection-et 模拟proactor, 结构参考了asio  
-还有很多未完成
+最终功能是让我可以在不同网络环境控制（或可通过邮件控制）家里的pi，pi再控制外部硬件，从而喂狗    
+先用go实现，这样简单些  
 
 命令控制
 未完成  

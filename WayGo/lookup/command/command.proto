@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+message Request
+{
+    message RegServiceMessage{}
+    message UnregServiceMessage{}
+    // 可订阅服务列表，刚订阅时会收到完整列表，后面会收到增删信息
+    message SubMessage{}
+    message UnsubMessage{}
+    
+    message UpdateMessage{}
+    
+    oneof Message
+    {
+        string Heartbeat = 1;
+        SubMessage Sub = 2;
+        UnsubMessage Unsub = 4;
+        RegServiceMessage Reg = 3;
+        UnregServiceMessage Unreg = 5;
+        UpdateMessage Update = 128;
+    }
+}
+
+message Response
+{
+    
+}

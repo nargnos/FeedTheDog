@@ -1,0 +1,291 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<modelStoreModel xmlns:dm0="http://schemas.microsoft.com/VisualStudio/2008/DslTools/Core" xmlns:dm1="http://schemas.microsoft.com/dsltools/Kernel" xmlns:dm2="http://schemas.microsoft.com/dsltools/Component" xmlns:dm3="http://schemas.microsoft.com/dsltools/Activity" xmlns:dm4="http://schemas.microsoft.com/dsltools/Interaction" xmlns:dm5="http://schemas.microsoft.com/dsltools/UseCase" xmlns:dm6="http://schemas.microsoft.com/dsltools/UmlModelLibrary" xmlns:dm7="http://schemas.microsoft.com/dsltools/UmlDiagrams" xmlns:dm8="http://schemas.microsoft.com/dsltools/LogicalClassDesigner" xmlns:dm9="http://schemas.microsoft.com/VisualStudio/TeamArchitect/ComponentDesigner" xmlns:dm10="http://schemas.microsoft.com/dsltools/SimpleShapesModel" xmlns:dm11="http://schemas.microsoft.com/VisualStudio/TeamArchitect/ActivityDesigner"
+  dslVersion="1.0.0.0"
+  Id="d50057e1-fcfd-4c50-aaf1-ff1de4ea7469"
+  name="NetUML" xmlns="http://schemas.microsoft.com/dsltools/ModelStore">
+  <ownedCommentsInternal>
+    <comment
+      Id="78407f86-7432-463d-98cf-037487f3fbbf">
+      <body>Broker
+</body>
+    </comment>
+    <comment
+      Id="4acb2d8f-60ed-4a43-8a8f-858e1175d122">
+      <body>parkServer</body>
+      <annotatedElements>
+        <interfaceMoniker
+          Id="c1962632-ffda-4bba-95ff-d6c39ff45906"
+          LastKnownName="ILookupServer"
+          LastKnownLocation="NetUML.uml" />
+      </annotatedElements>
+    </comment>
+    <comment
+      Id="948f2632-19af-4d6d-a7c6-0059f81de2d7">
+      <body>worker
+</body>
+      <annotatedElements>
+        <interfaceMoniker
+          Id="e187c357-e005-40c1-a03a-5d1564dfdbb7"
+          LastKnownName="IService"
+          LastKnownLocation="NetUML.uml" />
+      </annotatedElements>
+    </comment>
+    <comment
+      Id="19509bd5-d782-4353-8030-19f03e83d74c">
+      <body>contractor</body>
+      <annotatedElements>
+        <interfaceMoniker
+          Id="f2ba2fff-77b8-4dcf-9395-85d32b0a6c40"
+          LastKnownName="IServiceClient"
+          LastKnownLocation="NetUML.uml" />
+      </annotatedElements>
+    </comment>
+    <comment
+      Id="fddaadb8-2b10-463e-920c-1d8b8ab5bfa1">
+      <body>使用service地址创建</body>
+      <annotatedElements>
+        <interfaceMoniker
+          Id="f2ba2fff-77b8-4dcf-9395-85d32b0a6c40"
+          LastKnownName="IServiceClient"
+          LastKnownLocation="NetUML.uml" />
+      </annotatedElements>
+    </comment>
+    <comment
+      Id="9833466e-d281-4d9e-9961-f5774b8b8bf1">
+      <body>监听，向lookup服务注册地址</body>
+      <annotatedElements>
+        <interfaceMoniker
+          Id="e187c357-e005-40c1-a03a-5d1564dfdbb7"
+          LastKnownName="IService"
+          LastKnownLocation="NetUML.uml" />
+      </annotatedElements>
+    </comment>
+    <comment
+      Id="6f71390d-5c08-483c-a5b6-165f6921c07c">
+      <body>建立到lookup的通信，可设置一些机制寻找该服务</body>
+      <annotatedElements>
+        <interfaceMoniker
+          Id="284b87fc-6793-4e83-965f-850e7af0ad6a"
+          LastKnownName="ILookupClient"
+          LastKnownLocation="NetUML.uml" />
+      </annotatedElements>
+    </comment>
+    <comment
+      Id="4b5a52de-da4e-4f73-9e0f-a12a6df1792e">
+      <body>提供服务注册和订阅发布服务
+内部可用redis实现，先做接口隔离
+
+之后从这找消息队列做中转或直接跟服务连接</body>
+      <annotatedElements>
+        <interfaceMoniker
+          Id="c1962632-ffda-4bba-95ff-d6c39ff45906"
+          LastKnownName="ILookupServer"
+          LastKnownLocation="NetUML.uml" />
+      </annotatedElements>
+    </comment>
+    <comment
+      Id="fe10c9ba-629d-450b-8178-16bd61b268a1">
+      <body>先不考虑不同网段</body>
+      <annotatedElements>
+        <interfaceMoniker
+          Id="c1962632-ffda-4bba-95ff-d6c39ff45906"
+          LastKnownName="ILookupServer"
+          LastKnownLocation="NetUML.uml" />
+      </annotatedElements>
+    </comment>
+    <comment
+      Id="d98d31c3-d242-43b7-a763-077fde7e2a79">
+      <body>除了能订阅服务变更外，还可以得到lookup变更信息</body>
+      <annotatedElements>
+        <interfaceMoniker
+          Id="56a27b86-85bf-4d42-8a82-03f82f02feb3"
+          LastKnownName="ILookupServiceSubscriber"
+          LastKnownLocation="NetUML.uml" />
+      </annotatedElements>
+    </comment>
+  </ownedCommentsInternal>
+  <profileInstances>
+    <packageHasProfileInstances
+      Id="0caec977-1f8c-4ba3-a7db-8cc9ad9cc73b">
+      <profileInstance
+        Id="e34d544e-0fea-4ed6-ac5e-1b74119ac791"
+        name="StandardProfileL2" />
+    </packageHasProfileInstances>
+    <packageHasProfileInstances
+      Id="29349502-908c-4fda-9054-c48619c59ed0">
+      <profileInstance
+        Id="532ea607-fb19-44b8-8502-3351b05452be"
+        name="StandardProfileL3" />
+    </packageHasProfileInstances>
+  </profileInstances>
+  <packagedElements>
+    <packageHasNamedElement>
+      <Interface
+        Id="c1962632-ffda-4bba-95ff-d6c39ff45906"
+        name="ILookupServer"
+        isAbstract="false"
+        isLeaf="false" />
+    </packageHasNamedElement>
+    <packageHasNamedElement>
+      <Interface
+        Id="284b87fc-6793-4e83-965f-850e7af0ad6a"
+        name="ILookupClient"
+        isAbstract="false"
+        isLeaf="false">
+        <suppliersInternal>
+          <dependency
+            Id="9e70ea13-0a02-4e69-a0dd-18efea4a1f69">
+            <interfaceMoniker
+              Id="c1962632-ffda-4bba-95ff-d6c39ff45906"
+              LastKnownName="ILookupServer"
+              LastKnownLocation="NetUML.uml" />
+          </dependency>
+        </suppliersInternal>
+        <ownedOperations>
+          <operation
+            Id="fcdeb6c5-9639-42e6-8cba-36e7d197993b"
+            name="Send"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="true"
+            concurrency="Sequential"
+            isQuery="false" />
+          <operation
+            Id="87d15473-86ac-4929-83d0-4ad38ee77e70"
+            name="Recv"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="true"
+            concurrency="Sequential"
+            isQuery="false" />
+        </ownedOperations>
+      </Interface>
+    </packageHasNamedElement>
+    <packageHasNamedElement>
+      <Interface
+        Id="56a27b86-85bf-4d42-8a82-03f82f02feb3"
+        name="ILookupServiceSubscriber"
+        isAbstract="false"
+        isLeaf="false">
+        <generalsInternal>
+          <generalization
+            Id="f54501bf-445d-4169-b6ef-d8fa49ababfb"
+            isSubstitutable="false">
+            <interfaceMoniker
+              Id="284b87fc-6793-4e83-965f-850e7af0ad6a"
+              LastKnownName="ILookupClient"
+              LastKnownLocation="NetUML.uml" />
+          </generalization>
+        </generalsInternal>
+        <ownedOperations>
+          <operation
+            Id="697b152a-bf31-45e9-8aac-0ced1be42483"
+            name="Sub"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="true"
+            concurrency="Sequential"
+            isQuery="false" />
+          <operation
+            Id="485e9ff6-e256-4b72-8d86-e1669103bdbb"
+            name="Unsub"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="true"
+            concurrency="Sequential"
+            isQuery="false" />
+        </ownedOperations>
+      </Interface>
+    </packageHasNamedElement>
+    <packageHasNamedElement>
+      <Interface
+        Id="9bb106c5-e435-487f-81ac-946871937287"
+        name="ILookupServiceRegister"
+        isAbstract="false"
+        isLeaf="false">
+        <generalsInternal>
+          <generalization
+            Id="40dd2053-fed2-4ffa-9f18-bde0ad5fbd85"
+            isSubstitutable="false">
+            <interfaceMoniker
+              Id="284b87fc-6793-4e83-965f-850e7af0ad6a"
+              LastKnownName="ILookupClient"
+              LastKnownLocation="NetUML.uml" />
+          </generalization>
+        </generalsInternal>
+        <ownedOperations>
+          <operation
+            Id="4fe689a8-714d-42ae-807f-50b9f03bf397"
+            name="Reg"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="true"
+            concurrency="Sequential"
+            isQuery="false" />
+          <operation
+            Id="a831bf2b-158a-4258-8cf8-5ba1e9ab41a1"
+            name="Unreg"
+            isLeaf="false"
+            isStatic="false"
+            isAbstract="true"
+            concurrency="Sequential"
+            isQuery="false" />
+        </ownedOperations>
+      </Interface>
+    </packageHasNamedElement>
+    <packageHasNamedElement>
+      <Interface
+        Id="e187c357-e005-40c1-a03a-5d1564dfdbb7"
+        name="IService"
+        isAbstract="false"
+        isLeaf="false">
+        <suppliersInternal>
+          <dependency
+            Id="766c17fd-26ae-4f54-899b-d9fe8d31d123">
+            <interfaceMoniker
+              Id="9bb106c5-e435-487f-81ac-946871937287"
+              LastKnownName="ILookupServiceRegister"
+              LastKnownLocation="NetUML.uml" />
+          </dependency>
+        </suppliersInternal>
+      </Interface>
+    </packageHasNamedElement>
+    <packageHasNamedElement>
+      <Interface
+        Id="f2ba2fff-77b8-4dcf-9395-85d32b0a6c40"
+        name="IServiceClient"
+        isAbstract="false"
+        isLeaf="false">
+        <suppliersInternal>
+          <dependency
+            Id="6685bc50-2048-4a98-8129-4ecec3c298e5">
+            <interfaceMoniker
+              Id="56a27b86-85bf-4d42-8a82-03f82f02feb3"
+              LastKnownName="ILookupServiceSubscriber"
+              LastKnownLocation="NetUML.uml" />
+          </dependency>
+        </suppliersInternal>
+      </Interface>
+    </packageHasNamedElement>
+  </packagedElements>
+  <primitiveType
+    Id="220a3521-e091-4221-bae9-3ef9018e845c"
+    name="Integer"
+    isAbstract="false"
+    isLeaf="false" />
+  <primitiveType
+    Id="8943dc84-709e-4f62-b15a-a3273aa6f165"
+    name="Boolean"
+    isAbstract="false"
+    isLeaf="false" />
+  <primitiveType
+    Id="59259974-6d55-42c6-b7bd-763d77ac8ef9"
+    name="String"
+    isAbstract="false"
+    isLeaf="false" />
+  <primitiveType
+    Id="3ab42e7d-4969-445a-b209-471f5cb8209c"
+    name="UnlimitedNatural"
+    isAbstract="false"
+    isLeaf="false" />
+</modelStoreModel>

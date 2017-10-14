@@ -1,0 +1,175 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<logicalClassDesignerModel xmlns:dm0="http://schemas.microsoft.com/VisualStudio/2008/DslTools/Core" xmlns:dm1="http://schemas.microsoft.com/dsltools/Kernel" xmlns:dm2="http://schemas.microsoft.com/dsltools/Component" xmlns:dm3="http://schemas.microsoft.com/dsltools/Activity" xmlns:dm4="http://schemas.microsoft.com/dsltools/Interaction" xmlns:dm5="http://schemas.microsoft.com/dsltools/UseCase" xmlns:dm6="http://schemas.microsoft.com/dsltools/UmlModelLibrary" xmlns:dm7="http://schemas.microsoft.com/dsltools/UmlDiagrams" xmlns:dm8="http://schemas.microsoft.com/dsltools/ModelStore" xmlns:dm9="http://schemas.microsoft.com/VisualStudio/TeamArchitect/ComponentDesigner" xmlns:dm10="http://schemas.microsoft.com/dsltools/SimpleShapesModel" xmlns:dm11="http://schemas.microsoft.com/VisualStudio/TeamArchitect/ActivityDesigner" dslVersion="1.0.0.0" Id="9bffd702-a45f-4420-8bf4-508b1b7ab8ba" name="UMLClassDiagram1" linkedPackageId="d02d0c5f-3b47-4a3e-be84-f3f9c57f2fad" xmlns="http://schemas.microsoft.com/dsltools/LogicalClassDesigner">
+  <ownedCommentsInternal>
+    <comment Id="dae042c8-7acd-45ad-8b1e-1b99a2824736">
+      <elementDefinition Id="4acb2d8f-60ed-4a43-8a8f-858e1175d122" />
+      <body>parkServer</body>
+      <annotatedElements>
+        <interfaceMoniker Id="b0c6a905-f309-4d4e-9b48-99b2eb3cd887" LastKnownName="ILookupServer" />
+      </annotatedElements>
+    </comment>
+    <comment Id="c7f0f579-dac7-40e8-aa53-41c04cb1a3f5">
+      <elementDefinition Id="948f2632-19af-4d6d-a7c6-0059f81de2d7" />
+      <body>worker
+</body>
+      <annotatedElements>
+        <interfaceMoniker Id="07d2f97f-fc25-47d0-b9ad-e30bfbfcb3f2" LastKnownName="IService" />
+      </annotatedElements>
+    </comment>
+    <comment Id="2fa47140-d74d-401f-95c3-3af1a2142534">
+      <elementDefinition Id="19509bd5-d782-4353-8030-19f03e83d74c" />
+      <body>contractor</body>
+      <annotatedElements>
+        <interfaceMoniker Id="ce616493-f226-46e6-98c8-cd2e04ad081c" LastKnownName="IServiceClient" />
+      </annotatedElements>
+    </comment>
+    <comment Id="2666bb1b-9045-4194-b214-2de26261364e">
+      <elementDefinition Id="fddaadb8-2b10-463e-920c-1d8b8ab5bfa1" />
+      <body>使用service地址创建</body>
+      <annotatedElements>
+        <interfaceMoniker Id="ce616493-f226-46e6-98c8-cd2e04ad081c" LastKnownName="IServiceClient" />
+      </annotatedElements>
+    </comment>
+    <comment Id="15d4045c-5374-4e70-9c75-1ac12156133d">
+      <elementDefinition Id="9833466e-d281-4d9e-9961-f5774b8b8bf1" />
+      <body>监听，向lookup服务注册地址</body>
+      <annotatedElements>
+        <interfaceMoniker Id="07d2f97f-fc25-47d0-b9ad-e30bfbfcb3f2" LastKnownName="IService" />
+      </annotatedElements>
+    </comment>
+    <comment Id="8d5183f0-9bbe-496b-bd68-6650b1362d9b">
+      <elementDefinition Id="6f71390d-5c08-483c-a5b6-165f6921c07c" />
+      <body>建立到lookup的通信，可设置一些机制寻找该服务</body>
+      <annotatedElements>
+        <interfaceMoniker Id="270aca46-6ab1-4dab-aa8c-a3fa06cce79a" LastKnownName="ILookupClient" />
+      </annotatedElements>
+    </comment>
+    <comment Id="6450a539-342c-4adb-b4d6-e6cd5e7bb4d5">
+      <elementDefinition Id="4b5a52de-da4e-4f73-9e0f-a12a6df1792e" />
+      <body>提供服务注册和订阅发布服务
+内部可用redis实现，先做接口隔离
+
+之后从这找消息队列做中转或直接跟服务连接</body>
+      <annotatedElements>
+        <interfaceMoniker Id="b0c6a905-f309-4d4e-9b48-99b2eb3cd887" LastKnownName="ILookupServer" />
+      </annotatedElements>
+    </comment>
+    <comment Id="6e3c2404-b4f0-44ef-be43-3ecdb43f0e56">
+      <elementDefinition Id="fe10c9ba-629d-450b-8178-16bd61b268a1" />
+      <body>先不考虑不同网段</body>
+      <annotatedElements>
+        <interfaceMoniker Id="b0c6a905-f309-4d4e-9b48-99b2eb3cd887" LastKnownName="ILookupServer" />
+      </annotatedElements>
+    </comment>
+    <comment Id="a20631e4-7ea3-42b8-b468-7e1f1a219e56">
+      <elementDefinition Id="d98d31c3-d242-43b7-a763-077fde7e2a79" />
+      <body>除了能订阅服务变更外，还可以得到lookup变更信息</body>
+      <annotatedElements>
+        <interfaceMoniker Id="b6287c77-3942-4753-8535-c3a39a854fd8" LastKnownName="ILookupServiceSubscriber" />
+      </annotatedElements>
+    </comment>
+  </ownedCommentsInternal>
+  <packagedElements>
+    <logicalClassDesignerModelHasTypes>
+      <Interface Id="b0c6a905-f309-4d4e-9b48-99b2eb3cd887" name="ILookupServer" isAbstract="false" isLeaf="false">
+        <elementDefinition Id="c1962632-ffda-4bba-95ff-d6c39ff45906" />
+      </Interface>
+    </logicalClassDesignerModelHasTypes>
+    <logicalClassDesignerModelHasTypes>
+      <Interface Id="270aca46-6ab1-4dab-aa8c-a3fa06cce79a" name="ILookupClient" isAbstract="false" isLeaf="false">
+        <elementDefinition Id="284b87fc-6793-4e83-965f-850e7af0ad6a" />
+        <suppliersInternal>
+          <dependency Id="e5751480-8612-4c4a-9362-0dbd08a5e92c">
+            <interfaceMoniker Id="b0c6a905-f309-4d4e-9b48-99b2eb3cd887" LastKnownName="ILookupServer" />
+            <elementDefinition Id="9e70ea13-0a02-4e69-a0dd-18efea4a1f69" />
+          </dependency>
+        </suppliersInternal>
+        <ownedOperations>
+          <operation Id="a8540413-b94c-49ea-8775-e63926ca9b94" name="Send" isLeaf="false" isStatic="false" isAbstract="true" concurrency="Sequential" isQuery="false">
+            <elementDefinition Id="fcdeb6c5-9639-42e6-8cba-36e7d197993b" />
+          </operation>
+          <operation Id="25c842b7-3801-4c49-bee1-2781b3a5d54f" name="Recv" isLeaf="false" isStatic="false" isAbstract="true" concurrency="Sequential" isQuery="false">
+            <elementDefinition Id="87d15473-86ac-4929-83d0-4ad38ee77e70" />
+          </operation>
+        </ownedOperations>
+      </Interface>
+    </logicalClassDesignerModelHasTypes>
+    <logicalClassDesignerModelHasTypes>
+      <Interface Id="b6287c77-3942-4753-8535-c3a39a854fd8" name="ILookupServiceSubscriber" isAbstract="false" isLeaf="false">
+        <elementDefinition Id="56a27b86-85bf-4d42-8a82-03f82f02feb3" />
+        <generalsInternal>
+          <generalization Id="e743f3af-9e23-4636-a5ed-ecd85408f703" isSubstitutable="false">
+            <interfaceMoniker Id="270aca46-6ab1-4dab-aa8c-a3fa06cce79a" LastKnownName="ILookupClient" />
+            <elementDefinition Id="f54501bf-445d-4169-b6ef-d8fa49ababfb" />
+          </generalization>
+        </generalsInternal>
+        <ownedOperations>
+          <operation Id="cc6f7d97-6ebc-4b74-872d-597fc99fceef" name="Sub" isLeaf="false" isStatic="false" isAbstract="true" concurrency="Sequential" isQuery="false">
+            <elementDefinition Id="697b152a-bf31-45e9-8aac-0ced1be42483" />
+          </operation>
+          <operation Id="1289f265-790d-4e45-be2b-c07ab9b94250" name="Unsub" isLeaf="false" isStatic="false" isAbstract="true" concurrency="Sequential" isQuery="false">
+            <elementDefinition Id="485e9ff6-e256-4b72-8d86-e1669103bdbb" />
+          </operation>
+        </ownedOperations>
+      </Interface>
+    </logicalClassDesignerModelHasTypes>
+    <logicalClassDesignerModelHasTypes>
+      <Interface Id="36c07cbb-64ca-4fc2-9a1f-86fdcc39120f" name="ILookupServiceRegister" isAbstract="false" isLeaf="false">
+        <elementDefinition Id="9bb106c5-e435-487f-81ac-946871937287" />
+        <generalsInternal>
+          <generalization Id="e6d7898f-ae35-41a8-9070-0c9559f8cbff" isSubstitutable="false">
+            <interfaceMoniker Id="270aca46-6ab1-4dab-aa8c-a3fa06cce79a" LastKnownName="ILookupClient" />
+            <elementDefinition Id="40dd2053-fed2-4ffa-9f18-bde0ad5fbd85" />
+          </generalization>
+        </generalsInternal>
+        <ownedOperations>
+          <operation Id="9cc0138b-5feb-4be6-99b5-6c2b10312ccc" name="Reg" isLeaf="false" isStatic="false" isAbstract="true" concurrency="Sequential" isQuery="false">
+            <elementDefinition Id="4fe689a8-714d-42ae-807f-50b9f03bf397" />
+          </operation>
+          <operation Id="263067c7-a84e-426e-9d0c-43a080b85171" name="Unreg" isLeaf="false" isStatic="false" isAbstract="true" concurrency="Sequential" isQuery="false">
+            <elementDefinition Id="a831bf2b-158a-4258-8cf8-5ba1e9ab41a1" />
+          </operation>
+        </ownedOperations>
+      </Interface>
+    </logicalClassDesignerModelHasTypes>
+    <logicalClassDesignerModelHasTypes>
+      <Interface Id="07d2f97f-fc25-47d0-b9ad-e30bfbfcb3f2" name="IService" isAbstract="false" isLeaf="false">
+        <elementDefinition Id="e187c357-e005-40c1-a03a-5d1564dfdbb7" />
+        <suppliersInternal>
+          <dependency Id="18faf509-bc2c-46d0-8d8a-19b1b642063f">
+            <interfaceMoniker Id="36c07cbb-64ca-4fc2-9a1f-86fdcc39120f" LastKnownName="ILookupServiceRegister" />
+            <elementDefinition Id="766c17fd-26ae-4f54-899b-d9fe8d31d123" />
+          </dependency>
+        </suppliersInternal>
+      </Interface>
+    </logicalClassDesignerModelHasTypes>
+    <logicalClassDesignerModelHasTypes>
+      <Interface Id="ce616493-f226-46e6-98c8-cd2e04ad081c" name="IServiceClient" isAbstract="false" isLeaf="false">
+        <elementDefinition Id="f2ba2fff-77b8-4dcf-9395-85d32b0a6c40" />
+        <suppliersInternal>
+          <dependency Id="519c7ae6-6c0d-4fb2-91b8-f230c89ca00c">
+            <interfaceMoniker Id="b6287c77-3942-4753-8535-c3a39a854fd8" LastKnownName="ILookupServiceSubscriber" />
+            <elementDefinition Id="6685bc50-2048-4a98-8129-4ecec3c298e5" />
+          </dependency>
+        </suppliersInternal>
+      </Interface>
+    </logicalClassDesignerModelHasTypes>
+  </packagedElements>
+  <package Id="d02d0c5f-3b47-4a3e-be84-f3f9c57f2fad" name="NetUML">
+    <elementDefinition Id="d50057e1-fcfd-4c50-aaf1-ff1de4ea7469" />
+    <profileInstances>
+      <packageHasProfileInstances Id="1675391b-87ce-45b7-b06c-68eca80c2f5d">
+        <profileInstance Id="b2e11cfd-dcb1-4542-a390-3cffbd2602b7" name="StandardProfileL2">
+          <elementDefinition Id="e34d544e-0fea-4ed6-ac5e-1b74119ac791" />
+        </profileInstance>
+        <elementDefinition Id="0caec977-1f8c-4ba3-a7db-8cc9ad9cc73b" />
+      </packageHasProfileInstances>
+      <packageHasProfileInstances Id="62bf4a1d-34c8-4b5f-a8e2-e52a43cf1150">
+        <profileInstance Id="e3c0183c-340b-4324-ab05-1e1b3dee53fb" name="StandardProfileL3">
+          <elementDefinition Id="532ea607-fb19-44b8-8502-3351b05452be" />
+        </profileInstance>
+        <elementDefinition Id="29349502-908c-4fda-9054-c48619c59ed0" />
+      </packageHasProfileInstances>
+    </profileInstances>
+  </package>
+</logicalClassDesignerModel>
